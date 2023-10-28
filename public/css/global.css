@@ -1,0 +1,24 @@
+/*  Put all the universal styles here.  */
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+    body {
+        background-color: white;
+        color: black;
+    }
+}
+
+/*!* Dark mode *!*/
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #323437;
+        color: #a0a1a2;
+    }
+    /*so that links arnt so hard to read in dark mode*/
+    a:link {
+        color: lightskyblue;
+    }
+    a:visited {
+        color: cornflowerblue;
+    }
+}

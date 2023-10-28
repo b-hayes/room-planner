@@ -1,0 +1,27 @@
+
+# Composer
+composer.phar
+/vendor/
+# composer.lock
+
+# Node
+/node_modules/
+
+# IDE / Editors
+.idea/
+.vs/
+.vscode/
+
+# Temporary | Generated files.
+/temp/
+
+# PhpUnit
+test/coverage/
+.phpunit.result.cache
+
+# Potentually sensitive files.
+*.env.json
+*.env
+*.key
+*.cer
+*.crt
