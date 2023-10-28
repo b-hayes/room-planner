@@ -67,5 +67,6 @@ try {
     <?=
     //including it via php prevents the page flashing white before the css file is processed.
     include __DIR__ . '/css/global.css';
+    include __DIR__ . '/css/reset.css';
     ?>
 </style>

@@ -2,23 +2,45 @@
 
 /* Light mode */
 @media (prefers-color-scheme: light) {
-    body {
-        background-color: white;
-        color: black;
+    :root {
+        /* Set vars to use for background and foreground colours */
+        --background: white;
+        --foreground: black;
+        /* Set vars to use for link colours */
+        --link: #007bff;
+        --link-visited: #007bff;
+        --link-hover: #00790d;
     }
 }
 
 /*!* Dark mode *!*/
 @media (prefers-color-scheme: dark) {
-    body {
-        background-color: #323437;
-        color: #a0a1a2;
+    :root {
+        /* Set vars to use for background and foreground colours */
+        --background: white;
+        --foreground: black;
+        /* Set vars to use for link colours */
+        --link: #007bff;
+        --link-visited: #007bff;
+        --link-hover: #00790d;
     }
-    /*so that links arnt so hard to read in dark mode*/
-    a:link {
-        color: lightskyblue;
-    }
-    a:visited {
-        color: cornflowerblue;
-    }
+}
+
+/* Use vars on body */
+body {
+    background-color: var(--background);
+    color: var(--foreground);
+}
+
+/* Use vars on links */
+a {
+    color: var(--link);
+}
+
+a:visited {
+    color: var(--link-visited);
+}
+
+a:hover {
+    color: var(--link-hover);
 }
