@@ -20,10 +20,4 @@ Run `composer init` to create a composer.json.
 Run the web server with docker `./docker/start-server.sh`.
 
 ## Licence
-Do what you want with this code.
-
-It comes as is with no warranty and the author
-accepts no liability in any way for how it is used.
-
-You do not have to keep a copy this licence with the code,
-once you delete it the code is yours and I expect no credit.
+NONE.
