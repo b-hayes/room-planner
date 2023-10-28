@@ -15,7 +15,7 @@ try {
     require_once __DIR__ . '/../vendor/autoload.php';
 
     //start your application here.
-    throw new \Exception('Check out this error page!');
+    require_once __DIR__ . '/../views/index.html';
 
 } catch (\Throwable $error) {
     //This is the last line of defence do not use any dependencies that could break.

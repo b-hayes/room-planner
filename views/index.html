@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Room Planner</title>
+</head>
+<body>
+<div class="grid fullscreen">
+</div>
+</body>
+</html>
+<style>
+    .fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+    }
+
+    .grid {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+    }
+
+    .grid {
+        background-image: repeating-linear-gradient(#ccc 0 1px, transparent 1px 100%),
+        repeating-linear-gradient(90deg, #ccc 0 1px, transparent 1px 100%);
+        background-size: 100px 100px;
+    }
+</style>
+
+<script>
+    /* Draw a box with absolute position in the middle of the page 300x300px with a thick grey border */
+    var box = document.createElement('div');
+    box.style.position = 'absolute';
+
+    /* position the box such that it is close to the center, but the top an left values are rounded to the nearest 100px */
+    box.style.top = (window.innerHeight / 2) % 100 + 'px';
+    box.style.left = (window.innerWidth / 2) % 100 + 'px';
+
+    box.style.width = '300px';
+    box.style.height = '300px';
+    box.style.marginTop = '-150px';
+    box.style.marginLeft = '-150px';
+    box.style.border = '1px solid black';
+    document.body.appendChild(box);
+
+    /* Snap the position to the nearest increment of 100px */
+    var snap = 10;
+    box.addEventListener('mousedown', function (e) {
+        var x = e.pageX - box.offsetLeft,
+            y = e.pageY - box.offsetTop;
+        document.addEventListener('mousemove', move, false);
+        document.addEventListener('mouseup', up, false);
+
+        function move(e) {
+            box.style.left = Math.round(e.pageX / snap) * snap - x + 'px';
+            box.style.top = Math.round(e.pageY / snap) * snap - y + 'px';
+            /* update the pos */
+            pos.innerHTML = 'x: ' + box.offsetLeft + ' y: ' + box.offsetTop;
+        }
+
+        function up() {
+            document.removeEventListener('mousemove', move, false);
+            document.removeEventListener('mouseup', up, false);
+        }
+    }, false);
+
+    /* SHow the x,y position of the top left corner inside the top left corner of the box in tiny font */
+    var pos = document.createElement('div');
+    pos.style.position = 'absolute';
+    pos.style.top = '0';
+    pos.style.left = '0';
+    pos.style.fontSize = '10px';
+    pos.style.color = '#000000';
+    pos.style.padding = '2px';
+    pos.innerHTML = 'x: ' + box.offsetLeft + ' y: ' + box.offsetTop;
+    box.appendChild(pos);
+
+</script>
