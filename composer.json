@@ -1,0 +1,15 @@
+{
+    "name": "b-hayes/room-planner",
+    "autoload": {
+        "psr-4": {
+            "BHayes\\RoomPlanner\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "b-hayes",
+            "email": "bradozman@gmail.com"
+        }
+    ],
+    "require": {}
+}
