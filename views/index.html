@@ -140,7 +140,7 @@
         update(x, y, width, height) {
             let snap = this.parent.snap || 10 //provide the opportunity for the parent dictate the grid snap
             this.element.style.top = y - (y % snap) + 'px'
-            this.element.style.left = x + (x % snap) + 'px'
+            this.element.style.left = x - (x % snap) + 'px'
             this.element.style.width = width + 'px'
             this.element.style.height = height + 'px'
             //update posText
