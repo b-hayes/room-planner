@@ -31,6 +31,52 @@
         repeating-linear-gradient(90deg, var(--foreground) 0 1px, transparent 1px 100%);
         background-size: 100px 100px;
     }
+
+    .shape {
+        position: absolute;
+        border: 1px solid var(--link);
+    }
+
+    .shape.selected {
+        border: 3px solid var(--link-hover);
+        /*box-shadow: inset 0 0 0 2px var(--link-hover);*/
+        z-index: 1;
+    }
+    .shape.selected .posText {
+        display: block;
+    }
+    .shape .posText {
+        display: none;
+    }
+
+    .shape.resize-top-left {
+        border-top-style: dotted;
+        border-left-style: dotted;
+    }
+    .shape.resize-top-right {
+        border-top-style: dotted;
+        border-right-style: dotted;
+    }
+    .shape.resize-bottom-left {
+        border-bottom-style: dotted;
+        border-left-style: dotted;
+    }
+    .shape.resize-bottom-right {
+        border-bottom-style: dotted;
+        border-right-style: dotted;
+    }
+    .shape.resize-left {
+        border-left-style: dotted;
+    }
+    .shape.resize-right {
+        border-right-style: dotted;
+    }
+    .shape.resize-top {
+        border-top-style: dotted;
+    }
+    .shape.resize-bottom {
+        border-bottom-style: dotted;
+    }
 </style>
 
 <script>
@@ -61,14 +107,17 @@
             this.element = document.createElement('div')
             this.element.style.position = 'absolute'
             this.element.style.border = '1px solid ' + this.colour
+            //add shape class
+            this.element.classList.add('shape')
 
             //create position label.
             this.posText = document.createElement('div')
             this.posText.style.position = 'absolute'
             this.posText.style.top = '0'
             this.posText.style.left = '0'
-            this.posText.style.color = 'var(--foreground)'
-            this.posText.style.fontSize = '10px'
+
+            //prevent all mouse events from interacting with the posText
+            this.posText.style.pointerEvents = 'none'
             this.element.appendChild(this.posText)
 
             document.addEventListener('mousedown', (e) => {
@@ -107,26 +156,15 @@
         /* When clicking the shape make the border match the css var for --link-hover */
         select() {
             this.selected = true
-            //todo: in future should just apply css classes and the css should handle the rest
-            this.element.style.border = '1px solid var(--link-hover)'
-            this.element.style.zIndex = '1'
-            //show an inner glow
-            this.element.style.boxShadow = 'inset 0 0 0 2px var(--link-hover)'
-            //make posText visible
-            this.posText.style.display = 'block'
+            //add selected class
+            this.element.classList.add('selected')
         }
 
         //When un-clicking the shape make the border match the css var for --foreground
         unselect() {
             this.selected = false
-            this.element.style.border = '1px solid ' + this.colour
-            this.element.style.zIndex = '0'
-            //remove the outer glow
-            this.element.style.boxShadow = 'none'
-            //make posText invisible
-            this.posText.style.display = 'none'
-            //change pointer back to default
-            this.parent.style.cursor = 'default'
+            //remove selected class
+            this.element.classList.remove('selected')
         }
 
         drag(e) {
@@ -204,7 +242,15 @@
 
             this.resizing = false
             this.parent.style.cursor = 'default'
-            this.element.classList.remove('nwse', 'nesw', 'ew', 'ns');
+            //remove all resizing classes
+            this.element.classList.remove('resize-top-left')
+            this.element.classList.remove('resize-bottom-right')
+            this.element.classList.remove('resize-bottom-left')
+            this.element.classList.remove('resize-top-right')
+            this.element.classList.remove('resize-left')
+            this.element.classList.remove('resize-right')
+            this.element.classList.remove('resize-top')
+            this.element.classList.remove('resize-bottom')
 
             if (this.selected === false || e.target !== this.element) {
                 return;
@@ -214,7 +260,7 @@
             let y = e.offsetY;
             let width = this.element.offsetWidth;
             let height = this.element.offsetHeight;
-            let border = 5;
+            let border = 10;
 
             if (x < border && y < border) {
                 //top left
@@ -250,7 +296,7 @@
                 this.parent.style.cursor = 'ns-resize';
             }
             //add a css class to the element matching the resize mode
-            this.element.classList.add('resize-' + this.resizing)
+            if (this.resizing) this.element.classList.add('resize-' + this.resizing)
         }
 
     }
