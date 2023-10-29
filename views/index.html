@@ -89,6 +89,9 @@
                 document.addEventListener('mouseup', () => this.up(), false)
             })
 
+            //add event listener for hovering
+            document.addEventListener('mousemove', (e) => this.hover(e), false)
+
             //anything stored in this is needed by other functions
             this.colour = colour
             this.parent = parent
@@ -107,8 +110,8 @@
             //todo: in future should just apply css classes and the css should handle the rest
             this.element.style.border = '1px solid var(--link-hover)'
             this.element.style.zIndex = '1'
-            //show an outer glow
-            this.element.style.boxShadow = '0 0 0 2px var(--link-hover)'
+            //show an inner glow
+            this.element.style.boxShadow = 'inset 0 0 0 2px var(--link-hover)'
             //make posText visible
             this.posText.style.display = 'block'
         }
@@ -122,6 +125,8 @@
             this.element.style.boxShadow = 'none'
             //make posText invisible
             this.posText.style.display = 'none'
+            //change pointer back to default
+            this.element.style.cursor = 'default'
         }
 
         moveWithMouse(e) {
@@ -158,6 +163,38 @@
 
         set position({x, y, width, height}) {
             this.update(x, y, width, height)
+        }
+
+
+        //change the cursor to a resize cursor when hovering within 3px of the border
+        hover(e) {
+            if (this.selected === false || e.target !== this.element) {
+                return
+            }
+            let x = e.offsetX
+            let y = e.offsetY
+            let width = this.element.offsetWidth
+            let height = this.element.offsetHeight
+            let border = 5
+            if (x < border && y < border) {
+                this.element.style.cursor = 'nwse-resize'
+            } else if (x > width - border && y > height - border) {
+                this.element.style.cursor = 'nwse-resize'
+            } else if (x < border && y > height - border) {
+                this.element.style.cursor = 'nesw-resize'
+            } else if (x > width - border && y < border) {
+                this.element.style.cursor = 'nesw-resize'
+            } else if (x < border) {
+                this.element.style.cursor = 'ew-resize'
+            } else if (x > width - border) {
+                this.element.style.cursor = 'ew-resize'
+            } else if (y < border) {
+                this.element.style.cursor = 'ns-resize'
+            } else if (y > height - border) {
+                this.element.style.cursor = 'ns-resize'
+            } else {
+                this.element.style.cursor = 'default'
+            }
         }
     }
 
