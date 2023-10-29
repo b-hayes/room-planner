@@ -126,7 +126,7 @@
             //make posText invisible
             this.posText.style.display = 'none'
             //change pointer back to default
-            this.element.style.cursor = 'default'
+            this.parent.style.cursor = 'default'
         }
 
         drag(e) {
@@ -171,63 +171,63 @@
 
         //change the cursor to a resize cursor when hovering within 3px of the border
         hover(e) {
+            // Reset cursor and border color
+            this.parent.style.cursor = 'default'
+            this.resizing = false
             if (this.selected === false || e.target !== this.element) {
                 return;
             }
+
             let x = e.offsetX;
             let y = e.offsetY;
             let width = this.element.offsetWidth;
             let height = this.element.offsetHeight;
             let border = 5;
 
-            // Reset cursor and border color
-            this.element.style.cursor = 'default'
-            this.resizing = false
-
             if (x < border && y < border) {
                 //top left
                 this.resizing = 'top-left'
                 this.element.style.borderTopColor = 'red'
                 this.element.style.borderLeftColor = 'red'
-                this.element.style.cursor = 'nwse-resize'
+                this.parent.style.cursor = 'nwse-resize'
             } else if (x > width - border && y > height - border) {
                 //bottom right
                 this.resizing = 'bottom-right'
                 this.element.style.borderBottomColor = 'red'
                 this.element.style.borderRightColor = 'red'
-                this.element.style.cursor = 'nwse-resize'
+                this.parent.style.cursor = 'nwse-resize'
             } else if (x < border && y > height - border) {
                 //bottom left
                 this.resizing = 'bottom-left'
                 this.element.style.borderBottomColor = 'red'
                 this.element.style.borderLeftColor = 'red'
-                this.element.style.cursor = 'nesw-resize';
+                this.parent.style.cursor = 'nesw-resize';
             } else if (x > width - border && y < border) {
                 //top right
                 this.resizing = 'top-right'
                 this.element.style.borderTopColor = 'red'
                 this.element.style.borderRightColor = 'red'
-                this.element.style.cursor = 'nesw-resize'
+                this.parent.style.cursor = 'nesw-resize'
             } else if (x < border) {
                 //left
                 this.resizing = 'left'
                 this.element.style.borderLeftColor = 'red'
-                this.element.style.cursor = 'ew-resize'
+                this.parent.style.cursor = 'ew-resize'
             } else if (x > width - border) {
                 //right
                 this.resizing = 'right'
                 this.element.style.borderRightColor = 'red'
-                this.element.style.cursor = 'ew-resize'
+                this.parent.style.cursor = 'ew-resize'
             } else if (y < border) {
                 //top
                 this.resizing = 'top'
                 this.element.style.borderTopColor = 'red'
-                this.element.style.cursor = 'ns-resize'
+                this.parent.style.cursor = 'ns-resize'
             } else if (y > height - border) {
                 //bottom
                 this.resizing = 'bottom'
                 this.element.style.borderBottomColor = 'red'
-                this.element.style.cursor = 'ns-resize';
+                this.parent.style.cursor = 'ns-resize';
             }
         }
     }
