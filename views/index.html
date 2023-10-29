@@ -80,7 +80,7 @@
                 //record where the click happened so that drag events can use it as a point of reference
                 this.clickX = e.pageX
                 this.clickY = e.pageY
-                this.clickPosition = this.position
+                this.shapePositionWhenClicked = this.position
 
                 //select the shape to make it more noticeable
                 this.select()
@@ -134,11 +134,37 @@
             if (!this.selected || e.buttons !== 1) {
                 return
             }
-            if (this.resizing) {
 
+            let shiftX = e.pageX - this.clickX;
+            let shiftY = e.pageY - this.clickY;
+            if (this.resizing) {
+                //resize the shape
+                let x = this.shapePositionWhenClicked.x
+                let y = this.shapePositionWhenClicked.y
+                let width = this.shapePositionWhenClicked.width
+                let height = this.shapePositionWhenClicked.height
+
+                if (this.resizing.includes('left')) {
+                    x = this.shapePositionWhenClicked.x + shiftX
+                    width = this.shapePositionWhenClicked.width - shiftX
+                }
+                if (this.resizing.includes('right')) {
+                    width = this.shapePositionWhenClicked.width + shiftX
+                }
+                if (this.resizing.includes('top')) {
+                    y = this.shapePositionWhenClicked.y + shiftY
+                    height = this.shapePositionWhenClicked.height - shiftY
+                }
+                if (this.resizing.includes('bottom')) {
+                    height = this.shapePositionWhenClicked.height + shiftY
+                }
+
+                this.update(x, y, width, height)
+            } else {
+                //move the shape
+                this.update(this.shapePositionWhenClicked.x + shiftX,this.shapePositionWhenClicked.y + shiftY)
             }
 
-            this.update(this.clickPosition.x + e.pageX - this.clickX,this.clickPosition.y + e.pageY - this.clickY)
         }
 
         up() {
@@ -171,9 +197,15 @@
 
         //change the cursor to a resize cursor when hovering within 3px of the border
         hover(e) {
-            // Reset cursor and border color
-            this.parent.style.cursor = 'default'
+            //if mouse is down change nothing
+            if (e.buttons === 1) {
+                return
+            }
+
             this.resizing = false
+            this.parent.style.cursor = 'default'
+            this.element.classList.remove('nwse', 'nesw', 'ew', 'ns');
+
             if (this.selected === false || e.target !== this.element) {
                 return;
             }
@@ -187,49 +219,40 @@
             if (x < border && y < border) {
                 //top left
                 this.resizing = 'top-left'
-                this.element.style.borderTopColor = 'red'
-                this.element.style.borderLeftColor = 'red'
                 this.parent.style.cursor = 'nwse-resize'
             } else if (x > width - border && y > height - border) {
                 //bottom right
                 this.resizing = 'bottom-right'
-                this.element.style.borderBottomColor = 'red'
-                this.element.style.borderRightColor = 'red'
                 this.parent.style.cursor = 'nwse-resize'
             } else if (x < border && y > height - border) {
                 //bottom left
                 this.resizing = 'bottom-left'
-                this.element.style.borderBottomColor = 'red'
-                this.element.style.borderLeftColor = 'red'
                 this.parent.style.cursor = 'nesw-resize';
             } else if (x > width - border && y < border) {
                 //top right
                 this.resizing = 'top-right'
-                this.element.style.borderTopColor = 'red'
-                this.element.style.borderRightColor = 'red'
                 this.parent.style.cursor = 'nesw-resize'
             } else if (x < border) {
                 //left
                 this.resizing = 'left'
-                this.element.style.borderLeftColor = 'red'
                 this.parent.style.cursor = 'ew-resize'
             } else if (x > width - border) {
                 //right
                 this.resizing = 'right'
-                this.element.style.borderRightColor = 'red'
                 this.parent.style.cursor = 'ew-resize'
             } else if (y < border) {
                 //top
                 this.resizing = 'top'
-                this.element.style.borderTopColor = 'red'
                 this.parent.style.cursor = 'ns-resize'
             } else if (y > height - border) {
                 //bottom
                 this.resizing = 'bottom'
-                this.element.style.borderBottomColor = 'red'
                 this.parent.style.cursor = 'ns-resize';
             }
+            //add a css class to the element matching the resize mode
+            this.element.classList.add('resize-' + this.resizing)
         }
+
     }
 
     new Shape()
