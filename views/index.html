@@ -45,80 +45,66 @@
             y = undefined, //if undefined will center
         ) {
             if (parent === undefined) {
-                parent = document.body.closest('.grid') ? document.body.closest('.grid') : document.body;
+                parent = document.body.closest('.grid') ? document.body.closest('.grid') : document.body
             }
-            this.parent = parent
 
             //If no position then center while rounding to nearest 100
             if (x === undefined) {
-                x = (this.parent.clientWidth / 2) - (width / 2)
+                x = (parent.clientWidth / 2) - (width / 2)
                 x = x - (x % 100)
             }
             if (y === undefined) {
-                y = (this.parent.clientHeight / 2) - (height / 2)
+                y = (parent.clientHeight / 2) - (height / 2)
                 y = y - (y % 100)
             }
-            console.log(this.parent.clientHeight)
-            this.x = x
-            this.y = y
-
-            //console log the client width and height
-            console.log('clientWidth: ' + parent.clientWidth + ' clientHeight: ' + parent.clientHeight)
-
-            this.width = width
-            this.height = height
-            this.colour = colour
 
             this.element = document.createElement('div')
             this.element.style.position = 'absolute'
             this.element.style.border = '1px solid ' + this.colour
 
-            //Position the element
-            this.element.style.top = this.y + 'px'
-            this.element.style.left = this.x + 'px'
-            this.element.style.width = this.width + 'px'
-            this.element.style.height = this.height + 'px'
-
-            //Add the element to the parent
-            this.parent.appendChild(this.element)
-
-            //Add event listeners for selecting and unselecting
-            this.element.addEventListener('mousedown', () => {
-                this.select()
-            });
-            //unselect if anything other than this is clicked on
-            document.addEventListener('mousedown', (e) => {
-                if (e.target !== this.element) {
-                    this.unselect()
-                }
-            });
-
-            // Add event listeners for dragging the shape
-            this.element.addEventListener('mousedown', (e) => {
-                var x = e.pageX - this.element.offsetLeft,
-                    y = e.pageY - this.element.offsetTop;
-                document.addEventListener('mousemove', (e) => this.move(e, x, y), false)
-                document.addEventListener('mouseup', () => this.up(), false)
-            }, false);
-
-            //Add X & Y pos to the elements top left corner
+            //create position label.
             this.posText = document.createElement('div')
             this.posText.style.position = 'absolute'
             this.posText.style.top = '0'
             this.posText.style.left = '0'
             this.posText.style.color = 'var(--foreground)'
             this.posText.style.fontSize = '10px'
-            this.posText.innerHTML = 'x: ' + this.element.offsetLeft + ' y: ' + this.element.offsetTop
             this.element.appendChild(this.posText)
+
+            document.addEventListener('mousedown', (e) => {
+                //unselect if anything other than this is clicked on
+                if (e.target !== this.element) {
+                    this.unselect()
+                    return
+                }
+                //record where the click happened so that drag events can use it as a point of reference
+                this.clickX = e.pageX
+                this.clickY = e.pageY
+                this.clickPosition = this.position
+
+                //select the shape to make it more noticeable
+                this.select()
+                //add event listeners for moving and unselecting
+                document.addEventListener('mousemove', (e) => this.moveWithMouse(e), false)
+                document.addEventListener('mouseup', () => this.up(), false)
+            })
+
+            //anything stored in this is needed by other functions
+            this.colour = colour
+            this.parent = parent
 
             //start selected so the user can notice when it's added.
             this.select()
-
-            console.log(this)
+            //update the position, size and related labels
+            this.update(x, y, width, height)
+            //Add the element to the parent
+            this.parent.appendChild(this.element)
         }
 
         /* When clicking the shape make the border match the css var for --link-hover */
-        select() {//todo just use css classes in the future
+        select() {
+            this.selected = true
+            //todo: in future should just apply css classes and the css should handle the rest
             this.element.style.border = '1px solid var(--link-hover)'
             this.element.style.zIndex = '1'
             //show an outer glow
@@ -129,6 +115,7 @@
 
         //When un-clicking the shape make the border match the css var for --foreground
         unselect() {
+            this.selected = false
             this.element.style.border = '1px solid ' + this.colour
             this.element.style.zIndex = '0'
             //remove the outer glow
@@ -137,22 +124,40 @@
             this.posText.style.display = 'none'
         }
 
-        move(e, x, y) {
-            //do nothing if the mouse button is not being held down or the event is not for this element.
-            if (e.buttons !== 1 || e.target !== this.element) {
-                return;
+        moveWithMouse(e) {
+            //if not selected or mouse is not down then don't move
+            if (!this.selected || e.buttons !== 1) {
+                return
             }
 
-            var snap = this.parent.snap || 10;
-            this.element.style.left = Math.round(e.pageX / snap) * snap - x + 'px'
-            this.element.style.top = Math.round(e.pageY / snap) * snap - y + 'px'
-            /* update the pos */
-            this.posText.innerHTML = 'x: ' + this.element.offsetLeft + ' y: ' + this.element.offsetTop;
+            this.update(this.clickPosition.x + e.pageX - this.clickX,this.clickPosition.y + e.pageY - this.clickY)
         }
 
         up() {
-            document.removeEventListener('mousemove', (e) => this.move(e, x, y), false)
             document.removeEventListener('mouseup', () => this.up(), false)
+        }
+
+        update(x, y, width, height) {
+            let snap = this.parent.snap || 10 //provide the opportunity for the parent dictate the grid snap
+            this.element.style.top = y - (y % snap) + 'px'
+            this.element.style.left = x + (x % snap) + 'px'
+            this.element.style.width = width + 'px'
+            this.element.style.height = height + 'px'
+            //update posText
+            this.posText.innerHTML = 'x: ' + this.element.offsetLeft + ' y: ' + this.element.offsetTop
+        }
+
+        get position() {
+            return {
+                x: this.element.offsetLeft,
+                y: this.element.offsetTop,
+                width: this.element.offsetWidth,
+                height: this.element.offsetHeight,
+            }
+        }
+
+        set position({x, y, width, height}) {
+            this.update(x, y, width, height)
         }
     }
 
