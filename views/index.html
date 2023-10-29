@@ -85,7 +85,7 @@
                 //select the shape to make it more noticeable
                 this.select()
                 //add event listeners for moving and unselecting
-                document.addEventListener('mousemove', (e) => this.moveWithMouse(e), false)
+                document.addEventListener('mousemove', (e) => this.drag(e), false)
                 document.addEventListener('mouseup', () => this.up(), false)
             })
 
@@ -129,10 +129,13 @@
             this.element.style.cursor = 'default'
         }
 
-        moveWithMouse(e) {
+        drag(e) {
             //if not selected or mouse is not down then don't move
             if (!this.selected || e.buttons !== 1) {
                 return
+            }
+            if (this.resizing) {
+
             }
 
             this.update(this.clickPosition.x + e.pageX - this.clickX,this.clickPosition.y + e.pageY - this.clickY)
@@ -169,31 +172,62 @@
         //change the cursor to a resize cursor when hovering within 3px of the border
         hover(e) {
             if (this.selected === false || e.target !== this.element) {
-                return
+                return;
             }
-            let x = e.offsetX
-            let y = e.offsetY
-            let width = this.element.offsetWidth
-            let height = this.element.offsetHeight
-            let border = 5
+            let x = e.offsetX;
+            let y = e.offsetY;
+            let width = this.element.offsetWidth;
+            let height = this.element.offsetHeight;
+            let border = 5;
+
+            // Reset cursor and border color
+            this.element.style.cursor = 'default'
+            this.resizing = false
+
             if (x < border && y < border) {
+                //top left
+                this.resizing = 'top-left'
+                this.element.style.borderTopColor = 'red'
+                this.element.style.borderLeftColor = 'red'
                 this.element.style.cursor = 'nwse-resize'
             } else if (x > width - border && y > height - border) {
+                //bottom right
+                this.resizing = 'bottom-right'
+                this.element.style.borderBottomColor = 'red'
+                this.element.style.borderRightColor = 'red'
                 this.element.style.cursor = 'nwse-resize'
             } else if (x < border && y > height - border) {
-                this.element.style.cursor = 'nesw-resize'
+                //bottom left
+                this.resizing = 'bottom-left'
+                this.element.style.borderBottomColor = 'red'
+                this.element.style.borderLeftColor = 'red'
+                this.element.style.cursor = 'nesw-resize';
             } else if (x > width - border && y < border) {
+                //top right
+                this.resizing = 'top-right'
+                this.element.style.borderTopColor = 'red'
+                this.element.style.borderRightColor = 'red'
                 this.element.style.cursor = 'nesw-resize'
             } else if (x < border) {
+                //left
+                this.resizing = 'left'
+                this.element.style.borderLeftColor = 'red'
                 this.element.style.cursor = 'ew-resize'
             } else if (x > width - border) {
+                //right
+                this.resizing = 'right'
+                this.element.style.borderRightColor = 'red'
                 this.element.style.cursor = 'ew-resize'
             } else if (y < border) {
+                //top
+                this.resizing = 'top'
+                this.element.style.borderTopColor = 'red'
                 this.element.style.cursor = 'ns-resize'
             } else if (y > height - border) {
-                this.element.style.cursor = 'ns-resize'
-            } else {
-                this.element.style.cursor = 'default'
+                //bottom
+                this.resizing = 'bottom'
+                this.element.style.borderBottomColor = 'red'
+                this.element.style.cursor = 'ns-resize';
             }
         }
     }
