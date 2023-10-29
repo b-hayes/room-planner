@@ -47,50 +47,49 @@
             if (parent === undefined) {
                 parent = document.body.closest('.grid') ? document.body.closest('.grid') : document.body;
             }
-            this.parent = parent;
+            this.parent = parent
 
             //If no position then center while rounding to nearest 100
             if (x === undefined) {
-                this.x = parent.clientWidth / 2;
-                this.x = this.x - (this.x % 100);
-            } else {
-                this.x = x;
+                x = (this.parent.clientWidth / 2) - (width / 2)
+                x = x - (x % 100)
             }
             if (y === undefined) {
-                this.y = parent.clientHeight / 2;
-                this.y = this.y - (this.y % 100);
-            } else {
-                this.y = y;
+                y = (this.parent.clientHeight / 2) - (height / 2)
+                y = y - (y % 100)
             }
+            console.log(this.parent.clientHeight)
+            this.x = x
+            this.y = y
 
             //console log the client width and height
-            console.log('clientWidth: ' + parent.clientWidth + ' clientHeight: ' + parent.clientHeight);
+            console.log('clientWidth: ' + parent.clientWidth + ' clientHeight: ' + parent.clientHeight)
 
-            this.width = width;
-            this.height = height;
-            this.colour = colour;
+            this.width = width
+            this.height = height
+            this.colour = colour
 
-            this.element = document.createElement('div');
-            this.element.style.position = 'absolute';
-            this.element.style.border = '1px solid ' + this.colour;
+            this.element = document.createElement('div')
+            this.element.style.position = 'absolute'
+            this.element.style.border = '1px solid ' + this.colour
 
             //Position the element
-            this.element.style.top = this.y + 'px';
-            this.element.style.left = this.x + 'px';
-            this.element.style.width = this.width + 'px';
-            this.element.style.height = this.height + 'px';
+            this.element.style.top = this.y + 'px'
+            this.element.style.left = this.x + 'px'
+            this.element.style.width = this.width + 'px'
+            this.element.style.height = this.height + 'px'
 
             //Add the element to the parent
-            this.parent.appendChild(this.element);
+            this.parent.appendChild(this.element)
 
             //Add event listeners for selecting and unselecting
             this.element.addEventListener('mousedown', () => {
-                this.select();
+                this.select()
             });
             //unselect if anything other than this is clicked on
             document.addEventListener('mousedown', (e) => {
                 if (e.target !== this.element) {
-                    this.unselect();
+                    this.unselect()
                 }
             });
 
@@ -98,44 +97,44 @@
             this.element.addEventListener('mousedown', (e) => {
                 var x = e.pageX - this.element.offsetLeft,
                     y = e.pageY - this.element.offsetTop;
-                document.addEventListener('mousemove', (e) => this.move(e, x, y), false);
-                document.addEventListener('mouseup', () => this.up(), false);
+                document.addEventListener('mousemove', (e) => this.move(e, x, y), false)
+                document.addEventListener('mouseup', () => this.up(), false)
             }, false);
 
             //Add X & Y pos to the elements top left corner
-            this.posText = document.createElement('div');
-            this.posText.style.position = 'absolute';
-            this.posText.style.top = '0';
-            this.posText.style.left = '0';
-            this.posText.style.color = 'var(--foreground)';
-            this.posText.style.fontSize = '10px';
-            this.posText.innerHTML = 'x: ' + this.element.offsetLeft + ' y: ' + this.element.offsetTop;
-            this.element.appendChild(this.posText);
+            this.posText = document.createElement('div')
+            this.posText.style.position = 'absolute'
+            this.posText.style.top = '0'
+            this.posText.style.left = '0'
+            this.posText.style.color = 'var(--foreground)'
+            this.posText.style.fontSize = '10px'
+            this.posText.innerHTML = 'x: ' + this.element.offsetLeft + ' y: ' + this.element.offsetTop
+            this.element.appendChild(this.posText)
 
             //start selected so the user can notice when it's added.
-            this.select();
+            this.select()
 
             console.log(this)
         }
 
         /* When clicking the shape make the border match the css var for --link-hover */
         select() {//todo just use css classes in the future
-            this.element.style.border = '1px solid var(--link-hover)';
-            this.element.style.zIndex = '1';
+            this.element.style.border = '1px solid var(--link-hover)'
+            this.element.style.zIndex = '1'
             //show an outer glow
-            this.element.style.boxShadow = '0 0 0 2px var(--link-hover)';
+            this.element.style.boxShadow = '0 0 0 2px var(--link-hover)'
             //make posText visible
-            this.posText.style.display = 'block';
+            this.posText.style.display = 'block'
         }
 
         //When un-clicking the shape make the border match the css var for --foreground
         unselect() {
-            this.element.style.border = '1px solid ' + this.colour;
-            this.element.style.zIndex = '0';
+            this.element.style.border = '1px solid ' + this.colour
+            this.element.style.zIndex = '0'
             //remove the outer glow
-            this.element.style.boxShadow = 'none';
+            this.element.style.boxShadow = 'none'
             //make posText invisible
-            this.posText.style.display = 'none';
+            this.posText.style.display = 'none'
         }
 
         move(e, x, y) {
@@ -145,18 +144,18 @@
             }
 
             var snap = this.parent.snap || 10;
-            this.element.style.left = Math.round(e.pageX / snap) * snap - x + 'px';
-            this.element.style.top = Math.round(e.pageY / snap) * snap - y + 'px';
+            this.element.style.left = Math.round(e.pageX / snap) * snap - x + 'px'
+            this.element.style.top = Math.round(e.pageY / snap) * snap - y + 'px'
             /* update the pos */
             this.posText.innerHTML = 'x: ' + this.element.offsetLeft + ' y: ' + this.element.offsetTop;
         }
 
         up() {
-            document.removeEventListener('mousemove', (e) => this.move(e, x, y), false);
-            document.removeEventListener('mouseup', () => this.up(), false);
+            document.removeEventListener('mousemove', (e) => this.move(e, x, y), false)
+            document.removeEventListener('mouseup', () => this.up(), false)
         }
     }
 
-    new Shape();
+    new Shape()
 
 </script>
