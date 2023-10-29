@@ -240,9 +240,9 @@
                 return
             }
 
+            //remove previous hover effects
             this.resizing = false
             this.parent.style.cursor = 'default'
-            //remove all resizing classes
             this.element.classList.remove('resize-top-left')
             this.element.classList.remove('resize-bottom-right')
             this.element.classList.remove('resize-bottom-left')
@@ -263,35 +263,27 @@
             let border = 10;
 
             if (x < border && y < border) {
-                //top left
                 this.resizing = 'top-left'
                 this.parent.style.cursor = 'nwse-resize'
             } else if (x > width - border && y > height - border) {
-                //bottom right
                 this.resizing = 'bottom-right'
                 this.parent.style.cursor = 'nwse-resize'
             } else if (x < border && y > height - border) {
-                //bottom left
                 this.resizing = 'bottom-left'
                 this.parent.style.cursor = 'nesw-resize';
             } else if (x > width - border && y < border) {
-                //top right
                 this.resizing = 'top-right'
                 this.parent.style.cursor = 'nesw-resize'
             } else if (x < border) {
-                //left
                 this.resizing = 'left'
                 this.parent.style.cursor = 'ew-resize'
             } else if (x > width - border) {
-                //right
                 this.resizing = 'right'
                 this.parent.style.cursor = 'ew-resize'
             } else if (y < border) {
-                //top
                 this.resizing = 'top'
                 this.parent.style.cursor = 'ns-resize'
             } else if (y > height - border) {
-                //bottom
                 this.resizing = 'bottom'
                 this.parent.style.cursor = 'ns-resize';
             }
