@@ -17,12 +17,12 @@
 @media (prefers-color-scheme: dark) {
     :root {
         /* Set vars to use for background and foreground colours */
-        --background: white;
-        --foreground: black;
+        --background: #323437;
+        --foreground: #a0a1a2;
         /* Set vars to use for link colours */
-        --link: #007bff;
-        --link-visited: #007bff;
-        --link-hover: #00790d;
+        --link: #3e96fa;
+        --link-visited: #3e96fa;
+        --link-hover: #61e16a;
     }
 }
 
