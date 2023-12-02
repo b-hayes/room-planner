@@ -65,7 +65,7 @@ export default class Shape {
         x = undefined, //if undefined will center
         y = undefined, //if undefined will center
     ) {
-        this.injectStyles(style, 'shapeStyle')
+        this.loadStyles(style, 'shapeStyle')
 
         if (parent === undefined) {
             parent = document.body.closest('.grid') ? document.body.closest('.grid') : document.body
@@ -130,7 +130,7 @@ export default class Shape {
         this.parent.appendChild(this.element)
     }
 
-    injectStyles(style, name) {
+    loadStyles(style, name) {
         //add style to document if it's not already there
         if (!document.getElementById(name)) {
             let styleElement = document.createElement('style')
