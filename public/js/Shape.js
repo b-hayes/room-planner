@@ -1,11 +1,13 @@
-const style = `
+
+// language=CSS
+const style = (typeof myVariable !== 'undefined')? style : `
 .shape {
     position: absolute;
-    border: 1px solid var(--link);
+    border: 1px solid var(--link, cornflowerblue);
 }
 
 .shape.selected {
-    border: 3px solid var(--link-hover);
+    border: 3px solid var(--link-hover, darkseagreen);
     /*box-shadow: inset 0 0 0 2px var(--link-hover);*/
     z-index: 1;
 }
@@ -19,34 +21,42 @@ const style = `
 .shape.resize-top-left {
     border-top-style: dotted;
     border-left-style: dotted;
+    cursor: nwse-resize;
 }
 .shape.resize-top-right {
     border-top-style: dotted;
     border-right-style: dotted;
+    cursor: nesw-resize;
 }
 .shape.resize-bottom-left {
     border-bottom-style: dotted;
     border-left-style: dotted;
+    cursor: nesw-resize;
 }
 .shape.resize-bottom-right {
     border-bottom-style: dotted;
     border-right-style: dotted;
+    cursor: nwse-resize;
 }
 .shape.resize-left {
     border-left-style: dotted;
+    cursor: ew-resize;
 }
 .shape.resize-right {
     border-right-style: dotted;
+    cursor: ew-resize;
 }
 .shape.resize-top {
     border-top-style: dotted;
+    cursor: ns-resize;
 }
 .shape.resize-bottom {
     border-bottom-style: dotted;
+    cursor: ns-resize;
 }
 `
 
-class Shape {
+export default class Shape {
     constructor(
         width = 300,
         height = 300,
@@ -58,7 +68,14 @@ class Shape {
         //add style to document if it's not already there
         if (!document.getElementById('shapeStyle')) {
             let styleElement = document.createElement('style')
-            styleElement.id = 'shapeStyle'
+
+            //creat a  hash of teh style sting
+            let hash = 0;
+            for (let i = 0; i < style.length; i++) {
+                hash = Math.imul(31, hash) + style.charCodeAt(i) | 0;
+            }
+
+            styleElement.id = 'shapeStyle-' + hash
             styleElement.innerHTML = style
             document.head.appendChild(styleElement)
         }
@@ -237,33 +254,31 @@ class Shape {
 
         if (x < border && y < border) {
             this.resizing = 'top-left'
-            this.parent.style.cursor = 'nwse-resize'
+            //this.parent.style.cursor = 'nwse-resize'
         } else if (x > width - border && y > height - border) {
             this.resizing = 'bottom-right'
-            this.parent.style.cursor = 'nwse-resize'
+            //this.parent.style.cursor = 'nwse-resize'
         } else if (x < border && y > height - border) {
             this.resizing = 'bottom-left'
-            this.parent.style.cursor = 'nesw-resize';
+            //this.parent.style.cursor = 'nesw-resize';
         } else if (x > width - border && y < border) {
             this.resizing = 'top-right'
-            this.parent.style.cursor = 'nesw-resize'
+            //this.parent.style.cursor = 'nesw-resize'
         } else if (x < border) {
             this.resizing = 'left'
-            this.parent.style.cursor = 'ew-resize'
+            //this.parent.style.cursor = 'ew-resize'
         } else if (x > width - border) {
             this.resizing = 'right'
-            this.parent.style.cursor = 'ew-resize'
+            //this.parent.style.cursor = 'ew-resize'
         } else if (y < border) {
             this.resizing = 'top'
-            this.parent.style.cursor = 'ns-resize'
+            //this.parent.style.cursor = 'ns-resize'
         } else if (y > height - border) {
             this.resizing = 'bottom'
-            this.parent.style.cursor = 'ns-resize';
+            //this.parent.style.cursor = 'ns-resize';
         }
         //add a css class to the element matching the resize mode
         if (this.resizing) this.element.classList.add('resize-' + this.resizing)
     }
 
 }
-
-export default Shape
