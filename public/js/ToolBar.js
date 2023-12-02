@@ -22,4 +22,8 @@ export default class ToolBar extends Shape {
         console.log('toolbar element', this.element)
         this.element.classList.add('toolbar')
     }
+
+    injectStyles() {
+        super.injectStyles(style, 'toolbar')
+    }
 }

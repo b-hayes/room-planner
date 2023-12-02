@@ -65,20 +65,7 @@ export default class Shape {
         x = undefined, //if undefined will center
         y = undefined, //if undefined will center
     ) {
-        //add style to document if it's not already there
-        if (!document.getElementById('shapeStyle')) {
-            let styleElement = document.createElement('style')
-
-            //creat a  hash of teh style sting
-            let hash = 0;
-            for (let i = 0; i < style.length; i++) {
-                hash = Math.imul(31, hash) + style.charCodeAt(i) | 0;
-            }
-
-            styleElement.id = 'shapeStyle-' + hash
-            styleElement.innerHTML = style
-            document.head.appendChild(styleElement)
-        }
+        this.injectStyles(style, 'shapeStyle')
 
         if (parent === undefined) {
             parent = document.body.closest('.grid') ? document.body.closest('.grid') : document.body
@@ -143,6 +130,23 @@ export default class Shape {
         this.parent.appendChild(this.element)
     }
 
+    injectStyles(style, name) {
+        //add style to document if it's not already there
+        if (!document.getElementById(name)) {
+            let styleElement = document.createElement('style')
+
+            //create a hash of the style sting
+            let hash = 0;
+            for (let i = 0; i < style.length; i++) {
+                hash = Math.imul(31, hash) + style.charCodeAt(i) | 0;
+            }
+
+            styleElement.id = 'shapeStyle-' + hash
+            styleElement.innerHTML = style
+            document.head.appendChild(styleElement)
+        }
+    }
+
     /* When clicking the shape make the border match the css var for --link-hover */
     select() {
         this.selected = true
@@ -200,7 +204,7 @@ export default class Shape {
     }
 
     update(x, y, width, height) {
-        let snap = this.parent.snap || 10 //provide the opportunity for the parent dictate the grid snap
+        let snap = this.parent.snap || 10 //provide the opportunity for the parent to dictate the grid snap
         this.element.style.top = y - (y % snap) + 'px'
         this.element.style.left = x - (x % snap) + 'px'
         this.element.style.width = width + 'px'
