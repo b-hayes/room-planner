@@ -284,5 +284,4 @@ export default class Shape {
         //add a css class to the element matching the resize mode
         if (this.resizing) this.element.classList.add('resize-' + this.resizing)
     }
-
 }
