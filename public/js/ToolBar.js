@@ -3,6 +3,7 @@ import Shape from "./Shape.js";
 // language=HTML
 const html = `
     <div class="toolbar">
+        <div class="toolbar-header">Toolbar</div>
         <button class="toolbar-button">Button 1</button>
         <button class="toolbar-button">Button 2</button>
         <div class="toolbar-separator"></div>
@@ -11,15 +12,42 @@ const html = `
     </div>
 `
 
+
+export default class ToolBar extends Shape {
+    constructor(
+        width = 100,
+        height = 400,
+        colour = 'darkgrey',
+        parent = undefined, //if undefined will attach to nearest grid || document.body
+        x = 0,
+        y = 0,
+    ) {
+        super(width, height, colour, parent, x, y)
+    }
+
+    html() {
+        return html
+    }
+
+    style() {
+        return super.style() + style
+    }
+}
+
 // language=CSS
 const style = `
     /* Toolbar Container */
     .toolbar {
         z-index: 100;
-        display: flex;
         background-color: #2d2d2d;
         padding: 10px;
-        border-bottom: 1px solid #444;
+    }
+    
+    .toolbar-header {
+        font-size: 10px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        pointer-events: none;
     }
 
     /* Toolbar Button */
@@ -57,27 +85,3 @@ const style = `
         color: #fff;
     }
 `
-
-
-
-export default class ToolBar extends Shape {
-    constructor(
-        width = 100,
-        height = 400,
-        colour = 'darkgrey',
-        parent = undefined, //if undefined will attach to nearest grid || document.body
-        x = 0,
-        y = 0,
-    ) {
-        super(width, height, colour, parent, x, y)
-        this.element.classList.add('toolbar')
-    }
-
-    html() {
-        return html
-    }
-
-    style() {
-        return super.style() + style
-    }
-}
