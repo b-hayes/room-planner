@@ -1,6 +1,7 @@
+import Component from "./Scafold/Component.js";
 
 // language=CSS
-const style = (typeof myVariable !== 'undefined')? style : `
+const style = `
 .shape {
     position: absolute;
     border: 1px solid var(--link, cornflowerblue);
@@ -56,8 +57,12 @@ const style = (typeof myVariable !== 'undefined')? style : `
 }
 `
 
-export default class Shape {
-    style = style
+export default class Shape extends Component {
+
+
+    style() {
+        return super.style() + style;
+    }
 
     constructor(
         width = 300,
@@ -67,9 +72,7 @@ export default class Shape {
         x = undefined, //if undefined will center
         y = undefined, //if undefined will center
     ) {
-        console.log('shape style', this.constructor.style)
-        this.loadStyles(this.constructor.style, 'shapeStyle')
-
+        super();
         if (parent === undefined) {
             parent = document.body.closest('.grid') ? document.body.closest('.grid') : document.body
         }
@@ -131,23 +134,6 @@ export default class Shape {
         this.update(x, y, width, height)
         //Add the element to the parent
         this.parent.appendChild(this.element)
-    }
-
-    loadStyles(style, name) {
-        //add style to document if it's not already there
-        if (!document.getElementById(name)) {
-            let styleElement = document.createElement('style')
-
-            //create a hash of the style sting
-            let hash = 0;
-            for (let i = 0; i < style.length; i++) {
-                hash = Math.imul(31, hash) + style.charCodeAt(i) | 0;
-            }
-
-            styleElement.id = 'shapeStyle-' + hash
-            styleElement.innerHTML = style
-            document.head.appendChild(styleElement)
-        }
     }
 
     /* When clicking the shape make the border match the css var for --link-hover */

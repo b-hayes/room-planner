@@ -70,15 +70,14 @@ export default class ToolBar extends Shape {
         y = 0,
     ) {
         super(width, height, colour, parent, x, y)
-        console.log('toolbar element', this.element)
         this.element.classList.add('toolbar')
     }
 
-    loadStyles() {
-        super.loadStyles(style, 'toolbar')
+    html() {
+        return html
     }
 
-    loadHtml(html) {
-            super.loadHtml()
+    style() {
+        return super.style() + style
     }
 }
