@@ -8,16 +8,16 @@ export default class Shape extends Component {
     }
 
     constructor(
+        parent = document.body,
         width = 300,
         height = 300,
         colour = 'var(--link)',
-        parent = undefined, //if undefined will attach to nearest grid || document.body
         x = undefined, //if undefined will center
         y = undefined, //if undefined will center
     ) {
         super();
         if (parent === undefined) {
-            parent = document.body.closest('.grid') ? document.body.closest('.grid') : document.body
+            parent = document.body
         }
 
         //If no position then center while rounding to nearest 100
@@ -74,6 +74,7 @@ export default class Shape extends Component {
         this.select()
         //update the position, size and related labels
         this.update(x, y, width, height)
+
         //Add the element to the parent
         this.parent.appendChild(this.element())
     }

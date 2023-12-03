@@ -5,38 +5,80 @@
     <title>Room Planner</title>
 </head>
 <body>
-<div class="grid fullscreen">
+<div class="toolbar">
+    <div class="toolbar-header">Toolbar</div>
+    <button class="toolbar-button">💾 Save</button>
+    <div class="toolbar-separator"></div>
+    <button class="toolbar-button">⬛ Square</button>
+</div>
+<div class="grid">
+    <div class="grid-background"></div>
 </div>
 </body>
 </html>
 <style>
-
-    .fullscreen {
+    .grid {
         position: fixed;
-        top: 0;
-        left: 0;
         height: 100%;
-        width: 100%;
-    }
-
-    .grid {
-        height: 100%;
-        width: 100%;
+        width: 90vw;
         margin: 0;
-        opacity: 10%;
+        left: 10vw;
+        top: 0;
+        overflow: hidden;
+        box-shadow: inset 5px 5px 10px 3px rgba(0, 0, 0, 0.5);
     }
 
-    .grid {
+    .grid-background {
         background-image: repeating-linear-gradient(var(--foreground) 0 1px, transparent 1px 100%),
         repeating-linear-gradient(90deg, var(--foreground) 0 1px, transparent 1px 100%);
         background-size: 100px 100px;
+        width: 100%;
+        height: 100%;
+        opacity: 0.5;
+    }
+
+    .toolbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 10vw;
+        background-color: var(--background);
+        border-right: 1px solid var(--foreground);
+    }
+
+    .toolbar-header {
+        width: 100%;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        border-bottom: 1px double var(--foreground);
+    }
+
+    .toolbar-button {
+        width: 100%;
+        height: 50px;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .toolbar-button:hover {
+        background-color: var(--foreground);
+        color: var(--background);
+    }
+
+    .toolbar-separator {
+        width: 100%;
+        height: 1px;
+        background-color: var(--foreground);
     }
 
 </style>
 
 <script type="module">
     import Shape from "/js/Shape.js"
-    import ToolBar from "/js/ToolBar.js"
-    new ToolBar()
-    new Shape()
+    const grid = document.querySelector(".grid")
+    console.log(grid)
+    new Shape(grid)
 </script>
