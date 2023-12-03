@@ -57,6 +57,8 @@ const style = (typeof myVariable !== 'undefined')? style : `
 `
 
 export default class Shape {
+    style = style
+
     constructor(
         width = 300,
         height = 300,
@@ -65,7 +67,8 @@ export default class Shape {
         x = undefined, //if undefined will center
         y = undefined, //if undefined will center
     ) {
-        this.loadStyles(style, 'shapeStyle')
+        console.log('shape style', this.constructor.style)
+        this.loadStyles(this.constructor.style, 'shapeStyle')
 
         if (parent === undefined) {
             parent = document.body.closest('.grid') ? document.body.closest('.grid') : document.body
