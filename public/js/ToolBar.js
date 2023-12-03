@@ -4,14 +4,11 @@ import Shape from "./Shape.js";
 const html = `
     <div class="toolbar">
         <div class="toolbar-header">Toolbar</div>
-        <button class="toolbar-button">Button 1</button>
-        <button class="toolbar-button">Button 2</button>
+        <button class="toolbar-button">⬛ Square</button>
         <div class="toolbar-separator"></div>
-        <button class="toolbar-button active">Button 3</button>
-        <button class="toolbar-button">Button 4</button>
+        <button class="toolbar-button">💾 Save</button>
     </div>
 `
-
 
 export default class ToolBar extends Shape {
     constructor(
@@ -41,6 +38,7 @@ const style = `
         z-index: 100;
         background-color: #2d2d2d;
         padding: 10px;
+        pointer-events: none;
     }
     
     .toolbar-header {
@@ -52,6 +50,7 @@ const style = `
 
     /* Toolbar Button */
     .toolbar-button {
+        width: 100%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
