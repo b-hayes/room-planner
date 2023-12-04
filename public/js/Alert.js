@@ -50,9 +50,9 @@ const style = `
     width: 60vw;
     min-height: 10px;
 
-    background-color: var(--background);
+    background-color: var(--background, lightgray);
     border-radius: 3px;
-    border: 1px solid var(--foreground);
+    border: 1px solid var(--foreground, black);
     box-shadow: 3px 3px 10px 0 rgba(0, 0, 0, 0.5);
 }
 
@@ -68,8 +68,8 @@ const style = `
     font-size: 1em;
     text-align: center;
     margin: 3PX;
-    background-color: var(--foreground);
-    color: var(--background);
+    background-color: var(--foreground, black);
+    color: var(--background, lightgray);
 }
 
 .alert-message {

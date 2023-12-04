@@ -2,6 +2,9 @@ import Component from "./Scafold/Component.js";
 
 export default class Shape extends Component {
 
+    html() {
+        return html;
+    }
 
     style() {
         return super.style() + style;
@@ -13,7 +16,7 @@ export default class Shape extends Component {
         height = 300,
         x = undefined, //if undefined will center
         y = undefined, //if undefined will center
-        colour = 'var(--link)',
+        colour = 'var(--link, cornflowerblue)',
     ) {
         super();
 
@@ -36,15 +39,10 @@ export default class Shape extends Component {
         //add shape class
         this.element().classList.add('shape')
 
-        //create position label.
-        this.posText = document.createElement('div')
-        this.posText.style.position = 'absolute'
-        this.posText.style.top = '0'
-        this.posText.style.left = '0'
-
-        //prevent all mouse events from interacting with the posText
-        this.posText.style.pointerEvents = 'none'
-        this.element().appendChild(this.posText)
+        //get labels.
+        this.posText = this.element().querySelector('.posText')
+        this.widthText = this.element().querySelector('.widthText')
+        this.heightText = this.element().querySelector('.heightText')
 
         document.addEventListener('mousedown', (e) => {
             //unselect if anything other than this is clicked on
@@ -77,16 +75,15 @@ export default class Shape extends Component {
 
         //Add the element to the parent
         this.parent.appendChild(this.element())
+        this.updateLabels()// not sure why but this has no effect until after its added ot the parent
     }
 
-    /* When clicking the shape make the border match the css var for --link-hover */
     select() {
         this.selected = true
         //add selected class
         this.element().classList.add('selected')
     }
 
-    //When un-clicking the shape make the border match the css var for --foreground
     unselect() {
         this.selected = false
         //remove selected class
@@ -136,13 +133,21 @@ export default class Shape extends Component {
     }
 
     update(x, y, width, height) {
+
+        console.log('update', x, y, width, height)
+
         let snap = this.parent.snap || 10 //provide the opportunity for the parent to dictate the grid snap
         this.element().style.top = y - (y % snap) + 'px'
         this.element().style.left = x - (x % snap) + 'px'
         this.element().style.width = width + 'px'
         this.element().style.height = height + 'px'
-        //update posText
+        this.updateLabels()
+    }
+
+    updateLabels() {
         this.posText.innerHTML = 'x: ' + this.element().offsetLeft + ' y: ' + this.element().offsetTop
+        this.widthText.innerHTML = 'w: ' + this.element().offsetWidth
+        this.heightText.innerHTML = 'h: ' + this.element().offsetHeight
     }
 
     get position() {
@@ -218,6 +223,15 @@ export default class Shape extends Component {
     }
 }
 
+// language=HTML
+const html = `
+<div class="shape">
+    <div class="posText"></div>
+    <div class="widthText"></div>
+    <div class="heightText"></div>
+</div>
+`
+
 // language=CSS
 const style = `
 .shape {
@@ -272,5 +286,28 @@ const style = `
 .shape.resize-bottom {
     border-bottom-style: dotted;
     cursor: ns-resize;
+}
+
+.posText {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.widthText {
+    pointer-events: none;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.heightText {
+    pointer-events: none;
+    position: absolute;
+    bottom: 50%;
+    right: 0;
+    transform: rotate(-90deg);
 }
 `
