@@ -13,6 +13,7 @@ export default class Shape extends Component {
         height = 300,
         x = undefined, //if undefined will center
         y = undefined, //if undefined will center
+        colour = 'var(--link)',
     ) {
         super();
 
