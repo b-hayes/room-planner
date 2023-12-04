@@ -8,12 +8,7 @@ export default class Alert extends Component {
         console.log('Alert: ' + message)
         this.message = message
         this.title = title
-
-        //replace the {{ title }} and {{ message }} with the actual title and message inside this.element()
-        this.element().innerHTML = this.html()
-            .replace('{{ title }}', this.title)
-            .replace('{{ message }}', this.message)
-            .replace('{{ type }}', type)
+        this.type = type
 
         document.body.appendChild(this.element())
 
@@ -25,6 +20,9 @@ export default class Alert extends Component {
 
     html() {
         return html
+            .replace('{{ title }}', this.title)
+            .replace('{{ message }}', this.message)
+            .replace('{{ type }}', this.type)
     }
 
     style() {
@@ -58,10 +56,12 @@ const style = `
 
 .alert.success {
     background-color: var(--success, darkseagreen);
+    color: var(--success-text, black);
 }
 
 .alert.error {
-    background-color: var(--error, crimson);
+    background-color: var(--error, indianred);
+    color: var(--error-text, black);
 }
 
 .alert-title {

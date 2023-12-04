@@ -5,7 +5,6 @@ export default class Component {
     constructor() {
         let styleId = this.constructor.name + '-' + Loader.hashString(this.style())
         Loader.loadStyles(this.style(), styleId)
-        this._element = Loader.loadHtml(this.html())
     }
 
     html() {
@@ -16,6 +15,9 @@ export default class Component {
     }
 
     element() {
+        if (this._element === undefined) {
+            this._element = Loader.loadHtml(this.html())
+        }
         return this._element
     }
 }
