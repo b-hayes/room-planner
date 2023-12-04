@@ -11,16 +11,17 @@ export default class Shape extends Component {
         parent = document.body,
         width = 300,
         height = 300,
-        colour = 'var(--link)',
         x = undefined, //if undefined will center
         y = undefined, //if undefined will center
+        colour = 'var(--link)',
     ) {
         super();
+
         if (parent === undefined) {
             parent = document.body
         }
 
-        //If no position then center while rounding to nearest 100
+        //If no position then center while rounding to the nearest 100
         if (x === undefined) {
             x = (parent.clientWidth / 2) - (width / 2)
             x = x - (x % 100)

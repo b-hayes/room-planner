@@ -7,9 +7,9 @@
 <body>
 <div class="toolbar">
     <div class="toolbar-header">Toolbar</div>
-    <button class="toolbar-button">💾 Save</button>
+    <button class="toolbar-button" onclick="save()">💾 Save</button>
     <div class="toolbar-separator"></div>
-    <button class="toolbar-button">⬛ Square</button>
+    <button class="toolbar-button" onclick="newShape()">⬛ Square</button>
 </div>
 <div class="grid">
     <div class="grid-background"></div>
@@ -78,7 +78,62 @@
 
 <script type="module">
     import Shape from "/js/Shape.js"
+
     const grid = document.querySelector(".grid")
-    console.log(grid)
-    new Shape(grid)
+
+    let shapes = []
+
+    window.newShape = function () {
+        const shape = new Shape(grid)
+        shapes.push(shape)
+        console.log('shapes:', shapes)
+    }
+
+    window.save = function () {
+        let data = {
+            shapes: shapes.map(shape => {
+                return {
+                    position: shape.position,
+                }
+            })
+        }
+
+        let jsonString = JSON.stringify(data)
+        console.log('saving:', jsonString)
+        localStorage.setItem("data", jsonString)
+    }
+
+    window.load = function () {
+        let jsonString = localStorage.getItem("data")
+        if (!jsonString) {
+            return
+        }
+
+        let data = JSON.parse(jsonString)
+        if (!data.shapes) {
+            console.log('no shapes in data storage')
+            return
+        }
+
+        if (!Array.isArray(data.shapes)) {
+            throw new Error('data.shapes is not an array')
+        }
+
+        let loadedShapes = []
+        data.shapes.forEach(shape => {
+            console.log('loading shape:', shape)
+            loadedShapes.push(
+                new Shape(
+                    grid,
+                    shape.position.width,
+                    shape.position.height,
+                    shape.position.x,
+                    shape.position.y,
+                )
+            )
+        })
+        shapes = loadedShapes
+    }
+
+    load()
 </script>
