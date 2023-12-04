@@ -86,8 +86,8 @@
 
     window.newShape = function () {
         const shape = new Shape(grid)
+        shape.select()
         shapes.push(shape)
-        console.log('shapes:', shapes)
     }
 
     window.save = function () {

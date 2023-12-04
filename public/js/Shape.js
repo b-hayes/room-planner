@@ -13,7 +13,6 @@ export default class Shape extends Component {
         height = 300,
         x = undefined, //if undefined will center
         y = undefined, //if undefined will center
-        colour = 'var(--link)',
     ) {
         super();
 
@@ -57,8 +56,9 @@ export default class Shape extends Component {
             this.clickY = e.pageY
             this.shapePositionWhenClicked = this.position
 
-            //select the shape to make it more noticeable
+            // mark the shape as selected (important)
             this.select()
+
             //add event listeners for moving and unselecting
             document.addEventListener('mousemove', (e) => this.drag(e), false)
             document.addEventListener('mouseup', () => this.up(), false)
@@ -71,8 +71,6 @@ export default class Shape extends Component {
         this.colour = colour
         this.parent = parent
 
-        //start selected so the user can notice when it's added.
-        this.select()
         //update the position, size and related labels
         this.update(x, y, width, height)
 
