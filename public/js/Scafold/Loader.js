@@ -15,9 +15,9 @@ export default class Loader {
     }
 
     static loadHtml(html) {
-        let element = document.createElement('div')
-        element.innerHTML = html
-        return element
+        let template = document.createElement('template')
+        template.innerHTML = html
+        return template.content.firstElementChild
     }
 
     static hashString(string) {
