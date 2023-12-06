@@ -9,7 +9,8 @@
     <div class="toolbar-header">Toolbar</div>
     <button class="toolbar-button" onclick="save()">💾 Save</button>
     <div class="toolbar-separator"></div>
-    <button class="toolbar-button" onclick="newShape()">⬛ Square</button>
+    <button class="toolbar-button" onclick="newRoom()">⬜ Room</button>
+    <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
 </div>
 <div class="grid">
     <div class="grid-background"></div>
@@ -79,6 +80,7 @@
 <script type="module">
     import Shape from "/js/Shape.js"
     import Alert from "/js/Alert.js"
+    import Room from "/js/Room.js"
 
     const grid = document.querySelector(".grid")
 
@@ -90,11 +92,19 @@
         shapes.push(shape)
     }
 
+    window.newRoom = function () {
+        const room = new Room(grid)
+        room.select()
+        shapes.push(room)
+    }
+
     window.save = function () {
         let data = {
             shapes: shapes.map(shape => {
                 return {
                     position: shape.position,
+                    //store the class name so we can recreate the object
+                    class: shape.constructor.name
                 }
             })
         }
@@ -124,15 +134,33 @@
         let loadedShapes = []
         data.shapes.forEach(shape => {
             console.log('loading shape:', shape)
-            loadedShapes.push(
-                new Shape(
-                    grid,
-                    shape.position.width,
-                    shape.position.height,
-                    shape.position.x,
-                    shape.position.y,
+
+            //check the class to use the correct constructor
+            if (shape.class === 'Shape') {
+                loadedShapes.push(
+                    new Shape(
+                        grid,
+                        shape.position.width,
+                        shape.position.height,
+                        shape.position.x,
+                        shape.position.y,
+                    )
                 )
-            )
+                return
+            }
+
+            if (shape.class === 'Room') {
+                loadedShapes.push(
+                    new Room(
+                        grid,
+                        shape.position.width,
+                        shape.position.height,
+                        shape.position.x,
+                        shape.position.y,
+                    )
+                )
+                return
+            }
         })
         shapes = loadedShapes
     }

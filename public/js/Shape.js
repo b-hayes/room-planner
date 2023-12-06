@@ -237,17 +237,18 @@ const style = `
 .shape {
     position: absolute;
     border: 1px solid var(--link, cornflowerblue);
+    z-index: 100;
 }
 
 .shape.selected {
+    z-index: 1000;
     border: 3px solid var(--link-hover, darkseagreen);
-    /*box-shadow: inset 0 0 0 2px var(--link-hover);*/
-    z-index: 1;
 }
-.shape.selected .posText {
+
+.selected .posText {
     display: block;
 }
-.shape .posText {
+.posText {
     display: none;
 }
 
