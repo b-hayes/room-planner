@@ -290,14 +290,16 @@ const style = `
 }
 
 .posText {
+    pointer-events: none;
+    user-select: none;
     position: absolute;
     top: 0;
     left: 0;
-    pointer-events: none;
 }
 
 .widthText {
     pointer-events: none;
+    user-select: none;
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -306,6 +308,7 @@ const style = `
 
 .heightText {
     pointer-events: none;
+    user-select: none;
     position: absolute;
     bottom: 50%;
     right: 0;
