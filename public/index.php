@@ -15,7 +15,7 @@ try {
     require_once __DIR__ . '/../vendor/autoload.php';
 
     //start your application here.
-    require_once __DIR__ . '/../views/index.html';
+    require_once __DIR__ . '/../views/index.php';
 
 } catch (\Throwable $error) {
     //This is the last line of defence do not use any dependencies that could break.

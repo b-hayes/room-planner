@@ -1,3 +1,14 @@
+<?php
+declare(strict_types=1);
+
+//data used inside the view.
+//get git log with date and message
+
+
+$latestUpdates = explode("\n", `git log -2 --pretty=format:"%cd %s" --date=format:"%Y-%m-%d"`);
+$latestUpdates[0] = "Latest update: " . $latestUpdates[0];
+$latestUpdates[1] = "Previous update: " . $latestUpdates[1];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +25,13 @@
 </div>
 <div class="grid">
     <div class="grid-background"></div>
+</div>
+<div class="status-bar">
+    <?php
+    foreach ($latestUpdates as $update) {
+        echo "<div class='status'>$update</div>";
+    }
+    ?>
 </div>
 </body>
 </html>
@@ -74,6 +92,26 @@
         width: 100%;
         height: 1px;
         background-color: var(--foreground);
+    }
+
+    .status-bar {
+        position: fixed;
+        overflow: scroll;
+        bottom: 0;
+        left: 0;
+        height: 20px;
+        width: 100%;
+        background-color: var(--background);
+        border-top: 1px solid var(--foreground);
+    }
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .status-bar::-webkit-scrollbar {
+        display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .status-bar {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
     }
 
 </style>
