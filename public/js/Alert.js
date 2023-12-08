@@ -4,8 +4,6 @@ export default class Alert extends Component {
 
     constructor(message, type = 'success', title = '') {
         super()
-
-        console.log('Alert: ' + message)
         this.message = message
         this.title = title
         this.type = type

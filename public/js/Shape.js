@@ -55,10 +55,25 @@ export default class Shape extends Component {
             this.clickY = e.pageY
             this.shapePositionWhenClicked = this.position
 
-            // mark the shape as selected (important)
+            //mark the shape as selected (important)
             this.select()
 
-            //add event listeners for moving and unselecting
+            //trigger a custom event so the parent application to perform other actions.
+            let event = new CustomEvent('shape-click', {
+                detail: {
+                    button: e.button,
+                    x: e.pageX,
+                    y: e.pageY,
+                    shape: this
+                }
+            })
+
+            //if not primary mouse button then don't bother with move and resize events.
+            if (e.buttons !== 1) {
+                return
+            }
+
+            //add event listeners for moving and resizing
             document.addEventListener('mousemove', (e) => this.drag(e), false)
             document.addEventListener('mouseup', () => this.up(), false)
         })
@@ -232,6 +247,7 @@ const html = `
 // language=CSS
 const style = `
 .shape {
+    box-sizing: border-box;
     position: absolute;
     border: 1px solid var(--link, cornflowerblue);
     z-index: 100;
