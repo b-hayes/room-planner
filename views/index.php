@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 $latestUpdates = explode("\n", `git log -10 --pretty=format:"%cd %s" --date=format:"%a %e %b %Y"`);
+$latestUpdates = array_unique($latestUpdates);// this lets me do several commits in a row without it showing up multiple times
 ?>
 <!DOCTYPE html>
 <html lang="en">
