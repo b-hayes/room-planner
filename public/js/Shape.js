@@ -85,12 +85,9 @@ export default class Shape extends Component {
         this.colour = colour
         this.parent = parent
 
-        //update the position, size and related labels
-        this.update(x, y, width, height)
-
-        //Add the element to the parent
+        //Add the element to the parent, and position it.
         this.parent.appendChild(this.element())
-        this.updateLabels()// not sure why but this has no effect until after its added ot the parent
+        this.position = {x, y, width, height}
     }
 
     select() {
@@ -148,15 +145,6 @@ export default class Shape extends Component {
 
     up() {
         document.removeEventListener('mouseup', () => this.up(), false)
-    }
-
-    update(x, y, width, height) {
-        let snap = this.parent.snap || 10 //provide the opportunity for the parent to dictate the grid snap
-        this.element().style.top = y - (y % snap) + 'px'
-        this.element().style.left = x - (x % snap) + 'px'
-        this.element().style.width = width - (width % snap) + 'px'
-        this.element().style.height = height - (height % snap) + 'px'
-        this.updateLabels()
     }
 
     updateLabels() {
