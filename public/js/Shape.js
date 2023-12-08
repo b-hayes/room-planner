@@ -133,9 +133,6 @@ export default class Shape extends Component {
     }
 
     update(x, y, width, height) {
-
-        console.log('update', x, y, width, height)
-
         let snap = this.parent.snap || 10 //provide the opportunity for the parent to dictate the grid snap
         this.element().style.top = y - (y % snap) + 'px'
         this.element().style.left = x - (x % snap) + 'px'
