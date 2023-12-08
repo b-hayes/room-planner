@@ -139,8 +139,8 @@ export default class Shape extends Component {
         let snap = this.parent.snap || 10 //provide the opportunity for the parent to dictate the grid snap
         this.element().style.top = y - (y % snap) + 'px'
         this.element().style.left = x - (x % snap) + 'px'
-        this.element().style.width = width + 'px'
-        this.element().style.height = height + 'px'
+        this.element().style.width = width - (width % snap) + 'px'
+        this.element().style.height = height - (height % snap) + 'px'
         this.updateLabels()
     }
 
