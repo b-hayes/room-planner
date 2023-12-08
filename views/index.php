@@ -5,9 +5,7 @@ declare(strict_types=1);
 //get git log with date and message
 
 
-$latestUpdates = explode("\n", `git log -2 --pretty=format:"%cd %s" --date=format:"%Y-%m-%d"`);
-$latestUpdates[0] = "Latest update: " . $latestUpdates[0];
-$latestUpdates[1] = "Previous update: " . $latestUpdates[1];
+$latestUpdates = explode("\n", `git log -10 --pretty=format:"%cd %s" --date=format:"%a %e %b %Y"`);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -27,15 +25,22 @@ $latestUpdates[1] = "Previous update: " . $latestUpdates[1];
     <div class="grid-background"></div>
 </div>
 <div class="status-bar">
-    <?php
-    foreach ($latestUpdates as $update) {
-        echo "<div class='status'>$update</div>";
-    }
-    ?>
+    <div style="padding-right: 1em">Latest Updates:</div>
+    <div class="invisibleScrollBars incrementalScroll" style="flex-grow: 1">
+        <?php
+        foreach ($latestUpdates as $update) {
+            echo "<div style='width: 100%'>$update</div>";
+        }
+        ?>
+    </div>
 </div>
 </body>
 </html>
 <style>
+    * {
+        /* Pretty much never want people accidentally highlight text while using this app. */
+        user-select: none;
+    }
     .grid {
         position: fixed;
         height: 100%;
@@ -95,8 +100,8 @@ $latestUpdates[1] = "Previous update: " . $latestUpdates[1];
     }
 
     .status-bar {
+        display: flex;
         position: fixed;
-        overflow: scroll;
         bottom: 0;
         left: 0;
         height: 20px;
@@ -105,13 +110,26 @@ $latestUpdates[1] = "Previous update: " . $latestUpdates[1];
         border-top: 1px solid var(--foreground);
     }
     /* Hide scrollbar for Chrome, Safari and Opera */
-    .status-bar::-webkit-scrollbar {
+    .invisibleScrollBars::-webkit-scrollbar {
         display: none;
     }
     /* Hide scrollbar for IE, Edge and Firefox */
-    .status-bar {
+    .invisibleScrollBars {
+        overflow: scroll;
         -ms-overflow-style: none;  /* IE and Edge */
         scrollbar-width: none;  /* Firefox */
+    }
+    div:has(> .incrementalScroll) {
+        scroll-snap-type: both mandatory;
+    }
+    .incrementalScroll * {
+        scroll-snap-align: start;
+        /* Make sure each element is tall enough not to scroll pat before it can snap to it */
+        min-height: 100px;
+    }
+    .incrementalScroll *:last-child {
+        /* Last element shouldn't have extra height or the scroll back up wont work as nice. */
+        min-height: revert;
     }
 
 </style>
