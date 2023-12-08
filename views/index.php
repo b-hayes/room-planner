@@ -1,10 +1,5 @@
 <?php
 declare(strict_types=1);
-
-//data used inside the view.
-//get git log with date and message
-
-
 $latestUpdates = explode("\n", `git log -10 --pretty=format:"%cd %s" --date=format:"%a %e %b %Y"`);
 ?>
 <!DOCTYPE html>

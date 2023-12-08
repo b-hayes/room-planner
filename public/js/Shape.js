@@ -113,13 +113,16 @@ export default class Shape extends Component {
 
         let shiftX = e.pageX - this.clickX;
         let shiftY = e.pageY - this.clickY;
+
+        //snap shift to grid
+        let snap = this.parent.snap || 10 //provide the opportunity for the parent to dictate the grid snap
+        shiftX = shiftX - (shiftX % snap)
+        shiftY = shiftY - (shiftY % snap)
+
+        let { x, y, width, height } = this.shapePositionWhenClicked;
+
         if (this.resizing) {
             //resize the shape
-            let x = this.shapePositionWhenClicked.x
-            let y = this.shapePositionWhenClicked.y
-            let width = this.shapePositionWhenClicked.width
-            let height = this.shapePositionWhenClicked.height
-
             if (this.resizing.includes('left')) {
                 x = this.shapePositionWhenClicked.x + shiftX
                 width = this.shapePositionWhenClicked.width - shiftX
@@ -134,13 +137,13 @@ export default class Shape extends Component {
             if (this.resizing.includes('bottom')) {
                 height = this.shapePositionWhenClicked.height + shiftY
             }
-
-            this.update(x, y, width, height)
         } else {
-            //move the shape
-            this.update(this.shapePositionWhenClicked.x + shiftX,this.shapePositionWhenClicked.y + shiftY)
+            //move the shape only
+            x = this.shapePositionWhenClicked.x + shiftX;
+            y = this.shapePositionWhenClicked.y + shiftY;
         }
 
+        this.position = {x, y, width, height}
     }
 
     up() {
@@ -172,7 +175,11 @@ export default class Shape extends Component {
     }
 
     set position({x, y, width, height}) {
-        this.update(x, y, width, height)
+        this.element().style.top = y + 'px'
+        this.element().style.left = x + 'px'
+        this.element().style.width = width + 'px'
+        this.element().style.height = height + 'px'
+        this.updateLabels()
     }
 
 
