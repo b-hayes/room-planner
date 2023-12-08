@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
-$latestUpdates = explode("\n", `git log -10 --pretty=format:"%cd %s" --date=format:"%a %e %b %Y"`);
+$latestUpdates = explode("\n", `git log --pretty=format:"%cd %s" --date=format:"%a %e %b %Y"`);
 $latestUpdates = array_unique($latestUpdates);// this lets me do several commits in a row without it showing up multiple times
+$latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 unique commit messages
 ?>
 <!DOCTYPE html>
 <html lang="en">
