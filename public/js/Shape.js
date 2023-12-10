@@ -302,7 +302,7 @@ const style = `
     user-select: none;
     position: absolute;
     top: 0;
-    left: 0;
+    left: 5px;
 }
 
 .widthText {
@@ -319,7 +319,7 @@ const style = `
     user-select: none;
     position: absolute;
     bottom: 50%;
-    right: 0;
+    right: -10;
     transform: rotate(-90deg);
 }
 `
