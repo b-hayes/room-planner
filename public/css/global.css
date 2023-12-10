@@ -1,9 +1,4 @@
 /*  Put all the universal styles here.  */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
 /* Light mode */
 @media (prefers-color-scheme: light) {
