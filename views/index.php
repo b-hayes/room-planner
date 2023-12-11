@@ -168,7 +168,6 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         }
 
         let jsonString = JSON.stringify(data)
-        console.log('saving:', jsonString)
         localStorage.setItem("data", jsonString)
         new Alert('Saved your stuff (locally).', 'success')
     }
@@ -181,7 +180,6 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
         let data = JSON.parse(jsonString)
         if (!data.shapes) {
-            console.log('no shapes in data storage')
             return
         }
 
@@ -191,8 +189,6 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
         let loadedShapes = []
         data.shapes.forEach(shape => {
-            console.log('loading shape:', shape)
-
             //check the class to use the correct constructor
             if (shape.class === 'Shape') {
                 loadedShapes.push(
@@ -225,6 +221,5 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
     await Loader.replaceTagsWithComponents(document)
     const grid = document.querySelector(".grid")
-    console.log('grid:', grid)
     load()
 </script>

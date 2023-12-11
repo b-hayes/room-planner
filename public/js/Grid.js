@@ -5,7 +5,6 @@ export default class Grid extends Component {
     constructor({scale = 1}) {
         super()
         this.scale = scale
-        console.log('scale',scale)
     }
 
     html() {

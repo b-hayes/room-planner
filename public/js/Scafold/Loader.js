@@ -30,6 +30,8 @@ export default class Loader {
         return hash
     }
 
+    // This is totally unnecessary since it's only used for Grid.
+    // I could have just called new Grid() but I wanted to see how hard it is to dynamically load a component.
     static async replaceTagsWithComponents(parent) {
         let tags = parent.getElementsByTagName('*')
         for (let tag of tags) {
@@ -62,7 +64,7 @@ export default class Loader {
                     throw new Error('Class ' + className + ' is not a function')
                 }
 
-                //check for a params attribute and parse it
+                // Check for a params attribute and parse it. todo: this should probably just copy all attributes to the component in general.
                 let params = {}
                 if (tag.hasAttribute('params')) {
                     params = JSON.parse(tag.getAttribute('params'))
@@ -73,18 +75,13 @@ export default class Loader {
                 }
 
                 // Create a new instance
-                console.log('Loader is creating a ', className, ' with ', params)
                 let newInstance = new LoadedClass(params)
                 let newElement = newInstance.element()
 
-                // if tag has inner html and newElement has <slot> tags then replace them with the inner html
+                // Replace slot content
                 if (tag.innerHTML && newElement.getElementsByTagName('slot').length > 0) {
-                    console.log('tag.innerHTML', tag.innerHTML)
-                    // replace all <slot> tags with the inner html
                     newElement.innerHTML = newElement.innerHTML.replace(/<slot>/g, tag.innerHTML)
                 }
-
-                console.log('Replacing ', tag, ' with ', newElement)
 
                 tag.parentNode.replaceChild(newElement, tag)
             } catch (e) {
