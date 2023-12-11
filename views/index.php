@@ -2,6 +2,10 @@
 declare(strict_types=1);
 $latestUpdates = explode("\n", `git log --pretty=format:"%cd %s" --date=format:"%a %e %b %Y"`);
 $latestUpdates = array_unique($latestUpdates);// this lets me do several commits in a row without it showing up multiple times
+$latestUpdates = array_filter($latestUpdates, function ($update) {
+    // exclude work in progress commits or cleanup commits (i tend to do those a lot when I have to leave my machine in a hurry)
+    return stripos($update, 'wip') === false && stripos($update, 'cleanup') === false;
+});
 $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 unique commit messages
 ?>
 <!DOCTYPE html>
@@ -18,9 +22,9 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     <button class="toolbar-button" onclick="newRoom()">⬜ Room</button>
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
 </div>
-<div class="grid">
-    <div class="grid-background"></div>
-</div>
+
+<Grid params='{ "scale": 1 }'></Grid>
+
 <div class="status-bar">
     <div style="padding-right: 1em">Latest Updates:</div>
     <div class="invisibleScrollBars incrementalScroll" style="flex-grow: 1">
@@ -132,11 +136,11 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 </style>
 
 <script type="module">
+    import Grid from "/js/Grid.js"
     import Shape from "/js/Shape.js"
     import Alert from "/js/Alert.js"
     import Room from "/js/Room.js"
-
-    const grid = document.querySelector(".grid")
+    import Loader from "../public/js/Scafold/Loader.js"
 
     let shapes = []
 
@@ -219,5 +223,8 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         shapes = loadedShapes
     }
 
+    await Loader.replaceTagsWithComponents(document)
+    const grid = document.querySelector(".grid")
+    console.log('grid:', grid)
     load()
 </script>

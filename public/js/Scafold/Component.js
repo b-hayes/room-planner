@@ -1,6 +1,7 @@
 import Loader from "./Loader.js"
 
 export default class Component {
+    static isComponent = true;
 
     constructor() {
         let styleId = this.constructor.name + '-' + Loader.hashString(this.style())
