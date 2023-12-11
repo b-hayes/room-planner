@@ -11,17 +11,36 @@ export default class Shape extends Component {
     }
 
     constructor(
+        id,
         parent = document.body,
-        width = 300,
-        height = 300,
-        x = undefined, //if undefined will center
-        y = undefined, //if undefined will center
+        position = {
+            width: 300,
+            height: 300,
+            x: undefined, //if undefined will center
+            y: undefined, //if undefined will center
+        }
     ) {
         super();
+        if (typeof id !== 'string') {
+            throw new TypeError('id must be a string')
+        }
+        this.id = id
 
         if (parent === undefined) {
             parent = document.body
         }
+        if (!(parent instanceof Node)) {
+            throw new TypeError('parent must be a node')
+        }
+
+        // for each Position value if defined should be int/float
+        for (let key in position) {
+            if (position[key] !== undefined && typeof position[key] !== 'number') {
+                throw new TypeError('position.' + key + ' must be a number')
+            }
+        }
+
+        let {width, height, x, y} = position
 
         //If no position then center while rounding to the nearest 100
         if (x === undefined) {
@@ -61,6 +80,7 @@ export default class Shape extends Component {
                     shape: this
                 }
             })
+            this.element().dispatchEvent(event)
 
             //if not primary mouse button then don't bother with move and resize events.
             if (e.buttons !== 1) {

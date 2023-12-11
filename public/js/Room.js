@@ -3,14 +3,16 @@ import Shape from "./Shape.js"
 export default class Room extends Shape {
 
     constructor(
+        id,
         parent = document.body,
-        width = 300,
-        height = 300,
-        x = undefined, //if undefined will center
-        y = undefined, //if undefined will center
-        colour = 'var(--link, cornflowerblue)',
+        position = {
+            width: 300,
+            height: 300,
+            x: undefined, //if undefined will center
+            y: undefined, //if undefined will center
+        }
     ) {
-        super(parent, width, height, x, y, colour)
+        super(id, parent, position)
         this.element().classList.add('room')
     }
 

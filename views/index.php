@@ -144,14 +144,27 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
     let shapes = []
 
+    window.randomId = function () {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    }
+
     window.newShape = function () {
-        const shape = new Shape(grid)
+        const shape = new Shape(randomId(), grid)
         shape.select()
         shapes.push(shape)
     }
 
+    window.deleteShape = function (id) {
+        const shape = shapes.find(shape => shape.id === id)
+        if (!shape) {
+            return
+        }
+        shape.delete()
+        shapes = shapes.filter(shape => shape.id !== id)
+    }
+
     window.newRoom = function () {
-        const room = new Room(grid)
+        const room = new Room(randomId(), grid)
         room.select()
         shapes.push(room)
     }
@@ -160,6 +173,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         let data = {
             shapes: shapes.map(shape => {
                 return {
+                    id: shape.id,
                     position: shape.position,
                     //store the class name so we can recreate the object
                     class: shape.constructor.name
@@ -193,11 +207,9 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
             if (shape.class === 'Shape') {
                 loadedShapes.push(
                     new Shape(
+                        shape.id ?? randomId(), //previous versions didn't have ids so need to make them up
                         grid,
-                        shape.position.width,
-                        shape.position.height,
-                        shape.position.x,
-                        shape.position.y,
+                        shape.position
                     )
                 )
                 return
@@ -206,11 +218,9 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
             if (shape.class === 'Room') {
                 loadedShapes.push(
                     new Room(
+                        shape.id ?? randomId(),
                         grid,
-                        shape.position.width,
-                        shape.position.height,
-                        shape.position.x,
-                        shape.position.y,
+                        shape.position
                     )
                 )
                 return
@@ -222,4 +232,14 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     await Loader.replaceTagsWithComponents(document)
     const grid = document.querySelector(".grid")
     load()
+    console.log(shapes)
+
+    //Listen for right clicks on shapes to open a menu
+    grid.addEventListener('shape-click', function (event) {
+        if (event.detail.button !== 2) {
+            return
+        }
+        event.preventDefault()
+        const shape = shapes.find(shape => shape.id === event.detail.id)
+    }, true)
 </script>
