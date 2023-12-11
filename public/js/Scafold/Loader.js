@@ -37,6 +37,10 @@ export default class Loader {
             //convert classname from kebab-case to PascalCase
             let className = Loader.toPascalCase(tagName)
 
+            //skip slot
+            if (['slot'].includes(tagName)) {
+                continue
+            }
             //skip common html tags like div span p etc
             if (['div', 'span', 'p', 'a', 'img', 'button', 'input', 'form', 'label', 'select', 'option', 'textarea', 'meta', 'head', 'script', 'link', 'html', 'body', 'title', 'style'].includes(tagName)) {
                 continue

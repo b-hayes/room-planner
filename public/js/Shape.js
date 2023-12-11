@@ -16,7 +16,6 @@ export default class Shape extends Component {
         height = 300,
         x = undefined, //if undefined will center
         y = undefined, //if undefined will center
-        colour = 'var(--link, cornflowerblue)',
     ) {
         super();
 
@@ -33,11 +32,6 @@ export default class Shape extends Component {
             y = (parent.clientHeight / 2) - (height / 2)
             y = y - (y % 100)
         }
-
-        this.element().style.position = 'absolute'
-        this.element().style.border = '1px solid ' + this.colour
-        //add shape class
-        this.element().classList.add('shape')
 
         //get labels.
         this.posText = this.element().querySelector('.posText')
@@ -82,7 +76,6 @@ export default class Shape extends Component {
         document.addEventListener('mousemove', (e) => this.hover(e), false)
 
         //anything stored in this is needed by other functions
-        this.colour = colour
         this.parent = parent
 
         //Add the element to the parent, and position it.
