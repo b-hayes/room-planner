@@ -234,12 +234,44 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     load()
     console.log(shapes)
 
-    //Listen for right clicks on shapes to open a menu
+    //Prevent the default right click menu
+    document.addEventListener('contextmenu', function (event) {
+        event.preventDefault()
+    }, true)
+
+    //Listen for shapes-click events to open a special context menu
     grid.addEventListener('shape-click', function (event) {
         if (event.detail.button !== 2) {
             return
         }
-        event.preventDefault()
-        const shape = shapes.find(shape => shape.id === event.detail.id)
+        console.log('shape-click', event)
+
+        //show a context menu with a delete option
+        let menuHtml = `
+            <div class="shape-context-menu">
+                <div class="context-menu-item" onclick="deleteShape('${event.detail.id}')">🚮Delete</div>
+            </div>
+        `
+        let menu = document.createElement('div')
+        menu.innerHTML = menuHtml
+        menu.style.position = 'absolute'
+        menu.style.left = event.detail.x + 'px'
+        menu.style.top = event.detail.y + 'px'
+        menu.style.zIndex = 999999
+        menu.style.backgroundColor = 'var(--background)'
+        menu.style.border = '1px solid var(--foreground)'
+        menu.style.padding = '5px'
+        menu.style.borderRadius = '5px'
+        menu.style.boxShadow = '5px 5px 10px 3px rgba(0, 0, 0, 0.5)'
+        menu.style.cursor = 'pointer'
+        menu.addEventListener('click', function (event) {
+            event.stopPropagation()
+        })
+        //remove the menu when the user clicks anywhere else
+        document.addEventListener('click', function () {
+            menu.remove()
+        })
+        //add the menu to the document
+        document.body.appendChild(menu)
     }, true)
 </script>

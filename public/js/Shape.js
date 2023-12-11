@@ -39,7 +39,7 @@ export default class Shape extends Component {
                 throw new TypeError('position.' + key + ' must be a number')
             }
         }
-
+        
         let {width, height, x, y} = position
 
         //If no position then center while rounding to the nearest 100
