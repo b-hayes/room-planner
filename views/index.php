@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
-$gitLog = `git log --pretty=format:"%cd %s" --date=format:"%a %e %b %Y"` ?: "No logs found.";
-$latestUpdates = explode("\n", $gitLog);
+$latestUpdates = explode("\n", `git log --pretty=format:"%cd %s" --date=format:"%a %e %b %Y"` ?? "No logs found.");
 $latestUpdates = array_unique($latestUpdates);// this lets me do several commits in a row without it showing up multiple times
 $latestUpdates = array_filter($latestUpdates, function ($update) {
     // exclude work in progress commits or cleanup commits (i tend to do those a lot when I have to leave my machine in a hurry)
