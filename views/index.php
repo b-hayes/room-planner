@@ -16,9 +16,12 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 </head>
 <body>
 <div class="toolbar">
-    <div class="toolbar-header">Toolbar</div>
+    <div class="toolbar-header">File</div>
     <button class="toolbar-button" onclick="save()">💾 Save</button>
-    <div class="toolbar-separator"></div>
+    <button class="toolbar-button" onclick="deleteData()">❌ Delete</button>
+    <div class="toolbar-header">
+        Objects
+    </div>
     <button class="toolbar-button" onclick="newRoom()">⬜ Room</button>
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
 </div>
@@ -75,8 +78,8 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
     .toolbar-header {
         width: 100%;
-        font-size: 20px;
-        font-weight: bold;
+        font-size: 16px;
+        padding: 3px;
         text-align: center;
         border-bottom: 1px double var(--foreground);
     }
@@ -96,8 +99,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
     .toolbar-separator {
         width: 100%;
-        height: 1px;
-        background-color: var(--foreground);
+        height: 3px;
     }
 
     .status-bar {
@@ -171,6 +173,14 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         const room = new Room(randomId(), grid)
         room.select()
         shapes.push(room)
+    }
+
+    window.deleteData = function () {
+        if (!confirm('Are you sure you want to delete all your data?')) {
+            return
+        }
+        localStorage.removeItem("data")
+        window.location.reload()
     }
 
     window.save = function () {

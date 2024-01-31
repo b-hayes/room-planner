@@ -17,7 +17,7 @@ export default class Room extends Shape {
     }
 
     style() {
-        return style;
+        return super.style() + style;
     }
 }
 
@@ -30,5 +30,10 @@ const style = `
         /* inner shadow */
         box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, 0.5);
         border: 3px solid black
+    }
+
+    .room.shape.selected {
+        background-color: var(--link-hover, darkseagreen);
+        color: var(--background, white);
     }
 `
