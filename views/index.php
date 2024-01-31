@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-$latestUpdates = explode("\n", `git log --pretty=format:"%cd %s" --date=format:"%a %e %b %Y"` ?? "No logs found.");
+$latestUpdates = explode("\n", `git log --pretty=format:"%cd %s" --date=format:"%a %e %b %Y"` ?? "No\n logs\n found.");
 $latestUpdates = array_unique($latestUpdates);// this lets me do several commits in a row without it showing up multiple times
 $latestUpdates = array_filter($latestUpdates, function ($update) {
     // exclude work in progress commits or cleanup commits (i tend to do those a lot when I have to leave my machine in a hurry)
@@ -155,12 +155,16 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     }
 
     window.deleteShape = function (id) {
+        console.log('received...', id)
         const shape = shapes.find(shape => shape.id === id)
+        console.log('Shape found:', shape instanceof Shape, shape)
         if (!shape) {
-            return
+            console.error(`Cant find shape to delete: '${id}'`)
+        } else {
+            shape.element().remove()
+            //update the shapes list.
+            shapes = shapes.filter(shape => shape.id !== id)
         }
-        shape.delete()
-        shapes = shapes.filter(shape => shape.id !== id)
     }
 
     window.newRoom = function () {
@@ -249,7 +253,10 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         //show a context menu with a delete option
         let menuHtml = `
             <div class="shape-context-menu">
-                <div class="context-menu-item" onclick="deleteShape('${event.detail.id}')">🚮Delete</div>
+                <div class="context-menu-item" onclick="
+                deleteShape('${event.detail.shape.id}')
+                this.parentElement.parentElement.remove()
+                ">🚮Delete</div>
             </div>
         `
         let menu = document.createElement('div')
