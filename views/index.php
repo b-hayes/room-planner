@@ -176,10 +176,11 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     }
 
     window.deleteData = function () {
-        if (!confirm('Are you sure you want to delete all your data?')) {
+        if (!confirm('Are you sure you want to delete everything and saved data?')) {
             return
         }
         localStorage.removeItem("data")
+        alert('Deleted your (local) storage. Page will now reload.')
         window.location.reload()
     }
 
