@@ -136,11 +136,12 @@ export default class Shape extends Component {
         let shiftX = e.pageX - this.clickX;
         let shiftY = e.pageY - this.clickY;
 
-        //snap shift to grid
-        let snap = this.parent.snap || 10 //provide the opportunity for the parent to dictate the grid snap
-        //todo: using snap this way has issues with scale. Id need to start tracking virtual position instead the actual position of the element.
-        // and then apply snapping to the virtual position and then scale the virtual position when drawing the element.
+        //apply the scale to the shift to get the virtual shift in the grid space
+        shiftX = shiftX / this.scale
+        shiftY = shiftY / this.scale
 
+        //snap shift to grid snap
+        let snap = this.parent.snap || 10
         shiftX = shiftX - (shiftX % snap)
         shiftY = shiftY - (shiftY % snap)
 
@@ -176,12 +177,13 @@ export default class Shape extends Component {
     }
 
     redraw() {
+        let pos = this.position
         // Calculate scaled position
         const sPos = {
-            x: this.unscaledPosition.x * this.scale,
-            y: this.unscaledPosition.y * this.scale,
-            width: this.unscaledPosition.width * this.scale,
-            height: this.unscaledPosition.height * this.scale,
+            x: pos.x * this.scale,
+            y: pos.y * this.scale,
+            width: pos.width * this.scale,
+            height: pos.height * this.scale,
         };
 
         // Apply the scaled position to the element
@@ -191,10 +193,12 @@ export default class Shape extends Component {
         this.element().style.height = sPos.height + 'px';
 
         // Update the labels
-        let pos = this.position
         this.posText.innerHTML = 'x: ' + pos.x + ' y: ' + pos.y
         this.widthText.innerHTML = 'w: ' + pos.width
         this.heightText.innerHTML = 'h: ' + pos.height
+
+        console.log('Grid position:', pos)
+        console.log('Scaled position:', sPos)
     }
 
     get position() {
