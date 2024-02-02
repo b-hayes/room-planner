@@ -16,13 +16,15 @@ export default class Grid extends Component {
             e.preventDefault()
             this.scale += e.deltaY * -0.001
             this.scale = Math.max(0.001, Math.min(10, this.scale))
-            //this.element().style.transform = `scale(${this.scale})`
 
             // Snap scale change to the nearest 0.001
             this.scale = Math.round(this.scale * 10000) / 10000;
 
             //update scale tooltip
             this.element().getElementsByClassName('tool-tip')[0].innerText = `Scale: 1px = ${this.scale}m`
+
+            //update grid background css to show the grid size change
+            this.element().getElementsByClassName('grid-background')[0].style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
         })
     }
 
