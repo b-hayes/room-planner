@@ -22,7 +22,7 @@ export default class Component {
         return this._element
     }
 
-    //NOTE: 100ms is necessary for scroll events with a trackpad not to be trigered twice during the wind down of the scroll.
+    //NOTE: 100ms is necessary for scroll events with a trackpad not to be triggered more than once during the wind down of the scroll.
     dispatchEventWithDebounce(event, debounceTime = 100) {
         //if the timeout is 0 then just dispatch the event
         if (debounceTime === 0) {
