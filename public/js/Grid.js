@@ -8,6 +8,11 @@ export default class Grid extends Component {
 
         //apply scale changes when scrolling
         window.addEventListener('wheel', (e) => {
+            //if scrolling is not happening on the grid, ignore it
+            if (!this.element().contains(e.target)) {
+                return
+            }
+
             e.preventDefault()
             this.scale += e.deltaY * -0.001
             this.scale = Math.max(0.001, Math.min(10, this.scale))
