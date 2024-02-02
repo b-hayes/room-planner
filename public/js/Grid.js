@@ -25,6 +25,17 @@ export default class Grid extends Component {
 
             //update grid background css to show the grid size change
             this.element().getElementsByClassName('grid-background')[0].style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
+
+            //trigger a custom event so the other objects can react to the scale change.
+            let event = new CustomEvent('grid-scale-changed', {
+                detail: {
+                    button: e.button,
+                    x: e.pageX,
+                    y: e.pageY,
+                    object: this
+                }
+            })
+            this.dispatchEventWithDebounce(event)
         })
     }
 

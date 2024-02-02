@@ -251,6 +251,10 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
     //Prevent the default right click menu
     document.addEventListener('contextmenu', function (event) {
+        //unless the control/command key is held down
+        if (event.ctrlKey || event.metaKey) {
+            return
+        }
         event.preventDefault()
     }, true)
 
@@ -259,7 +263,6 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         if (event.detail.button !== 2) {
             return
         }
-        console.log('shape-click', event)
 
         //show a context menu with a delete option
         let menuHtml = `
@@ -267,7 +270,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
                 <div class="context-menu-item" onclick="
                 deleteShape('${event.detail.shape.id}')
                 this.parentElement.parentElement.remove()
-                ">🚮Delete</div>
+                ">🚮 Delete</div>
             </div>
         `
         let menu = document.createElement('div')

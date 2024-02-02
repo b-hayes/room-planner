@@ -21,4 +21,22 @@ export default class Component {
         }
         return this._element
     }
+
+    //NOTE: 100ms is necessary for scroll events with a trackpad not to be trigered twice during the wind down of the scroll.
+    dispatchEventWithDebounce(event, debounceTime = 100) {
+        //if the timeout is 0 then just dispatch the event
+        if (debounceTime === 0) {
+            this.element().dispatchEvent(event)
+            console.log('dispatched event', event)
+            return
+        }
+
+        if (this.debounceTimeout) {
+            clearTimeout(this.debounceTimeout)
+        }
+        this.debounceTimeout = setTimeout(() => {
+            this.element().dispatchEvent(event)
+            console.log('dispatched event', event)
+        }, debounceTime)
+    }
 }

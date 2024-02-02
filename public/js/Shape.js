@@ -39,7 +39,7 @@ export default class Shape extends Component {
                 throw new TypeError('position.' + key + ' must be a number')
             }
         }
-        
+
         let {width, height, x, y} = position
 
         //If no position then center while rounding to the nearest 100
@@ -71,7 +71,7 @@ export default class Shape extends Component {
             //mark the shape as selected (important)
             this.select()
 
-            //trigger a custom event so the parent application to perform other actions.
+            //trigger a custom event so the parent application can perform other actions.
             let event = new CustomEvent('shape-click', {
                 detail: {
                     button: e.button,
