@@ -39,7 +39,7 @@ export default class Shape extends Component {
                 throw new TypeError('position.' + key + ' must be a number')
             }
         }
-        
+
         let {width, height, x, y} = position
 
         //If no position then center while rounding to the nearest 100
@@ -71,7 +71,7 @@ export default class Shape extends Component {
             //mark the shape as selected (important)
             this.select()
 
-            //trigger a custom event so the parent application to perform other actions.
+            //trigger a custom event so the parent application can perform other actions.
             let event = new CustomEvent('shape-click', {
                 detail: {
                     button: e.button,
@@ -100,7 +100,19 @@ export default class Shape extends Component {
 
         //Add the element to the parent, and position it.
         this.parent.appendChild(this.element())
+        // store unscaled position
+        this.unscaledPosition = { x, y, width, height };
         this.position = {x, y, width, height}
+
+        //add event listener for grid-scale-changed
+        this.parent.addEventListener('grid-scale-changed', (e) => {
+            //if the grid is not the parent then don't bother
+            if (e.detail.object !== this.parent) {
+                // return
+            }
+
+            this.scale = e.detail.object.scale
+        })
     }
 
     select() {
@@ -124,8 +136,12 @@ export default class Shape extends Component {
         let shiftX = e.pageX - this.clickX;
         let shiftY = e.pageY - this.clickY;
 
-        //snap shift to grid
-        let snap = this.parent.snap || 10 //provide the opportunity for the parent to dictate the grid snap
+        //apply the scale to the shift to get the virtual shift in the grid space
+        shiftX = shiftX / this.scale
+        shiftY = shiftY / this.scale
+
+        //snap shift to grid snap
+        let snap = this.parent.snap || 10
         shiftX = shiftX - (shiftX % snap)
         shiftY = shiftY - (shiftY % snap)
 
@@ -149,8 +165,8 @@ export default class Shape extends Component {
             }
         } else {
             //move the shape only
-            x = this.shapePositionWhenClicked.x + shiftX;
-            y = this.shapePositionWhenClicked.y + shiftY;
+            x = this.shapePositionWhenClicked.x + shiftX
+            y = this.shapePositionWhenClicked.y + shiftY
         }
 
         this.position = {x, y, width, height}
@@ -160,27 +176,44 @@ export default class Shape extends Component {
         document.removeEventListener('mouseup', () => this.up(), false)
     }
 
-    updateLabels() {
-        this.posText.innerHTML = 'x: ' + this.element().offsetLeft + ' y: ' + this.element().offsetTop
-        this.widthText.innerHTML = 'w: ' + this.element().offsetWidth
-        this.heightText.innerHTML = 'h: ' + this.element().offsetHeight
+    redraw() {
+        let pos = this.position
+        // Calculate scaled position
+        const sPos = {
+            x: pos.x * this.scale,
+            y: pos.y * this.scale,
+            width: pos.width * this.scale,
+            height: pos.height * this.scale,
+        };
+
+        // Apply the scaled position to the element
+        this.element().style.top = sPos.y + 'px';
+        this.element().style.left = sPos.x + 'px';
+        this.element().style.width = sPos.width + 'px';
+        this.element().style.height = sPos.height + 'px';
+
+        // Update the labels
+        this.posText.innerHTML = 'x: ' + pos.x + ' y: ' + pos.y
+        this.widthText.innerHTML = 'w: ' + pos.width
+        this.heightText.innerHTML = 'h: ' + pos.height
     }
 
     get position() {
-        return {
-            x: this.element().offsetLeft,
-            y: this.element().offsetTop,
-            width: this.element().offsetWidth,
-            height: this.element().offsetHeight,
-        }
+        return this._gridPosition;
     }
 
     set position({x, y, width, height}) {
-        this.element().style.top = y + 'px'
-        this.element().style.left = x + 'px'
-        this.element().style.width = width + 'px'
-        this.element().style.height = height + 'px'
-        this.updateLabels()
+        this._gridPosition = { x, y, width, height };
+        this.redraw();
+    }
+
+    get scale() {
+        return this._renderScale || 1;
+    }
+
+    set scale(value) {
+        this._renderScale = value
+        this.redraw()
     }
 
 
