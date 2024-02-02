@@ -25,7 +25,7 @@ export default class Room extends Shape {
 const style = `
     .room.shape {
         z-index: 90; /* behind regular shapes */
-        background-color: lightgrey;
+        background-color: rgba(211, 211, 211, 0.7);
         color: black;
         /* inner shadow */
         box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, 0.5);
@@ -33,7 +33,7 @@ const style = `
     }
 
     .room.shape.selected {
-        background-color: var(--link-hover, darkseagreen);
+        background-color: rgba(63, 185, 55, 0.7);
         color: var(--background, white);
     }
 `
