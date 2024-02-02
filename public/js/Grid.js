@@ -13,15 +13,35 @@ export default class Grid extends Component {
                 return
             }
 
+            let maxScale = 5
+            let minScale = 0.25
+            //if attempting to scroll over the max or below the min scale, ignore it
+            let toolTip = this.element().getElementsByClassName('tool-tip')[0]
+            if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
+                //make the tooltip flash red to indicate the scale is at its limit
+                //get the original color,  if not already red
+                if (toolTip.style.color !== 'red') {
+                    var originalColor = toolTip.style.color
+                }
+
+                toolTip.style.color = 'red'
+                setTimeout(() => {
+                    toolTip.style.color = originalColor
+                }
+                    , 100)
+                return
+            }
+
             e.preventDefault()
             this.scale += e.deltaY * -0.001
-            this.scale = Math.max(0.001, Math.min(10, this.scale))
+            this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
 
             // Snap scale change to the nearest 0.001
             this.scale = Math.round(this.scale * 10000) / 10000;
 
             //update scale tooltip
-            this.element().getElementsByClassName('tool-tip')[0].innerText = `Scale: 1px = ${this.scale}m`
+            toolTip.innerText = `Scale: 1px = ${this.scale}m`
+
 
             //update grid background css to show the grid size change
             this.element().getElementsByClassName('grid-background')[0].style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
@@ -84,11 +104,11 @@ const style = `
         position: absolute;
         top: 0;
         left: 0;
-        color: white;
-        background-color: var(--foreground, black);
-        opacity: 0.8;
+        color: var(--foreground, black);
+        /*background-color: var(--background, white);*/
+        /*opacity: 0.8;*/
         padding: 5px;
-        font-size: 1.5em;
+        font-size: 16px;
         z-index: 100;
     }
 `
