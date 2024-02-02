@@ -40,7 +40,7 @@ export default class Grid extends Component {
             this.scale = Math.round(this.scale * 10000) / 10000;
 
             //update scale tooltip
-            toolTip.innerText = `Scale: 1px = ${this.scale}m`
+            toolTip.innerText = `Scale: 1px = ${this.scale}cm`
 
 
             //update grid background css to show the grid size change
