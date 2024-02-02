@@ -101,6 +101,17 @@ export default class Shape extends Component {
         //Add the element to the parent, and position it.
         this.parent.appendChild(this.element())
         this.position = {x, y, width, height}
+
+        this._scale = this.parent.scale || 1 //provide the opportunity for the parent to dictate the scale
+        //add event listener for grid-scale-changed that updates the scale of the shape to match the grid scale
+        this.parent.addEventListener('grid-scale-changed', (e) => {
+            //if the grid is not the parent then don't bother
+            if (e.detail.object !== this.parent) {
+                return
+            }
+
+            this.scale = e.detail.object.scale
+        })
     }
 
     select() {
@@ -161,9 +172,9 @@ export default class Shape extends Component {
     }
 
     updateLabels() {
-        this.posText.innerHTML = 'x: ' + this.element().offsetLeft + ' y: ' + this.element().offsetTop
-        this.widthText.innerHTML = 'w: ' + this.element().offsetWidth
-        this.heightText.innerHTML = 'h: ' + this.element().offsetHeight
+        this.posText.innerHTML = 'x: ' + this.position.left + ' y: ' + this.position.top
+        this.widthText.innerHTML = 'w: ' + this.position.width
+        this.heightText.innerHTML = 'h: ' + this.position.height
     }
 
     get position() {
@@ -181,6 +192,16 @@ export default class Shape extends Component {
         this.element().style.width = width + 'px'
         this.element().style.height = height + 'px'
         this.updateLabels()
+    }
+
+    get scale() {
+        return this._scale
+    }
+
+    set scale(value) {
+        this._scale = value
+        //todo: I need the scale to update the postion however, currently the posiotn does not account for scale its a raw element position.
+        // I would need to track the non scaled position as s separate value and the scale the position when setting via the element.style
     }
 
 
