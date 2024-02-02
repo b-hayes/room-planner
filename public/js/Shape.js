@@ -196,9 +196,6 @@ export default class Shape extends Component {
         this.posText.innerHTML = 'x: ' + pos.x + ' y: ' + pos.y
         this.widthText.innerHTML = 'w: ' + pos.width
         this.heightText.innerHTML = 'h: ' + pos.height
-
-        console.log('Grid position:', pos)
-        console.log('Scaled position:', sPos)
     }
 
     get position() {

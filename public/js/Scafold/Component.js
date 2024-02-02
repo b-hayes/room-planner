@@ -27,7 +27,6 @@ export default class Component {
         //if the timeout is 0 then just dispatch the event
         if (debounceTime === 0) {
             this.element().dispatchEvent(event)
-            console.log('dispatched event', event)
             return
         }
 
@@ -36,7 +35,6 @@ export default class Component {
         }
         this.debounceTimeout = setTimeout(() => {
             this.element().dispatchEvent(event)
-            console.log('dispatched event', event)
         }, debounceTime)
     }
 }

@@ -157,9 +157,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     }
 
     window.deleteShape = function (id) {
-        console.log('received...', id)
         const shape = shapes.find(shape => shape.id === id)
-        console.log('Shape found:', shape instanceof Shape, shape)
         if (!shape) {
             console.error(`Cant find shape to delete: '${id}'`)
         } else {
@@ -247,7 +245,6 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     await Loader.replaceTagsWithComponents(document)
     const grid = document.querySelector(".grid")
     load()
-    console.log(shapes)
 
     //Prevent the default right click menu
     document.addEventListener('contextmenu', function (event) {

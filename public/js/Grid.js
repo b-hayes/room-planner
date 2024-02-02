@@ -55,7 +55,7 @@ export default class Grid extends Component {
                     object: this
                 }
             })
-            this.dispatchEventWithDebounce(event)
+            this.dispatchEventWithDebounce(event, 0)
         })
     }
 
@@ -72,7 +72,7 @@ export default class Grid extends Component {
 const html = `
     <div class="grid">
         <div class="grid-background">
-            <div class="tool-tip">Scale: 1px = .01m</div>
+            <div class="tool-tip">Scale: 1px = 1cm</div>
             <slot></slot>
         </div>
     </div>
