@@ -200,7 +200,7 @@ export default class Shape extends Component {
 
     set scale(value) {
         this._scale = value
-        //todo: I need the scale to update the postion however, currently the posiotn does not account for scale its a raw element position.
+        //todo: I need the scale to update the position however, currently the position does not account for scale its a raw element position.
         // I would need to track the non scaled position as s separate value and the scale the position when setting via the element.style
     }
 
