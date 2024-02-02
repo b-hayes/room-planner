@@ -100,14 +100,15 @@ export default class Shape extends Component {
 
         //Add the element to the parent, and position it.
         this.parent.appendChild(this.element())
+        // store unscaled position
+        this.unscaledPosition = { x, y, width, height };
         this.position = {x, y, width, height}
 
-        this._scale = this.parent.scale || 1 //provide the opportunity for the parent to dictate the scale
-        //add event listener for grid-scale-changed that updates the scale of the shape to match the grid scale
+        //add event listener for grid-scale-changed
         this.parent.addEventListener('grid-scale-changed', (e) => {
             //if the grid is not the parent then don't bother
             if (e.detail.object !== this.parent) {
-                return
+                // return
             }
 
             this.scale = e.detail.object.scale
@@ -137,6 +138,9 @@ export default class Shape extends Component {
 
         //snap shift to grid
         let snap = this.parent.snap || 10 //provide the opportunity for the parent to dictate the grid snap
+        //todo: using snap this way has issues with scale. Id need to start tracking virtual position instead the actual position of the element.
+        // and then apply snapping to the virtual position and then scale the virtual position when drawing the element.
+
         shiftX = shiftX - (shiftX % snap)
         shiftY = shiftY - (shiftY % snap)
 
@@ -160,8 +164,8 @@ export default class Shape extends Component {
             }
         } else {
             //move the shape only
-            x = this.shapePositionWhenClicked.x + shiftX;
-            y = this.shapePositionWhenClicked.y + shiftY;
+            x = this.shapePositionWhenClicked.x + shiftX
+            y = this.shapePositionWhenClicked.y + shiftY
         }
 
         this.position = {x, y, width, height}
@@ -171,7 +175,22 @@ export default class Shape extends Component {
         document.removeEventListener('mouseup', () => this.up(), false)
     }
 
-    updateVisually() {
+    redraw() {
+        // Calculate scaled position
+        const sPos = {
+            x: this.unscaledPosition.x * this.scale,
+            y: this.unscaledPosition.y * this.scale,
+            width: this.unscaledPosition.width * this.scale,
+            height: this.unscaledPosition.height * this.scale,
+        };
+
+        // Apply the scaled position to the element
+        this.element().style.top = sPos.y + 'px';
+        this.element().style.left = sPos.x + 'px';
+        this.element().style.width = sPos.width + 'px';
+        this.element().style.height = sPos.height + 'px';
+
+        // Update the labels
         let pos = this.position
         this.posText.innerHTML = 'x: ' + pos.x + ' y: ' + pos.y
         this.widthText.innerHTML = 'w: ' + pos.width
@@ -179,30 +198,21 @@ export default class Shape extends Component {
     }
 
     get position() {
-        return {
-            x: this.element().offsetLeft,
-            y: this.element().offsetTop,
-            width: this.element().offsetWidth,
-            height: this.element().offsetHeight,
-        }
+        return this._gridPosition;
     }
 
     set position({x, y, width, height}) {
-        this.element().style.top = y + 'px'
-        this.element().style.left = x + 'px'
-        this.element().style.width = width + 'px'
-        this.element().style.height = height + 'px'
-        this.updateVisually()
+        this._gridPosition = { x, y, width, height };
+        this.redraw();
     }
 
     get scale() {
-        return this._scale
+        return this._renderScale || 1;
     }
 
     set scale(value) {
-        this._scale = value
-        //todo: I need the scale to update the position however, currently the position does not account for scale its a raw element position.
-        // I would need to track the non scaled position as s separate value and the scale the position when setting via the element.style
+        this._renderScale = value
+        this.redraw()
     }
 
 
