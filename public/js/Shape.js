@@ -171,10 +171,11 @@ export default class Shape extends Component {
         document.removeEventListener('mouseup', () => this.up(), false)
     }
 
-    updateLabels() {
-        this.posText.innerHTML = 'x: ' + this.position.left + ' y: ' + this.position.top
-        this.widthText.innerHTML = 'w: ' + this.position.width
-        this.heightText.innerHTML = 'h: ' + this.position.height
+    updateVisually() {
+        let pos = this.position
+        this.posText.innerHTML = 'x: ' + pos.x + ' y: ' + pos.y
+        this.widthText.innerHTML = 'w: ' + pos.width
+        this.heightText.innerHTML = 'h: ' + pos.height
     }
 
     get position() {
@@ -191,7 +192,7 @@ export default class Shape extends Component {
         this.element().style.left = x + 'px'
         this.element().style.width = width + 'px'
         this.element().style.height = height + 'px'
-        this.updateLabels()
+        this.updateVisually()
     }
 
     get scale() {
