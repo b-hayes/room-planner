@@ -136,6 +136,8 @@ const html = `
 // language=CSS
 const style = `
     .grid {
+        user-select: none;
+        position: relative;
         overflow: scroll;
         min-height: 100%;
         min-width: 100%;
