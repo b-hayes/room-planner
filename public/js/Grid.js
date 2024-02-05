@@ -5,8 +5,9 @@ export default class Grid extends Component {
     constructor({scale = 1}) {
         super()
         this.scale = scale
+        this.background = this.element().getElementsByClassName('grid-background')[0]
+        this.toolTip = this.element().getElementsByClassName('tool-tip')[0]
 
-        //apply scale changes when scrolling
         document.addEventListener('wheel', (e) => this.scroll(e), false)
     }
 
@@ -16,7 +17,7 @@ export default class Grid extends Component {
             if (this.element().contains(e.target)) {
                 let maxScale = 5
                 let minScale = 0.25
-                let toolTip = this.element().getElementsByClassName('tool-tip')[0]
+                let toolTip = this.toolTip
                 if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
                     //make the tooltip flash red to indicate the scale is at its limit
                     //get the original color,  if not already red
@@ -36,7 +37,7 @@ export default class Grid extends Component {
                 this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
                 this.scale = Math.round(this.scale * 10000) / 10000;
                 toolTip.innerText = `Scale: 1px = ${this.scale}cm`
-                this.element().getElementsByClassName('grid-background')[0].style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
+                this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
                 let event = new CustomEvent('grid-scale-changed', {
                     detail: {
                         button: e.button,
@@ -52,6 +53,10 @@ export default class Grid extends Component {
         //update the size of the background to match the scrollable space in the grid
         this.element().getElementsByClassName('grid-background')[0].style.width = this.element().scrollWidth + 'px'
         this.element().getElementsByClassName('grid-background')[0].style.height = this.element().scrollHeight + 'px'
+
+        //update the position of the tool tip so it stays in the top left corner
+        this.toolTip.style.top = this.element().scrollTop + 'px'
+        this.toolTip.style.left = this.element().scrollLeft + 'px'
     }
 
     html() {
