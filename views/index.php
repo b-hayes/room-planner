@@ -18,15 +18,16 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 <div class="toolbar">
     <div class="toolbar-header">File</div>
     <button class="toolbar-button" onclick="save()">💾 Save</button>
-    <button class="toolbar-button" onclick="deleteData()">❌ Delete</button>
+    <button class="toolbar-button" onclick="deleteData()">🗑️ Delete</button>
     <div class="toolbar-header">
         Objects
     </div>
     <button class="toolbar-button" onclick="newRoom()">⬜ Room</button>
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
 </div>
-
-<Grid params='{ "scale": 1 }'></Grid>
+<main>
+    <Grid params='{ "scale": 1 }'></Grid>
+</main>
 
 <div class="status-bar">
     <div style="padding-right: 1em">Latest Updates:</div>
@@ -45,24 +46,13 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         /* Pretty much never want people accidentally highlight text while using this app. */
         user-select: none;
     }
-    .grid {
-        position: fixed;
-        height: 100%;
-        width: 90vw;
-        margin: 0;
-        left: 10vw;
-        top: 0;
-        overflow: hidden;
-        box-shadow: inset 5px 5px 10px 3px rgba(0, 0, 0, 0.5);
-    }
 
-    .grid-background {
-        background-image: repeating-linear-gradient(var(--foreground) 0 1px, transparent 1px 100%),
-        repeating-linear-gradient(90deg, var(--foreground) 0 1px, transparent 1px 100%);
-        background-size: 100px 100px;
-        width: 100%;
-        height: 100%;
-        opacity: 0.5;
+    main {
+        position: relative;
+        top: 0;
+        left: 10vw;
+        width: 90vw;
+        height: calc(100% - 20px);
     }
 
     .toolbar {
@@ -138,9 +128,9 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 </style>
 
 <script type="module">
-    import Grid from "/js/Grid.js"
+    //import Grid from "/js/Grid.js" //this import isn't needed because of the dynamic component loading.
     import Shape from "/js/Shape.js"
-    import Alert from "/js/Alert.js"
+    import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"
     import Loader from "../public/js/Scafold/Loader.js"
 

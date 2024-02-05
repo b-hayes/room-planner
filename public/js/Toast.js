@@ -1,6 +1,6 @@
 import Component from "./Scafold/Component.js"
 
-export default class Alert extends Component {
+export default class Toast extends Component {
 
     constructor(message, type = 'success', title = '') {
         super()
@@ -10,7 +10,7 @@ export default class Alert extends Component {
 
         document.body.appendChild(this.element())
 
-        //delete the alert after 3 seconds
+        //delete the toast after 3 seconds
         setTimeout(() => {
             this.element().remove()
         }, 3000)
@@ -30,15 +30,15 @@ export default class Alert extends Component {
 
 //language=HTML
 const html = `
-<div class="alert fade-out {{ type }}">
-    <div class="alert-title">{{ title }}</div>
-    <div class="alert-message">{{ message }}</div>
+<div class="toast fade-out {{ type }}">
+    <div class="toast-title">{{ title }}</div>
+    <div class="toast-message">{{ message }}</div>
 </div>
 `
 
 //language=CSS
 const style = `
-.alert {
+.toast {
     z-index: 50000;
     position: absolute;
     top: 1vh;
@@ -52,17 +52,17 @@ const style = `
     box-shadow: 3px 3px 10px 0 rgba(0, 0, 0, 0.5);
 }
 
-.alert.success {
+.toast.success {
     background-color: var(--success, darkseagreen);
     color: var(--success-text, black);
 }
 
-.alert.error {
+.toast.error {
     background-color: var(--error, indianred);
     color: var(--error-text, black);
 }
 
-.alert-title {
+.toast-title {
     font-size: 1em;
     text-align: center;
     margin: 3PX;
@@ -70,7 +70,7 @@ const style = `
     color: var(--background, lightgray);
 }
 
-.alert-message {
+.toast-message {
     font-size: 1em;
     font-weight: bold;
     text-align: center;
