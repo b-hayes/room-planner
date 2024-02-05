@@ -10,7 +10,7 @@
         --link: #007bff;
         --link-visited: #007bff;
         --link-hover: #019f15;
-        --default-room-color: rgba(222, 222, 222, 0.9);
+        --default-room-color: rgba(222, 222, 222, 0.8);
     }
 }
 
@@ -24,7 +24,7 @@
         --link: #3e96fa;
         --link-visited: #3e96fa;
         --link-hover: #61e16a;
-        --default-room-color: rgba(80, 80, 80, 0.9);
+        --default-room-color: rgba(80, 80, 80, 0.8);
     }
 }
 

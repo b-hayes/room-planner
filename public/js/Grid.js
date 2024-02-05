@@ -8,11 +8,6 @@ export default class Grid extends Component {
 
         //apply scale changes when scrolling
         document.addEventListener('wheel', (e) => this.scroll(e), false)
-
-        //click and drag the grid to move the view around
-        this.viewPosition = {x: 0, y: 0}
-        document.addEventListener('mousemove', (e) => this.drag(e), false)
-        document.addEventListener('mouseup', () => this.up(), false)
     }
 
     scroll(e) {
@@ -67,51 +62,6 @@ export default class Grid extends Component {
                 }
             })
             this.dispatchEventWithDebounce(event, 0)
-    }
-
-    drag(e) {
-        //if the mouse button is not held, ignore
-        if (e.buttons === 0) return
-        //if control or command is not held, ignore
-        if (!e.ctrlKey && !e.metaKey) return
-        //if the mouse is not over the grid, ignore
-        if (!this.element().contains(e.target)) return
-
-        //adjust the scrollbars to the new position
-        window.scrollBy(-e.movementX, -e.movementY)
-
-        return;//old method, trying something new.
-
-        //shift the background image offset to simulate dragging the grid
-        let x = e.movementX
-        let y = e.movementY
-        let background = this.element().getElementsByClassName('grid-background')[0]
-        let style = window.getComputedStyle(background)
-        let backgroundPosition = style.backgroundPosition.split(' ')
-        let xOffset = parseFloat(backgroundPosition[0].replace('px', ''))
-        let yOffset = parseFloat(backgroundPosition[1].replace('px', ''))
-        background.style.backgroundPosition = `${xOffset + x}px ${yOffset + y}px`
-
-        //update the view position
-        this.viewPosition.x += x
-        this.viewPosition.y += y
-
-        //trigger a custom event so the other objects can react to the view change.
-        let event = new CustomEvent('grid-view-changed', {
-            detail: {
-                button: e.button,
-                x: e.pageX,
-                y: e.pageY,
-                object: this
-            }
-        })
-        this.dispatchEventWithDebounce(event, 0)
-
-        console.log('grid drag', e)
-    }
-
-    up() {
-        // todo: implement if needed
     }
 
     html() {
