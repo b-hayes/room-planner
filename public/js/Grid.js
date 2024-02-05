@@ -11,57 +11,47 @@ export default class Grid extends Component {
     }
 
     scroll(e) {
-            //if ctrl or command is not held, ignore
-            if (!e.ctrlKey && !e.metaKey) return
-
-            //if scrolling is not happening on the grid, ignore it
-            if (!this.element().contains(e.target)) {
-                return
-            }
-
-            let maxScale = 5
-            let minScale = 0.25
-            //if attempting to scroll over the max or below the min scale, ignore it
-            let toolTip = this.element().getElementsByClassName('tool-tip')[0]
-            if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
-                //make the tooltip flash red to indicate the scale is at its limit
-                //get the original color,  if not already red
-                if (toolTip.style.color !== 'red') {
-                    var originalColor = toolTip.style.color
-                }
-
-                toolTip.style.color = 'red'
-                setTimeout(() => {
-                        toolTip.style.color = originalColor
+        //if ctrl or command is held, then scroll to zoom
+        if (!(!e.ctrlKey && !e.metaKey)) {
+            if (this.element().contains(e.target)) {
+                let maxScale = 5
+                let minScale = 0.25
+                let toolTip = this.element().getElementsByClassName('tool-tip')[0]
+                if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
+                    //make the tooltip flash red to indicate the scale is at its limit
+                    //get the original color,  if not already red
+                    if (toolTip.style.color !== 'red') {
+                        var originalColor = toolTip.style.color
                     }
-                    , 100)
-                return
-            }
 
-            e.preventDefault()
-            this.scale += e.deltaY * -0.001
-            this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
-
-            // Snap scale change to the nearest 0.001
-            this.scale = Math.round(this.scale * 10000) / 10000;
-
-            //update scale tooltip
-            toolTip.innerText = `Scale: 1px = ${this.scale}cm`
-
-
-            //update grid background css to show the grid size change
-            this.element().getElementsByClassName('grid-background')[0].style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
-
-            //trigger a custom event so the other objects can react to the scale change.
-            let event = new CustomEvent('grid-scale-changed', {
-                detail: {
-                    button: e.button,
-                    x: e.pageX,
-                    y: e.pageY,
-                    object: this
+                    toolTip.style.color = 'red'
+                    setTimeout(() => {
+                            toolTip.style.color = originalColor
+                        }
+                        , 100)
+                    return
                 }
-            })
-            this.dispatchEventWithDebounce(event, 0)
+                e.preventDefault()
+                this.scale += e.deltaY * -0.001
+                this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
+                this.scale = Math.round(this.scale * 10000) / 10000;
+                toolTip.innerText = `Scale: 1px = ${this.scale}cm`
+                this.element().getElementsByClassName('grid-background')[0].style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
+                let event = new CustomEvent('grid-scale-changed', {
+                    detail: {
+                        button: e.button,
+                        x: e.pageX,
+                        y: e.pageY,
+                        object: this
+                    }
+                })
+                this.dispatchEventWithDebounce(event, 0)
+            }
+        }
+
+        //update the size of the background to match the scrollable space in the grid
+        this.element().getElementsByClassName('grid-background')[0].style.width = this.element().scrollWidth + 'px'
+        this.element().getElementsByClassName('grid-background')[0].style.height = this.element().scrollHeight + 'px'
     }
 
     html() {
@@ -88,10 +78,14 @@ const style = `
     .grid {
         user-select: none;
         position: relative;
-        overflow: scroll;
         min-height: 100%;
         min-width: 100%;
         box-shadow: inset 5px 5px 10px 3px rgba(0, 0, 0, 0.5);
+        
+        /* Simply allowing scroll bars instead of manually controlling the "view" coz easier and it works */
+        overflow: scroll;
+        scrollbar-width: thin;
+        scrollbar-color: var(--foreground) var(--background);
     }
 
     .grid-background {
