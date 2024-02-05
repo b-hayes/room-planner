@@ -100,8 +100,6 @@ export default class Shape extends Component {
 
         //Add the element to the parent, and position it.
         this.parent.appendChild(this.element())
-        // store unscaled position
-        this.unscaledPosition = { x, y, width, height };
         this.position = {x, y, width, height}
 
         //add event listener for grid-scale-changed
@@ -203,6 +201,9 @@ export default class Shape extends Component {
     }
 
     set position({x, y, width, height}) {
+        if (x < 0) x = 0
+        if (y < 0) y = 0
+
         this._gridPosition = { x, y, width, height };
         this.redraw();
     }
