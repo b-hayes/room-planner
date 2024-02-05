@@ -18,7 +18,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 <div class="toolbar">
     <div class="toolbar-header">File</div>
     <button class="toolbar-button" onclick="save()">💾 Save</button>
-    <button class="toolbar-button" onclick="deleteData()">❌ Delete</button>
+    <button class="toolbar-button" onclick="deleteData()">🗑️ Delete</button>
     <div class="toolbar-header">
         Objects
     </div>
@@ -138,7 +138,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 </style>
 
 <script type="module">
-    import Grid from "/js/Grid.js"
+    //import Grid from "/js/Grid.js" //this important isn't needed because of the dynamic component loading.
     import Shape from "/js/Shape.js"
     import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"
