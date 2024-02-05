@@ -5,7 +5,7 @@ export default class Grid extends Component {
     constructor({scale = 1}) {
         super()
         this.scale = scale
-        this.background = this.element().getElementsByClassName('grid-background')[0]
+        this.background = this.element() //the background is the element now.
         this.toolTip = this.element().getElementsByClassName('tool-tip')[0]
 
         document.addEventListener('wheel', (e) => this.scroll(e), false)
@@ -50,10 +50,6 @@ export default class Grid extends Component {
             }
         }
 
-        //update the size of the background to match the scrollable space in the grid
-        this.element().getElementsByClassName('grid-background')[0].style.width = this.element().scrollWidth + 'px'
-        this.element().getElementsByClassName('grid-background')[0].style.height = this.element().scrollHeight + 'px'
-
         //update the position of the tool tip so it stays in the top left corner
         this.toolTip.style.top = this.element().scrollTop + 'px'
         this.toolTip.style.left = this.element().scrollLeft + 'px'
@@ -70,11 +66,9 @@ export default class Grid extends Component {
 
 // language=HTML
 const html = `
-    <div class="grid">
-        <div class="grid-background">
-            <div class="tool-tip">Scale: 1px = 1cm</div>
-            <slot></slot>
-        </div>
+    <div class="grid grid-background">
+        <div class="tool-tip">Scale: 1px = 1cm</div>
+        <slot></slot>
     </div>
 `
 
@@ -94,16 +88,9 @@ const style = `
     }
 
     .grid-background {
-        background-image: repeating-linear-gradient(var(--foreground) 0 1px, transparent 1px 100%),
-        repeating-linear-gradient(90deg, var(--foreground) 0 1px, transparent 1px 100%);
+        background-image: repeating-linear-gradient(var(--grid-foreground) 0 1px, transparent 1px 100%),
+        repeating-linear-gradient(90deg, var(--grid-foreground) 0 1px, transparent 1px 100%);
         background-size: 100px 100px;
-        /* absolut with all zeros stretches to fill the scrollable space not just the size of the parent container */
-        position: absolute;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        opacity: 0.5;
     }
 
     .tool-tip {
@@ -111,8 +98,6 @@ const style = `
         top: 0;
         left: 0;
         color: var(--foreground, black);
-        /*background-color: var(--background, white);*/
-        /*opacity: 0.8;*/
         padding: 5px;
         font-size: 16px;
         z-index: 100;

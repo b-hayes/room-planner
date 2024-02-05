@@ -128,7 +128,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 </style>
 
 <script type="module">
-    //import Grid from "/js/Grid.js" //this important isn't needed because of the dynamic component loading.
+    //import Grid from "/js/Grid.js" //this import isn't needed because of the dynamic component loading.
     import Shape from "/js/Shape.js"
     import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"
