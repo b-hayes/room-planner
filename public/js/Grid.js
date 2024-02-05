@@ -7,7 +7,18 @@ export default class Grid extends Component {
         this.scale = scale
 
         //apply scale changes when scrolling
-        window.addEventListener('wheel', (e) => {
+        document.addEventListener('wheel', (e) => this.scroll(e), false)
+
+        //click and drag the grid to move the view around
+        this.viewPosition = {x: 0, y: 0}
+        document.addEventListener('mousemove', (e) => this.drag(e), false)
+        document.addEventListener('mouseup', () => this.up(), false)
+    }
+
+    scroll(e) {
+            //if ctrl or command is not held, ignore
+            if (!e.ctrlKey && !e.metaKey) return
+
             //if scrolling is not happening on the grid, ignore it
             if (!this.element().contains(e.target)) {
                 return
@@ -26,8 +37,8 @@ export default class Grid extends Component {
 
                 toolTip.style.color = 'red'
                 setTimeout(() => {
-                    toolTip.style.color = originalColor
-                }
+                        toolTip.style.color = originalColor
+                    }
                     , 100)
                 return
             }
@@ -56,12 +67,6 @@ export default class Grid extends Component {
                 }
             })
             this.dispatchEventWithDebounce(event, 0)
-        })
-
-        //click and drag the grid to move the view around
-        this.viewPosition = {x: 0, y: 0}
-        document.addEventListener('mousemove', (e) => this.drag(e), false)
-        document.addEventListener('mouseup', () => this.up(), false)
     }
 
     drag(e) {
@@ -71,6 +76,11 @@ export default class Grid extends Component {
         if (!e.ctrlKey && !e.metaKey) return
         //if the mouse is not over the grid, ignore
         if (!this.element().contains(e.target)) return
+
+        //adjust the scrollbars to the new position
+        window.scrollBy(-e.movementX, -e.movementY)
+
+        return;//old method, trying something new.
 
         //shift the background image offset to simulate dragging the grid
         let x = e.movementX
@@ -126,13 +136,9 @@ const html = `
 // language=CSS
 const style = `
     .grid {
-        position: fixed;
-        height: 100%;
-        width: 90vw;
-        margin: 0;
-        left: 10vw;
-        top: 0;
-        overflow: hidden;
+        overflow: scroll;
+        min-height: 100%;
+        min-width: 100%;
         box-shadow: inset 5px 5px 10px 3px rgba(0, 0, 0, 0.5);
     }
 
@@ -140,12 +146,16 @@ const style = `
         background-image: repeating-linear-gradient(var(--foreground) 0 1px, transparent 1px 100%),
         repeating-linear-gradient(90deg, var(--foreground) 0 1px, transparent 1px 100%);
         background-size: 100px 100px;
-        width: 100%;
-        height: 100%;
+        /* absolut with all zeros stretches to fill the scrollable space not just the size of the parent container */
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
         opacity: 0.5;
     }
 
-    .grid-background .tool-tip {
+    .tool-tip {
         position: absolute;
         top: 0;
         left: 0;
