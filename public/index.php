@@ -29,17 +29,14 @@ try {
     $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
     if ($url === '/' || $url === '') {
-        require_once __DIR__ . '/../views/index.php';
-        return;
+        $view = __DIR__ . '/../views/index.php';
+    } else if (file_exists(__DIR__ . "/../views$url.php")) {
+        $view = __DIR__ . "/../views$url.php";
+    } else {
+        $view = __DIR__ . '/404.php';
     }
 
-    if (file_exists(__DIR__ . "/../views$url.php")) {
-        require_once __DIR__ . "/../views$url.php";
-        return;
-    }
-
-    //if no file is found, return a 404.
-    include __DIR__ . '/404.php';
+    require_once $view;
 
 } catch (\Throwable $error) {
     //This is the last line of defence do not use any dependencies that could break.
