@@ -10,7 +10,7 @@ declare(strict_types=1);
 </head>
 <body>
 <div class="centered">
-    <main style="width: 100%;text-align: center;">
+    <div class="middle" style="width: 100%;text-align: center;">
         <h1>Feedback for Room Planner</h1>
         <p>What do you think of Room Planner? What features would you like to see added?</p>
         <p>Let us know in the box below:</p>
@@ -22,12 +22,46 @@ declare(strict_types=1);
             <section>
                 <label for="feedback">Your feedback:</label>
                 <br>
-                <textarea name="feedback" id="feedback" cols="30" rows="10" required></textarea>
+                <textarea name="feedback" id="feedback" required></textarea>
             </section>
             <button type="submit">Submit</button>
         </form>
-    </main>
+    </div>
 </div>
 
 </body>
 </html>
+
+<style>
+    textarea, input, button, label {
+        margin: 10px;
+        font-size: 1.5em;
+        max-width: 100%;
+        max-height: 100%;
+    }
+    textarea {
+        width: 600px;
+        height: 200px;
+    }
+    input {
+        width: 300px;
+    }
+    label {
+        width: 200px;
+    }
+    button {
+        width: 200px;
+        height: 50px;
+    }
+</style>
+
+<?php
+// Email dev with the feedback
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'] ?? 'Anonymous';
+    $feedback = $_POST['feedback'];
+    $to = 'test@admin.com';
+    $subject = 'Feedback for Room Planner';
+    $message = "Feedback from: $email\n\n$feedback";
+    mail($to, $subject, $message);
+}
