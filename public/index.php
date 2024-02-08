@@ -10,11 +10,12 @@ set_error_handler(function ($severity, $message, $file, $line) {
     throw new \ErrorException($message, 0, $severity, $file, $line);
 });
 
-$jsonRequest = $_SERVER['REQUEST_METHOD'] !== 'GET' || stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
+//Switch to json if it was specified in the accept header.
+$jsonRequest = stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
 
 try {
     if (!$jsonRequest) {
-        // add common head tags here. Browser should merge them with the ones in the view file.
+        // add common head tags here. Browser will merge them with any head tags printed afterwards.
         echo <<<HTML
             <head>
                 <link rel="icon" type="image/png" href="/favicon.png">

@@ -5,15 +5,17 @@ declare(strict_types=1);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? 'Anonymous';
     $feedback = $_POST['feedback'];
-    $to = 'test@admin.com';
+    $to = getenv('feedbackEmail');
     $subject = 'Feedback for Room Planner';
     $message = "Feedback from: $email\n\n$feedback";
     $sent = mail($to, $subject, $message);
 
     //display a message if the mail was successful
-    if ($sent) {
-        echo '<h1>Thank you for your feedback!</h1>';
+    if (!$sent) {
+        throw new \Exception('Failed to send feedback.');
     }
+
+    echo '<h1>Thank you for your feedback!</h1>';
     //log the feedback
     error_log($message);
 
