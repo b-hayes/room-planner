@@ -13,17 +13,19 @@ set_error_handler(function ($severity, $message, $file, $line) {
 $jsonRequest = $_SERVER['REQUEST_METHOD'] !== 'GET' || stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
 
 try {
-    require_once __DIR__ . '/../vendor/autoload.php';
-
     if (!$jsonRequest) {
         // add common head tags here. Browser should merge them with the ones in the view file.
         echo <<<HTML
             <head>
                 <link rel="icon" type="image/png" href="/favicon.png">
                 <link rel="stylesheet" href="/css/reset.css">
+                <link rel="stylesheet" href="/css/global.css">
             </head>
             HTML;
     }
+
+    require_once __DIR__ . '/../vendor/autoload.php';
+    require_once __DIR__ . '/../src/load_env.php';
 
     //Basic routing...
     $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -83,9 +85,3 @@ try {
 }
 
 ?>
-<style>
-    <?=
-    //including it via php prevents the page flashing white before the css file is processed.
-    include __DIR__ . '/css/global.css';
-    ?>
-</style>
