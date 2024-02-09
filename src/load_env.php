@@ -7,7 +7,7 @@ declare(strict_types=1);
 $project = basename(__DIR__ . '/..');
 $filename = realpath(__DIR__ . "/../../$project.env") ?:
     //use this path when running on local server
-    realpath(__DIR__ . '/../dev.env');
+    realpath(__DIR__ . '/dev.env');
 
 if (!$filename) {
     throw new \Exception('No environment file found.');

@@ -37,8 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mail->send();
 
     echo '<h1>Thank you for your feedback!</h1>';
-    //log the feedback
-    error_log($message);
 
     return;
 }
