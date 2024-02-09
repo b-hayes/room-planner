@@ -4,6 +4,7 @@ declare(strict_types=1);
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 
+// Some basic spam prevention... not idea but it will do for now.
 // Check if the ip address already submitted feedback in the last hour...
 $feedBackLogFile = __DIR__ . '/../feedback-log.txt';
 if (is_file($feedBackLogFile)) {
