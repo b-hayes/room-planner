@@ -4,6 +4,29 @@ declare(strict_types=1);
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 
+// Check if the ip address already submitted feedback in the last hour...
+$feedBackLogFile = __DIR__ . '/../feedback-log.txt';
+if (is_file($feedBackLogFile)) {
+    $file = fopen($feedBackLogFile, 'r');
+    $lastHour = strtotime('-1 hour');
+    while ($line = fgets($file)) {
+        $parts = explode(' | ', $line);
+        $logTime = strtotime($parts[0]);
+        if ($logTime > $lastHour && $parts[1] === $_SERVER['REMOTE_ADDR']) {
+            echo <<<HTML
+                <div style="text-align: center;">
+                <h1>You have already submitted feedback in the last hour.</h1>
+                <p>To prevent us getting spammed we ask that you at least wait an hour before sending feedback again.</p>
+                <a href="/">Back to Room Planner</a>
+                </div>
+            HTML;
+
+            return;
+        }
+    }
+}
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Email feedback to the devs
@@ -38,10 +61,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mail->Body = "<b>$userName</b> submitted some feedback: <p>$feedback</p>";
     $mail->AltBody = "$userName submitted some feedback: \n\n $feedback";
 
-    $mail->send();
+    //$mail->send(); //todo: enable this again when done faffing around with the log
 
     echo '<h1>🤩Thanks for the feedback!</h1>
     <a href="/">Back to Room Planner</a>';
+
+    // Append the ip address and a timestamp to a file.
+    $file = fopen($feedBackLogFile, 'a');
+    fwrite($file, date('Y-m-d H:i:s') . ' | ' . $_SERVER['REMOTE_ADDR'] . ' | ' . $feedback . "\n");
+    fclose($file);
 
     return;
 }

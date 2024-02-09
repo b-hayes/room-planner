@@ -79,7 +79,7 @@ try {
     //otherwise assume we want a nice html error page.
     include __DIR__ . '/500.php';
     if ($developerMode) {
-        echo "<pre style='z-index: 99999999999999999;'>";
+        echo "<pre style='z-index: 99999999999999999; text-align: left; min-width: 100%'>";
         echo json_encode($errorResponse, $encodingOptions);
         echo "</pre>";
     }
