@@ -14,21 +14,13 @@ if (is_file($feedBackLogFile)) {
         $parts = explode(' | ', $line);
         $logTime = strtotime($parts[0]);
         if ($logTime > $lastHour && $parts[1] === $_SERVER['REMOTE_ADDR']) {
-            echo <<<HTML
-                <div style="text-align: center;">
-                <h1>You have already submitted feedback in the last hour.</h1>
-                <p>To prevent us getting spammed we ask that you at least wait an hour before sending feedback again.</p>
-                <a href="/">Back to Room Planner</a>
-                </div>
-            HTML;
-
-            return;
+            $alreadySubmittedRecently = true;
         }
     }
 }
 
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($alreadySubmittedRecently)) {
 
     // Email feedback to the devs
     $feedback = $_POST['feedback'];
@@ -85,22 +77,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 <div>
     <div style="width: 100%;text-align: center;">
-        <form action="/feedback" method="post">
-            <h1>Feedback for Room Planner</h1>
-            <p>What do you think of Room Planner? What features would you like to see added? Found any bugs?</p>
-            <section>
-                <label for="email">Email address (optional):</label>
-                <input type="text" name="email" id="email" placeholder="Your email">
-                <p class="subscript">If you'd like us to be able to respond or ask questions, provide a contact email.</p>
-            </section>
-            <section>
-                <label for="feedback">Your feedback:</label>
-                <br>
-                <textarea name="feedback" id="feedback" required></textarea>
-            </section>
-            <button type="submit">Submit</button>
-<!--            <p>If you just want to say thank you consider donating a coffee ☕️ to keep the code ninja working on this project.</p>-->
-        </form>
+        <?php if (isset($alreadySubmittedRecently)): ?>
+            <div style="text-align: center;">
+                <h1>⛔️Feedback received recently.</h1>
+                <p>To prevent us getting spammed we ask that you wait an hour before sending feedback again.</p>
+                <a href="/">Back to Room Planner</a>
+            </div>
+        <?php else: ?>
+            <form action="/feedback" method="post">
+                <h1>Feedback for Room Planner</h1>
+                <p>What do you think of Room Planner? What features would you like to see added? Found any bugs?</p>
+                <section>
+                    <label for="email">Email address (optional):</label>
+                    <input type="text" name="email" id="email" placeholder="Your email">
+                    <p class="subscript">If you'd like us to be able to respond or ask questions, provide a contact email.</p>
+                </section>
+                <section>
+                    <label for="feedback">Your feedback:</label>
+                    <br>
+                    <textarea name="feedback" id="feedback" required></textarea>
+                </section>
+                <button type="submit">Submit</button>
+    <!--            <p>If you just want to say thank you consider donating a coffee ☕️ to keep the code ninja working on this project.</p>-->
+            </form>
+        <?php endif; ?>
+        <div>
+            <br>
+            <h2>Want some more info?</h2>
+            <p>Checkout the <a href="https://trello.com/b/5K94ZcYt/room-planner" target="_blank">Trello Board</a> to see what's planned / being worked on.</p>
+        </div>
     </div>
 </div>
 
