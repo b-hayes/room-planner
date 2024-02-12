@@ -4,8 +4,8 @@ declare(strict_types=1);
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 
-// Some basic spam prevention... not idea but it will do for now.
-// Check if the ip address already submitted feedback in the last hour...
+// Some basic spam prevention... not ideal but it will do for now.
+// Check if the ip address already submitted feedback in the last hour and hide the form / prevent submissions.
 $feedBackLogFile = __DIR__ . '/../feedback-log.txt';
 if (is_file($feedBackLogFile)) {
     $file = fopen($feedBackLogFile, 'r');
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($alreadySubmittedRecently)) 
     $mail->Body = "<b>$userName</b> submitted some feedback: <p>$feedback</p>";
     $mail->AltBody = "$userName submitted some feedback: \n\n $feedback";
 
-    //$mail->send(); //todo: enable this again when done faffing around with the log
+    $mail->send();
 
     echo '<h1>🤩Thanks for the feedback!</h1>
     <a href="/">Back to Room Planner</a>';
