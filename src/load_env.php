@@ -3,8 +3,8 @@ declare(strict_types=1);
 //because of my shared hosting provider I need to:
 //  - manually load ENV vars from a file
 //  - and I am forced to keep this file outside the document root
-//  - file names are derived from project folder name as a generic approach.
-$project = basename(realpath(__DIR__ . '/..'));
+$project = json_decode(file_get_contents(__DIR__ . '/../composer.json'))->name ?? 'undefined/undefined';
+$project = explode('/', $project)[1];
 $prodPath = __DIR__ . "/../../$project.env";
 $devPath = __DIR__ . '/dev.env'; //use this path when running on local server
 $filename = realpath($prodPath) ?: realpath($devPath);
