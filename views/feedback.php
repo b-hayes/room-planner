@@ -5,7 +5,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 // Some basic spam prevention... not ideal but it will do for now.
 // Check if the ip address already submitted feedback in the last hour and hide the form / prevent submissions.
-$feedBackLogFile = __DIR__ . '/../feedback-log.txt';
+$feedBackLogFile = __DIR__ . '/../feedback.log';
 if (is_file($feedBackLogFile)) {
     $file = fopen($feedBackLogFile, 'r');
     $lastHour = strtotime('-1 hour');
