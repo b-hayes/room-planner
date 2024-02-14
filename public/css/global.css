@@ -1,4 +1,10 @@
-/*  Put all the universal styles here.  */
+/*  Universal styles that are preloaded to prevent flashes or jitter.
+    - keep this file to a minimum and preload it before any page.
+    - use the variables defined here in post loaded css.
+ */
+:root {
+    --font-size: 16px;
+}
 
 /* Light mode */
 @media (prefers-color-scheme: light) {
@@ -14,6 +20,9 @@
         --link-visited: #007bff;
         --link-hover: #019f15;
         --default-room-color: rgba(222, 222, 222, 0.8);
+
+        /* Set vars for Form controls */
+        --input-background: white;
     }
 }
 
@@ -31,11 +40,22 @@
         --link-visited: #3e96fa;
         --link-hover: #61e16a;
         --default-room-color: rgba(80, 80, 80, 0.8);
+
+        textarea {
+            background-color: #323437;
+            color: #a0a1a2;
+        }
+
+        button {
+            background-color: #323437;
+            color: #a0a1a2;
+        }
     }
 }
 
 /* Use vars on body */
 body {
+    font-size: var(--font-size);
     background-color: var(--background);
     color: var(--foreground);
 }

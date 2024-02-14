@@ -38,6 +38,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         }
         ?>
     </div>
+    <div><a href="/feedback">🤔Feedback?</a></div>
 </div>
 </body>
 </html>

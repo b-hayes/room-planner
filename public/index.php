@@ -10,23 +10,36 @@ set_error_handler(function ($severity, $message, $file, $line) {
     throw new \ErrorException($message, 0, $severity, $file, $line);
 });
 
-$jsonRequest = $_SERVER['REQUEST_METHOD'] !== 'GET' || stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
+//Switch to json if it was specified in the accept header.
+$jsonRequest = stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
 
 try {
-    require_once __DIR__ . '/../vendor/autoload.php';
-
     if (!$jsonRequest) {
-        // add common head tags here. Browser should merge them with the ones in the view file.
+        // add common head tags here. Browser will merge them with any head tags printed afterward.
         echo <<<HTML
             <head>
                 <link rel="icon" type="image/png" href="/favicon.png">
                 <link rel="stylesheet" href="/css/reset.css">
+                <link rel="stylesheet" href="/css/global.css">
             </head>
             HTML;
     }
 
-    // start your application here.
-    require_once __DIR__ . '/../views/index.php';
+    require_once __DIR__ . '/../vendor/autoload.php';
+    require_once __DIR__ . '/../src/load_env.php';
+
+    //Basic routing...
+    $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+    if ($url === '/' || $url === '') {
+        $view = __DIR__ . '/../views/index.php';
+    } else if (file_exists(__DIR__ . "/../views$url.php")) {
+        $view = __DIR__ . "/../views$url.php";
+    } else {
+        $view = __DIR__ . '/404.php';
+    }
+
+    require_once $view;
 
 } catch (\Throwable $error) {
     //This is the last line of defence do not use any dependencies that could break.
@@ -66,16 +79,10 @@ try {
     //otherwise assume we want a nice html error page.
     include __DIR__ . '/500.php';
     if ($developerMode) {
-        echo "<pre style='z-index: 99999999999999999;'>";
+        echo "<pre style='z-index: 99999999999999999; text-align: left; min-width: 100%'>";
         echo json_encode($errorResponse, $encodingOptions);
         echo "</pre>";
     }
 }
 
 ?>
-<style>
-    <?=
-    //including it via php prevents the page flashing white before the css file is processed.
-    include __DIR__ . '/css/global.css';
-    ?>
-</style>
