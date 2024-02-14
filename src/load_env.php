@@ -4,7 +4,7 @@ declare(strict_types=1);
 //  - manually load ENV vars from a file
 //  - and I am forced to keep this file outside the document root
 //  - file names are derived from project folder name as a generic approach.
-$project = basename(__DIR__ . '/..');
+$project = basename(realpath(__DIR__ . '/..'));
 $prodPath = __DIR__ . "/../../$project.env";
 $devPath = __DIR__ . '/dev.env'; //use this path when running on local server
 $filename = realpath($prodPath) ?: realpath($devPath);
