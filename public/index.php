@@ -15,8 +15,10 @@ $jsonRequest = stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
 
 try {
     if (!$jsonRequest) {
-        // add common head tags here. Browser will merge them with any head tags printed afterward.
+        // add common head tags here. Most browsers will merge them with any head tags printed afterward.
+        // but we must print the doctype first here so that firefox doesn't break.
         echo <<<HTML
+            <!DOCTYPE html>
             <head>
                 <link rel="icon" type="image/png" href="/favicon.png">
                 <link rel="stylesheet" href="/css/reset.css">
