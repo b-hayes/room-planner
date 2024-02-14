@@ -2,7 +2,6 @@
 declare(strict_types=1);
 
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
 
 // Some basic spam prevention... not ideal but it will do for now.
 // Check if the ip address already submitted feedback in the last hour and hide the form / prevent submissions.
