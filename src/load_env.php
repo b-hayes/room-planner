@@ -5,12 +5,12 @@ declare(strict_types=1);
 //  - and I am forced to keep this file outside the document root
 //  - file names are derived from project folder name as a generic approach.
 $project = basename(__DIR__ . '/..');
-$filename = realpath(__DIR__ . "/../../$project.env") ?:
-    //use this path when running on local server
-    realpath(__DIR__ . '/dev.env');
+$prodPath = __DIR__ . "/../../$project.env";
+$devPath = __DIR__ . '/dev.env'; //use this path when running on local server
+$filename = realpath($prodPath) ?: realpath($devPath);
 
 if (!$filename) {
-    throw new \Exception('No environment file found.');
+    throw new \Exception("No environment file! Tried: $prodPath && $devPath and found nothing.");
 }
 
 $handle = fopen($filename, "r");
