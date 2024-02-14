@@ -1,6 +1,6 @@
 /*  Universal styles that are preloaded to prevent flashes or jitter.
-    Keep it to a minimum as this is re-loaded on every request.
-    Use the variables defined here in your post loaded / cached css.
+    - keep this file to a minimum and preload it before any page.
+    - use the variables defined here in post loaded css.
  */
 :root {
     --font-size: 16px;
