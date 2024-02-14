@@ -8,8 +8,6 @@ $latestUpdates = array_filter($latestUpdates, function ($update) {
 });
 $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 unique commit messages
 ?>
-<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Room Planner</title>
@@ -41,7 +39,6 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     <div><a href="/feedback">🤔Feedback?</a></div>
 </div>
 </body>
-</html>
 <style>
     * {
         /* Pretty much never want people accidentally highlight text while using this app. */
@@ -53,7 +50,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         top: 0;
         left: 10vw;
         width: 90vw;
-        height: calc(100% - 20px);
+        height: calc(100vh - 20px);
     }
 
     .toolbar {
