@@ -8,6 +8,8 @@ $latestUpdates = array_filter($latestUpdates, function ($update) {
 });
 $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 unique commit messages
 ?>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Room Planner</title>
