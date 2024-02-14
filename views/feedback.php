@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($alreadySubmittedRecently)) 
             <p>Checkout the <a href="https://trello.com/b/5K94ZcYt/room-planner" target="_blank">Trello Board</a> to see what's planned / being worked on.</p>
             <p>I made this project in my spare time because there is no hassle-free options out there so figured I'd build my own and let everyone have it.</p>
             <p>If the Room Planner helped you out, and you'd like to say thank you then
-                <a href="https://www.paypal.com/donate?business=bradozman%40gmail.com&item_name=%E2%98%95+Turning+Coffee++into+Code.&currency_code=AUD">
+                <a href="https://www.paypal.com/donate?business=no-reply%40codeninja.fun&item_name=%E2%98%95+Turning+Coffee++into+Code.&currency_code=AUD">
             buy me a coffee. ☕😃 <img src="https://img.shields.io/badge/Donate-PayPal-green.svg" alt="Donate">
                 </a>
             </p>

@@ -5,8 +5,8 @@ declare(strict_types=1);
 //  - and I am forced to keep this file outside the document root
 $project = json_decode(file_get_contents(__DIR__ . '/../composer.json'))->name ?? 'undefined/undefined';
 $project = explode('/', $project)[1];
-$prodPath = __DIR__ . "/../../$project.env";
-$devPath = __DIR__ . '/dev.env'; //use this path when running on local server
+$prodPath = __DIR__ . '/prod.env';
+$devPath = __DIR__ . '/dev.env';
 $filename = realpath($prodPath) ?: realpath($devPath);
 
 if (!$filename) {
