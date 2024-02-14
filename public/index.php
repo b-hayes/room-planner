@@ -55,13 +55,13 @@ try {
         $errorInfo['cause'] = $error->getPrevious()->getTraceAsString();
     }
 
-    //log the error
-    error_log(json_encode($errorInfo));
+    //log the error before responding
+    $encodingOptions = JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE;
+    error_log(json_encode($errorInfo, $encodingOptions));
 
     //construct error response.
     http_response_code(500);
     $errorResponse = ['error' => ['message' => 'Internal server error']];
-    $encodingOptions = JSON_UNESCAPED_SLASHES;
 
     //extra info for developers.
     $developerMode = (stripos($_SERVER['HTTP_HOST'], 'localhost') !== false);
