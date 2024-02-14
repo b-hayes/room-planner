@@ -17,6 +17,7 @@ try {
     if (!$jsonRequest) {
         // add common head tags here. Browser will merge them with any head tags printed afterward.
         echo <<<HTML
+            <!DOCTYPE html>
             <head>
                 <link rel="icon" type="image/png" href="/favicon.png">
                 <link rel="stylesheet" href="/css/reset.css">
