@@ -12,7 +12,7 @@ if (is_file($feedBackLogFile)) {
     while ($line = fgets($file)) {
         $parts = explode(' | ', $line);
         $logTime = strtotime($parts[0]);
-        if ($logTime > $lastHour && $parts[1] === $_SERVER['REMOTE_ADDR']) {
+        if ($logTime > $lastHour && $parts[1] ?? 'undefined' === $_SERVER['REMOTE_ADDR']) {
             $alreadySubmittedRecently = true;
         }
     }
