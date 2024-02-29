@@ -139,7 +139,7 @@ export default class Shape extends Component {
         shiftY = shiftY / this.scale
 
         //snap shift to grid snap
-        let snap = this.parent.snap || 10
+        let snap = this.parent.snap || 1
         shiftX = shiftX - (shiftX % snap)
         shiftY = shiftY - (shiftY % snap)
 
