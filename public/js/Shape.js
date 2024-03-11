@@ -283,6 +283,10 @@ const html = `
     <div class="posText"></div>
     <div class="widthText"></div>
     <div class="heightText"></div>
+    <div class="top-left rotation-handle">⤵</div>
+    <div class="top-right rotation-handle">⤵</div>
+    <div class="bottom-left rotation-handle">⤵</div>
+    <div class="bottom-right rotation-handle">⤵</div>
 </div>
 `
 
@@ -366,7 +370,49 @@ const style = `
     user-select: none;
     position: absolute;
     bottom: 50%;
-    right: -10;
+    right: -10%;
     transform: rotate(-90deg);
+}
+
+.rotation-handle {
+    position: absolute;
+    line-height: 30px; /* center the text vertically */
+    font-size: 24px;
+    font-weight: bolder;
+    text-align: center;
+    color: var(--link);
+}
+
+/* rotation handles are positioned outside of the shape */
+.top-left.rotation-handle {
+    transform: rotate(-90deg);
+    left: -25px;
+    top: -25px;
+    width: 25px;
+    height: 25px;
+}
+
+.top-right.rotation-handle {
+    transform: rotate(0deg);
+    right: -25px;
+    top: -25px;
+    width: 25px;
+    height: 25px;
+}
+
+.bottom-left.rotation-handle {
+    transform: rotate(-180deg);
+    left: -25px;
+    bottom: -25px;
+    width: 25px;
+    height: 25px;
+}
+
+.bottom-right.rotation-handle {
+    transform: rotate(90deg);
+    right: -25px;
+    bottom: -25px;
+    width: 25px;
+    height: 25px;
 }
 `
