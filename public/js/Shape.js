@@ -18,6 +18,7 @@ export default class Shape extends Component {
             height: 300,
             x: undefined, //if undefined will center
             y: undefined, //if undefined will center
+            rotation: 45
         }
     ) {
         super();
@@ -40,7 +41,8 @@ export default class Shape extends Component {
             }
         }
 
-        let {width, height, x, y} = position
+        // get the position values
+        let {width, height, x, y, rotation} = position
 
         //If no position then center while rounding to the nearest 100
         if (x === undefined) {
@@ -56,6 +58,7 @@ export default class Shape extends Component {
         this.posText = this.element().querySelector('.posText')
         this.widthText = this.element().querySelector('.widthText')
         this.heightText = this.element().querySelector('.heightText')
+        this.rotationText = this.element().querySelector('.rotationText')
 
         document.addEventListener('mousedown', (e) => {
             //unselect if anything other than this is clicked on
@@ -100,7 +103,7 @@ export default class Shape extends Component {
 
         //Add the element to the parent, and position it.
         this.parent.appendChild(this.element())
-        this.position = {x, y, width, height}
+        this.position = {x, y, width, height, rotation}
 
         //add event listener for grid-scale-changed
         this.parent.addEventListener('grid-scale-changed', (e) => {
@@ -185,26 +188,32 @@ export default class Shape extends Component {
         };
 
         // Apply the scaled position to the element
-        this.element().style.top = sPos.y + 'px';
-        this.element().style.left = sPos.x + 'px';
-        this.element().style.width = sPos.width + 'px';
-        this.element().style.height = sPos.height + 'px';
+        this.element().style.top = sPos.y + 'px'
+        this.element().style.left = sPos.x + 'px'
+        this.element().style.width = sPos.width + 'px'
+        this.element().style.height = sPos.height + 'px'
+        this.element().style.transform = `rotate(${pos.rotation}deg)`
 
         // Update the labels
         this.posText.innerHTML = 'x: ' + pos.x + ' y: ' + pos.y
         this.widthText.innerHTML = 'w: ' + pos.width
         this.heightText.innerHTML = 'h: ' + pos.height
+        this.rotationText.innerHTML = 'r: ' + pos.rotation
     }
 
     get position() {
         return this._gridPosition;
     }
 
-    set position({x, y, width, height}) {
+    set position({x, y, width, height, rotation}) {
         if (x < 0) x = 0
         if (y < 0) y = 0
+        if (width < 0) width = 0
+        if (height < 0) height = 0
+        if (rotation === undefined || rotation < 0) rotation = 0
+        if (rotation > 360) rotation = 360
 
-        this._gridPosition = { x, y, width, height };
+        this._gridPosition = { x, y, width, height, rotation};
         this.redraw();
     }
 
@@ -283,6 +292,7 @@ const html = `
     <div class="posText"></div>
     <div class="widthText"></div>
     <div class="heightText"></div>
+    <div class="rotationText"></div>
     <div class="top-left rotation-handle">⤵</div>
     <div class="top-right rotation-handle">⤵</div>
     <div class="bottom-left rotation-handle">⤵</div>
@@ -374,6 +384,14 @@ const style = `
     transform: rotate(-90deg);
 }
 
+.rotationText {
+    pointer-events: none;
+    user-select: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+
 .rotation-handle {
     position: absolute;
     line-height: 30px; /* center the text vertically */
@@ -381,9 +399,9 @@ const style = `
     font-weight: bolder;
     text-align: center;
     color: var(--link);
+    cursor: grab;
 }
 
-/* rotation handles are positioned outside of the shape */
 .top-left.rotation-handle {
     transform: rotate(-90deg);
     left: -25px;
