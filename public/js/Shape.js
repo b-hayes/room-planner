@@ -114,6 +114,30 @@ export default class Shape extends Component {
 
             this.scale = e.detail.object.scale
         })
+
+        //rotate the shape when the rotation handle is dragged
+        let rotationHandles = this.element().getElementsByClassName('rotation-handle')
+        for (let i = 0; i < rotationHandles.length; i++) {
+            let handle = rotationHandles[i]
+            handle.addEventListener('mousedown', (e) => {
+                //record where the click happened so that drag events can use it as a point of reference
+                this.clickX = e.pageX
+                this.clickY = e.pageY
+                this.shapePositionWhenClicked = this.position
+
+                //mark the shape as selected (important)
+                this.select()
+
+                //if not primary mouse button then don't bother with move and resize events.
+                if (e.buttons !== 1) {
+                    return
+                }
+
+                //add event listeners for moving and resizing
+                document.addEventListener('mousemove', (e) => this.rotate(e), false)
+                document.addEventListener('mouseup', () => this.up(), false)
+            })
+        }
     }
 
     select() {
@@ -171,6 +195,34 @@ export default class Shape extends Component {
         }
 
         this.position = {x, y, width, height}
+    }
+
+    rotate(e) {
+        //if not selected or mouse is not down then don't move
+        if (/*!this.selected ||*/ e.buttons !== 1) {
+            return
+        }
+
+        let shiftX = e.pageX - this.clickX;
+        let shiftY = e.pageY - this.clickY;
+
+        //apply the scale to the shift to get the virtual shift in the grid space
+        shiftX = shiftX / this.scale
+        shiftY = shiftY / this.scale
+
+        //snap shift to grid snap
+        let snap = this.parent.snap || 1
+        shiftX = shiftX - (shiftX % snap)
+        shiftY = shiftY - (shiftY % snap)
+
+        let { x, y, width, height, rotation } = this.shapePositionWhenClicked;
+
+        let angle = Math.atan2(shiftY, shiftX) * 180 / Math.PI
+        angle = angle - (angle % 15)
+
+        rotation = this.shapePositionWhenClicked.rotation + angle
+
+        this.position = {x, y, width, height, rotation}
     }
 
     up() {
