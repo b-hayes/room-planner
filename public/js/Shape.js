@@ -1,4 +1,5 @@
 import Component from "./Scafold/Component.js";
+import Vector from "./Vector.js";
 
 export default class Shape extends Component {
 
@@ -203,26 +204,17 @@ export default class Shape extends Component {
             return
         }
 
-        let shiftX = e.pageX - this.clickX;
-        let shiftY = e.pageY - this.clickY;
+        let clickedVector = new Vector(this.clickX, this.clickY)
+        let dragVector = new Vector(e.pageX, e.pageY)
+        let commonPoint = new Vector(this.position.x + this.position.width / 2, this.position.y + this.position.height / 2)
+        let angle = clickedVector.angleBetween(dragVector, commonPoint)
+        let newAngle = this.position.rotation + angle
 
-        //apply the scale to the shift to get the virtual shift in the grid space
-        shiftX = shiftX / this.scale
-        shiftY = shiftY / this.scale
+        //todo: need to be able to detect goring and shringking fo the angle not just adding the difference.
 
-        //snap shift to grid snap
-        let snap = this.parent.snap || 1
-        shiftX = shiftX - (shiftX % snap)
-        shiftY = shiftY - (shiftY % snap)
+        console.log('angle', newAngle)
 
-        let { x, y, width, height, rotation } = this.shapePositionWhenClicked;
-
-        let angle = Math.atan2(shiftY, shiftX) * 180 / Math.PI
-        angle = angle - (angle % 15)
-
-        rotation = this.shapePositionWhenClicked.rotation + angle
-
-        this.position = {x, y, width, height, rotation}
+        this.position = {...this.position, rotation: newAngle}
     }
 
     up() {
