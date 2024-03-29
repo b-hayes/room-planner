@@ -36,6 +36,15 @@ export default class Vector {
         // Convert radians to degrees
         let degrees = theta * (180 / Math.PI);
 
+        // Determine if the angle is clockwise or counterclockwise
+        // Cross product of the vectors
+        let crossProduct = vector1.x * vector2.y - vector1.y * vector2.x;
+
+        // If counterclockwise, make the angle negative
+        if (crossProduct < 0) {
+            degrees = -degrees;
+        }
+
         return degrees;
     }
 }

@@ -208,9 +208,7 @@ export default class Shape extends Component {
         let dragVector = new Vector(e.pageX, e.pageY)
         let commonPoint = new Vector(this.position.x + this.position.width / 2, this.position.y + this.position.height / 2)
         let angle = clickedVector.angleBetween(dragVector, commonPoint)
-        let newAngle = this.position.rotation + angle
-
-        //todo: need to be able to detect goring and shringking fo the angle not just adding the difference.
+        let newAngle  = this.position.rotation + angle
 
         console.log('angle', newAngle)
 
