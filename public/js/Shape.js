@@ -218,6 +218,10 @@ export default class Shape extends Component {
             height: pos.height * this.scale,
         };
 
+        //x and y are the center of the shape, so we need to adjust the position to be the top left corner
+        sPos.x = sPos.x - sPos.width / 2
+        sPos.y = sPos.y - sPos.height / 2
+
         // Apply the scaled position to the element
         this.element().style.top = sPos.y + 'px'
         this.element().style.left = sPos.x + 'px'
