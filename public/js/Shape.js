@@ -63,7 +63,11 @@ export default class Shape extends Component {
 
         document.addEventListener('mousedown', (e) => {
             //unselect if anything other than this is clicked on
-            if (e.target !== this.element()) {
+            if (
+                e.target !== this.element() &&
+                //if the target is a child of the shape then don't unselect
+                this.element().contains(e.target) === false
+            ) {
                 this.unselect()
                 return
             }
@@ -116,29 +120,6 @@ export default class Shape extends Component {
             this.scale = e.detail.object.scale
         })
 
-        //rotate the shape when the rotation handle is dragged
-        let rotationHandles = this.element().getElementsByClassName('rotation-handle')
-        for (let i = 0; i < rotationHandles.length; i++) {
-            let handle = rotationHandles[i]
-            handle.addEventListener('mousedown', (e) => {
-                //record where the click happened so that drag events can use it as a point of reference
-                this.clickX = e.pageX
-                this.clickY = e.pageY
-                this.shapePositionWhenClicked = this.position
-
-                //mark the shape as selected (important)
-                this.select()
-
-                //if not primary mouse button then don't bother with move and resize events.
-                if (e.buttons !== 1) {
-                    return
-                }
-
-                //add event listeners for moving and resizing
-                document.addEventListener('mousemove', (e) => this.rotate(e), false)
-                document.addEventListener('mouseup', () => this.up(), false)
-            })
-        }
     }
 
     select() {
@@ -171,31 +152,37 @@ export default class Shape extends Component {
         shiftX = shiftX - (shiftX % snap)
         shiftY = shiftY - (shiftY % snap)
 
-        let { x, y, width, height } = this.shapePositionWhenClicked;
+        let {x, y, width, height, rotation} = this.shapePositionWhenClicked;
 
-        if (this.resizing) {
-            //resize the shape
-            if (this.resizing.includes('left')) {
+        switch (true) {
+            case this.resizing !== false:
+                //resize the shape
+                if (this.resizing.includes('left')) {
+                    x = this.shapePositionWhenClicked.x + shiftX
+                    width = this.shapePositionWhenClicked.width - shiftX
+                }
+                if (this.resizing.includes('right')) {
+                    width = this.shapePositionWhenClicked.width + shiftX
+                }
+                if (this.resizing.includes('top')) {
+                    y = this.shapePositionWhenClicked.y + shiftY
+                    height = this.shapePositionWhenClicked.height - shiftY
+                }
+                if (this.resizing.includes('bottom')) {
+                    height = this.shapePositionWhenClicked.height + shiftY
+                }
+                break;
+            case this.rotating:
+                //rotate the shape
+                rotation = this.shapePositionWhenClicked.rotation + shiftX
+                break;
+            default:
+                //move the shape only
                 x = this.shapePositionWhenClicked.x + shiftX
-                width = this.shapePositionWhenClicked.width - shiftX
-            }
-            if (this.resizing.includes('right')) {
-                width = this.shapePositionWhenClicked.width + shiftX
-            }
-            if (this.resizing.includes('top')) {
                 y = this.shapePositionWhenClicked.y + shiftY
-                height = this.shapePositionWhenClicked.height - shiftY
-            }
-            if (this.resizing.includes('bottom')) {
-                height = this.shapePositionWhenClicked.height + shiftY
-            }
-        } else {
-            //move the shape only
-            x = this.shapePositionWhenClicked.x + shiftX
-            y = this.shapePositionWhenClicked.y + shiftY
         }
 
-        this.position = {x, y, width, height}
+        this.position = {x, y, width, height, rotation}
     }
 
     rotate(e) {
@@ -208,7 +195,7 @@ export default class Shape extends Component {
         let dragVector = new Vector(e.pageX, e.pageY)
         let commonPoint = new Vector(this.position.x + this.position.width / 2, this.position.y + this.position.height / 2)
         let angle = clickedVector.angleBetween(dragVector, commonPoint)
-        let newAngle  = this.shapePositionWhenClicked.rotation + angle
+        let newAngle = this.shapePositionWhenClicked.rotation + angle
 
         console.log('angle', newAngle)
 
@@ -217,6 +204,8 @@ export default class Shape extends Component {
 
     up() {
         document.removeEventListener('mouseup', () => this.up(), false)
+        //remove the rotating class (rotating is only done while the mouse is down).
+        this.element().classList.remove('rotating')
     }
 
     redraw() {
@@ -255,7 +244,7 @@ export default class Shape extends Component {
         if (rotation === undefined || rotation < 0) rotation = 0
         if (rotation > 360) rotation = 360
 
-        this._gridPosition = { x, y, width, height, rotation};
+        this._gridPosition = {x, y, width, height, rotation};
         this.redraw();
     }
 
@@ -271,13 +260,27 @@ export default class Shape extends Component {
 
     //change the cursor to a resize cursor when hovering within 3px of the border
     hover(event) {
+        //if event is not for this shape or its children then return
+        if (this.element().contains(event.target) === false) {
+            return
+        }
+
         //if mouse is down change nothing
         if (event.buttons === 1) {
             return
         }
-
         //remove previous hover effects
         this.resizing = false
+        this.rotating = false
+
+        //if hovering over a rotation handle then set rotation mode
+        if (event.target.classList.contains('rotation-handle')) {
+            this.rotating = true
+            this.element().classList.add('rotating')
+            return//don't worry about other effects
+        }
+
+
         this.parent.style.cursor = 'default'
         this.element().classList.remove('resize-top-left')
         this.element().classList.remove('resize-bottom-right')
@@ -296,7 +299,7 @@ export default class Shape extends Component {
         let y = event.offsetY;
         let width = this.element().offsetWidth;
         let height = this.element().offsetHeight;
-        let border = 10;
+        let border = 15;
 
         if (x < border && y < border) {
             this.resizing = 'top-left'
@@ -330,149 +333,174 @@ export default class Shape extends Component {
 
 // language=HTML
 const html = `
-<div class="shape">
-    <div class="posText"></div>
-    <div class="widthText"></div>
-    <div class="heightText"></div>
-    <div class="rotationText"></div>
-    <div class="top-left rotation-handle">⤵</div>
-    <div class="top-right rotation-handle">⤵</div>
-    <div class="bottom-left rotation-handle">⤵</div>
-    <div class="bottom-right rotation-handle">⤵</div>
-</div>
+    <div class="shape">
+        <div class="posText showWhenSelected"></div>
+        <div class="widthText showWhenSelected"></div>
+        <div class="heightText showWhenSelected"></div>
+        <div class="rotationText showWhenSelected"></div>
+        <div class="top-left rotation-handle showWhenSelected"></div>
+        <div class="top-right rotation-handle showWhenSelected"></div>
+        <div class="bottom-left rotation-handle showWhenSelected"></div>
+        <div class="bottom-right rotation-handle showWhenSelected"></div>
+        <div class="rotation-line showWhenRotating"></div>
+    </div>
 `
 
 // language=CSS
 const style = `
-.shape {
-    box-sizing: border-box;
-    position: absolute;
-    border: 1px solid var(--link, cornflowerblue);
-    z-index: 100;
-}
+    .shape {
+        box-sizing: border-box;
+        position: absolute;
+        border: 1px solid var(--link, cornflowerblue);
+        z-index: 100;
+    }
 
-.shape.selected {
-    z-index: 1000;
-    border: 3px solid var(--link-hover, darkseagreen);
-}
+    .shape.selected {
+        z-index: 1000;
+        border: 3px solid var(--link-hover, darkseagreen);
+    }
 
-.selected .posText {
-    display: block;
-}
-.posText {
-    display: none;
-}
+    .selected .showWhenSelected {
+        display: block;
+    }
 
-.shape.resize-top-left {
-    border-top-style: dotted;
-    border-left-style: dotted;
-    cursor: nwse-resize;
-}
-.shape.resize-top-right {
-    border-top-style: dotted;
-    border-right-style: dotted;
-    cursor: nesw-resize;
-}
-.shape.resize-bottom-left {
-    border-bottom-style: dotted;
-    border-left-style: dotted;
-    cursor: nesw-resize;
-}
-.shape.resize-bottom-right {
-    border-bottom-style: dotted;
-    border-right-style: dotted;
-    cursor: nwse-resize;
-}
-.shape.resize-left {
-    border-left-style: dotted;
-    cursor: ew-resize;
-}
-.shape.resize-right {
-    border-right-style: dotted;
-    cursor: ew-resize;
-}
-.shape.resize-top {
-    border-top-style: dotted;
-    cursor: ns-resize;
-}
-.shape.resize-bottom {
-    border-bottom-style: dotted;
-    cursor: ns-resize;
-}
+    .showWhenSelected {
+        display: none;
+    }
 
-.posText {
-    pointer-events: none;
-    user-select: none;
-    position: absolute;
-    top: 0;
-    left: 5px;
-}
+    .shape.resize-top-left {
+        border-top-style: dotted;
+        border-left-style: dotted;
+        cursor: nwse-resize;
+    }
 
-.widthText {
-    pointer-events: none;
-    user-select: none;
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    text-align: center;
-}
+    .shape.resize-top-right {
+        border-top-style: dotted;
+        border-right-style: dotted;
+        cursor: nesw-resize;
+    }
 
-.heightText {
-    pointer-events: none;
-    user-select: none;
-    position: absolute;
-    bottom: 50%;
-    right: -10%;
-    transform: rotate(-90deg);
-}
+    .shape.resize-bottom-left {
+        border-bottom-style: dotted;
+        border-left-style: dotted;
+        cursor: nesw-resize;
+    }
 
-.rotationText {
-    pointer-events: none;
-    user-select: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-}
+    .shape.resize-bottom-right {
+        border-bottom-style: dotted;
+        border-right-style: dotted;
+        cursor: nwse-resize;
+    }
 
-.rotation-handle {
-    position: absolute;
-    line-height: 30px; /* center the text vertically */
-    font-size: 24px;
-    font-weight: bolder;
-    text-align: center;
-    color: var(--link);
-    cursor: grab;
-}
+    .shape.resize-left {
+        border-left-style: dotted;
+        cursor: ew-resize;
+    }
 
-.top-left.rotation-handle {
-    transform: rotate(-90deg);
-    left: -25px;
-    top: -25px;
-    width: 25px;
-    height: 25px;
-}
+    .shape.resize-right {
+        border-right-style: dotted;
+        cursor: ew-resize;
+    }
 
-.top-right.rotation-handle {
-    transform: rotate(0deg);
-    right: -25px;
-    top: -25px;
-    width: 25px;
-    height: 25px;
-}
+    .shape.resize-top {
+        border-top-style: dotted;
+        cursor: ns-resize;
+    }
 
-.bottom-left.rotation-handle {
-    transform: rotate(-180deg);
-    left: -25px;
-    bottom: -25px;
-    width: 25px;
-    height: 25px;
-}
+    .shape.resize-bottom {
+        border-bottom-style: dotted;
+        cursor: ns-resize;
+    }
 
-.bottom-right.rotation-handle {
-    transform: rotate(90deg);
-    right: -25px;
-    bottom: -25px;
-    width: 25px;
-    height: 25px;
-}
+    .posText {
+        pointer-events: none;
+        user-select: none;
+        position: absolute;
+        top: 0;
+        left: 5px;
+    }
+
+    .widthText {
+        pointer-events: none;
+        user-select: none;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+    }
+
+    .heightText {
+        pointer-events: none;
+        user-select: none;
+        position: absolute;
+        bottom: 50%;
+        right: -10%;
+        transform: rotate(-90deg);
+    }
+
+    .rotationText {
+        pointer-events: none;
+        user-select: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+    }
+
+    .rotation-handle {
+        position: absolute;
+        line-height: 30px; /* center the text vertically */
+        font-size: 24px;
+        font-weight: bolder;
+        text-align: center;
+        color: var(--link);
+        cursor: grab;
+
+        /* make the handle look like a circle */
+        border-radius: 50%;
+        background-color: var(--link-hover, darkseagreen);
+
+        width: 25px;
+        height: 25px;
+        overflow: hidden;
+    }
+
+    .top-left.rotation-handle {
+        transform: rotate(-90deg);
+        left: -25px;
+        top: -25px;
+    }
+
+    .top-right.rotation-handle {
+        transform: rotate(0deg);
+        right: -25px;
+        top: -25px;
+    }
+
+    .bottom-left.rotation-handle {
+        transform: rotate(-180deg);
+        left: -25px;
+        bottom: -25px;
+    }
+
+    .bottom-right.rotation-handle {
+        transform: rotate(90deg);
+        right: -25px;
+        bottom: -25px;
+    }
+
+    .rotating .showWhenRotating {
+        display: block;
+    }
+    .showWhenRotating {
+        display: none;
+    }
+    
+    .rotation-line {
+        position: absolute;
+        width: 1px;
+        height: 50%;
+        background-color: var(--link-hover, darkseagreen);
+        left: 50%;
+        top: 0;
+    }
 `
