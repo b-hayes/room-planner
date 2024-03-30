@@ -204,8 +204,6 @@ export default class Shape extends Component {
 
     up() {
         document.removeEventListener('mouseup', () => this.up(), false)
-        //remove the rotating class (rotating is only done while the mouse is down).
-        this.element().classList.remove('rotating')
     }
 
     redraw() {
@@ -264,28 +262,15 @@ export default class Shape extends Component {
 
     //change the cursor to a resize cursor when hovering within 3px of the border
     hover(event) {
-        //if event is not for this shape or its children then return
-        if (this.element().contains(event.target) === false) {
-            return
-        }
-
-        //if mouse is down change nothing
+        //if mouse is down change nothing because the set mode will now be used in the drag method.
         if (event.buttons === 1) {
             return
         }
-        //remove previous hover effects
+
+        //reset the resizing and rotating modes before checking for new ones
         this.resizing = false
         this.rotating = false
-
-        //if hovering over a rotation handle then set rotation mode
-        if (event.target.classList.contains('rotation-handle')) {
-            this.rotating = true
-            this.element().classList.add('rotating')
-            return//don't worry about other effects
-        }
-
-
-        this.parent.style.cursor = 'default'
+        this.element().classList.remove('rotating')
         this.element().classList.remove('resize-top-left')
         this.element().classList.remove('resize-bottom-right')
         this.element().classList.remove('resize-bottom-left')
@@ -295,10 +280,19 @@ export default class Shape extends Component {
         this.element().classList.remove('resize-top')
         this.element().classList.remove('resize-bottom')
 
-        if (this.selected === false || event.target !== this.element()) {
+        //if not selected then don't bother
+        if (this.selected === false || this.element().contains(event.target) === false) {
             return;
         }
 
+        //if hovering over a rotation handle then set rotation mode
+        if (event.target.classList.contains('rotation-handle')) {
+            this.rotating = true
+            this.element().classList.add('rotating')
+            return
+        }
+
+        //detect and set the resize mode
         let x = event.offsetX;
         let y = event.offsetY;
         let width = this.element().offsetWidth;
