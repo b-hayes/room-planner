@@ -158,18 +158,16 @@ export default class Shape extends Component {
             case this.resizing !== false:
                 //resize the shape
                 if (this.resizing.includes('left')) {
-                    x = this.shapePositionWhenClicked.x + shiftX
-                    width = this.shapePositionWhenClicked.width - shiftX
+                    width = this.shapePositionWhenClicked.width - shiftX * 2
                 }
                 if (this.resizing.includes('right')) {
-                    width = this.shapePositionWhenClicked.width + shiftX
+                    width = this.shapePositionWhenClicked.width + shiftX * 2
                 }
                 if (this.resizing.includes('top')) {
-                    y = this.shapePositionWhenClicked.y + shiftY
-                    height = this.shapePositionWhenClicked.height - shiftY
+                    height = this.shapePositionWhenClicked.height - shiftY * 2
                 }
                 if (this.resizing.includes('bottom')) {
-                    height = this.shapePositionWhenClicked.height + shiftY
+                    height = this.shapePositionWhenClicked.height + shiftY * 2
                 }
                 break;
             case this.rotating:
