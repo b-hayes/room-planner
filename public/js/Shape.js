@@ -142,16 +142,6 @@ export default class Shape extends Component {
 
         let shiftX = e.pageX - this.clickX;
         let shiftY = e.pageY - this.clickY;
-
-        //apply the scale to the shift to get the virtual shift in the grid space
-        shiftX = shiftX / this.scale
-        shiftY = shiftY / this.scale
-
-        //snap shift to grid snap
-        let snap = this.parent.snap || 1
-        shiftX = shiftX - (shiftX % snap)
-        shiftY = shiftY - (shiftY % snap)
-
         let {x, y, width, height, rotation} = this.shapePositionWhenClicked;
 
         switch (true) {
@@ -179,6 +169,14 @@ export default class Shape extends Component {
                 x = this.shapePositionWhenClicked.x + shiftX
                 y = this.shapePositionWhenClicked.y + shiftY
         }
+
+        //apply snap
+        let snap = this.parent.snap || 1
+        x = x - (x % snap)
+        y = y - (y % snap)
+        width = width - (width % snap)
+        height = height - (height % snap)
+        rotation = rotation - (rotation % snap)
 
         this.position = {x, y, width, height, rotation}
     }
@@ -237,6 +235,9 @@ export default class Shape extends Component {
     }
 
     set position({x, y, width, height, rotation}) {
+        //these are the real world values of the shape and not the scaled values
+        // do not apply scaling, snapping or any other modifier here.
+        // aside from max and min value clamping
         if (x < 0) x = 0
         if (y < 0) y = 0
         if (width < 0) width = 0
