@@ -160,12 +160,12 @@ export default class Shape extends Component {
         }
 
         //for some functions we need the mouse position relative to the shapes current rotation
-        let translatedEventLocation = this.translateMouseEvent(e, this.position.rotation);
-        let translatedClickLocation = this.translateMouseEvent({clientX: this.clickX, clientY: this.clickY}, this.position.rotation);
+        let rotatedEventLocation = this.translateMouseEvent(e, this.position.rotation);
+        let rotatedClickLocation = this.translateMouseEvent({clientX: this.clickX, clientY: this.clickY}, this.position.rotation);
 
-        console.log('translatedEventLocation', translatedEventLocation)
-        let translatedShiftX = translatedEventLocation.x - translatedClickLocation.x
-        let translatedShiftY = translatedEventLocation.y - translatedClickLocation.y
+        console.log('rotatedEventLocation', rotatedEventLocation)
+        let rotatedShiftX = rotatedEventLocation.x - rotatedClickLocation.x
+        let rotatedShiftY = rotatedEventLocation.y - rotatedClickLocation.y
 
         let shiftX = e.pageX - this.clickX;
         let shiftY = e.pageY - this.clickY;
@@ -176,19 +176,19 @@ export default class Shape extends Component {
                 //resize the shape
                 if (this.resizing.includes('left')) {
                     //width = this.shapePositionWhenClicked.width - shiftX * 2
-                    width = this.shapePositionWhenClicked.width - translatedShiftX * 2
+                    width = this.shapePositionWhenClicked.width - rotatedShiftX * 2
                 }
                 if (this.resizing.includes('right')) {
                     //width = this.shapePositionWhenClicked.width + shiftX * 2
-                    width = this.shapePositionWhenClicked.width + translatedShiftX * 2
+                    width = this.shapePositionWhenClicked.width + rotatedShiftX * 2
                 }
                 if (this.resizing.includes('top')) {
                     //height = this.shapePositionWhenClicked.height - shiftY * 2
-                    height = this.shapePositionWhenClicked.height - translatedShiftY * 2
+                    height = this.shapePositionWhenClicked.height - rotatedShiftY * 2
                 }
                 if (this.resizing.includes('bottom')) {
                     //height = this.shapePositionWhenClicked.height + shiftY * 2
-                    height = this.shapePositionWhenClicked.height + translatedShiftY * 2
+                    height = this.shapePositionWhenClicked.height + rotatedShiftY * 2
                 }
                 break;
             case this.rotating:
