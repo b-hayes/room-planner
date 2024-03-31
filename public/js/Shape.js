@@ -456,8 +456,8 @@ const style = `
         border-radius: 50%;
         background-color: var(--link-hover, darkseagreen);
 
-        width: 25px;
-        height: 25px;
+        width: 15px;
+        height: 15px;
         overflow: hidden;
     }
 
