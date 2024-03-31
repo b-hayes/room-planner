@@ -163,7 +163,6 @@ export default class Shape extends Component {
         let rotatedEventLocation = this.translateMouseEvent(e, this.position.rotation);
         let rotatedClickLocation = this.translateMouseEvent({clientX: this.clickX, clientY: this.clickY}, this.position.rotation);
 
-        console.log('rotatedEventLocation', rotatedEventLocation)
         let rotatedShiftX = rotatedEventLocation.x - rotatedClickLocation.x
         let rotatedShiftY = rotatedEventLocation.y - rotatedClickLocation.y
 
