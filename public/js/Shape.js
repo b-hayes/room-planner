@@ -174,19 +174,15 @@ export default class Shape extends Component {
             case this.resizing !== false:
                 //resize the shape
                 if (this.resizing.includes('left')) {
-                    //width = this.shapePositionWhenClicked.width - shiftX * 2
                     width = this.shapePositionWhenClicked.width - rotatedShiftX * 2
                 }
                 if (this.resizing.includes('right')) {
-                    //width = this.shapePositionWhenClicked.width + shiftX * 2
                     width = this.shapePositionWhenClicked.width + rotatedShiftX * 2
                 }
                 if (this.resizing.includes('top')) {
-                    //height = this.shapePositionWhenClicked.height - shiftY * 2
                     height = this.shapePositionWhenClicked.height - rotatedShiftY * 2
                 }
                 if (this.resizing.includes('bottom')) {
-                    //height = this.shapePositionWhenClicked.height + shiftY * 2
                     height = this.shapePositionWhenClicked.height + rotatedShiftY * 2
                 }
                 break;
@@ -199,6 +195,8 @@ export default class Shape extends Component {
                 } else if(rotation < 0) {
                     rotation = rotation + 360
                 }
+                //prefer 0 over 360
+                if (rotation === 360) rotation = 0
                 break;
             default:
                 //move the shape only
