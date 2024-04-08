@@ -189,6 +189,9 @@ export default class Shape extends Component {
             case this.rotating:
                 //rotate the shape
                 rotation = this.shapePositionWhenClicked.rotation + shiftX
+
+                //TODO: calculate the angle based on X and Y instead of just doing X
+
                 //prevent the rotation going out of range
                 if (rotation > 360) {
                     rotation = rotation - 360
