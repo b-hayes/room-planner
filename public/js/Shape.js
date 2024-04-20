@@ -187,19 +187,19 @@ export default class Shape extends Component {
                 }
                 break;
             case this.rotating:
-                //rotate the shape
-                rotation = this.shapePositionWhenClicked.rotation + shiftX
+                // Calculate the center of the shape
+                const centerX = this.shapePositionWhenClicked.x + this.shapePositionWhenClicked.width / 2;
+                const centerY = this.shapePositionWhenClicked.y + this.shapePositionWhenClicked.height / 2;
 
-                //TODO: calculate the angle based on X and Y instead of just doing X
+                // Calculate the angle between the center of the shape and the current mouse position
+                const angleRadians = Math.atan2(e.pageY - centerY, e.pageX - centerX);
 
-                //prevent the rotation going out of range
-                if (rotation > 360) {
-                    rotation = rotation - 360
-                } else if(rotation < 0) {
-                    rotation = rotation + 360
-                }
-                //prefer 0 over 360
-                if (rotation === 360) rotation = 0
+                // Convert the angle to degrees and add 90 to it so that 0 degrees is at the top
+                rotation = angleRadians * (180 / Math.PI) + this.shapePositionWhenClicked.rotation;
+
+                // Normalize the rotation to be between 0 and 360
+                if (rotation < 0) rotation += 360;
+                if (rotation > 360) rotation -= 360;
                 break;
             default:
                 //move the shape only
