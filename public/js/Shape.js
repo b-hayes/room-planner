@@ -174,25 +174,32 @@ export default class Shape extends Component {
             case this.resizing !== false:
                 //resize the shape
                 if (this.resizing.includes('left')) {
-                    //width = this.shapePositionWhenClicked.width - shiftX * 2
                     width = this.shapePositionWhenClicked.width - rotatedShiftX * 2
                 }
                 if (this.resizing.includes('right')) {
-                    //width = this.shapePositionWhenClicked.width + shiftX * 2
                     width = this.shapePositionWhenClicked.width + rotatedShiftX * 2
                 }
                 if (this.resizing.includes('top')) {
-                    //height = this.shapePositionWhenClicked.height - shiftY * 2
                     height = this.shapePositionWhenClicked.height - rotatedShiftY * 2
                 }
                 if (this.resizing.includes('bottom')) {
-                    //height = this.shapePositionWhenClicked.height + shiftY * 2
                     height = this.shapePositionWhenClicked.height + rotatedShiftY * 2
                 }
                 break;
             case this.rotating:
                 //rotate the shape
                 rotation = this.shapePositionWhenClicked.rotation + shiftX
+
+                //TODO: calculate the angle based on X and Y instead of just doing X
+
+                //prevent the rotation going out of range
+                if (rotation > 360) {
+                    rotation = rotation - 360
+                } else if(rotation < 0) {
+                    rotation = rotation + 360
+                }
+                //prefer 0 over 360
+                if (rotation === 360) rotation = 0
                 break;
             default:
                 //move the shape only
@@ -209,23 +216,6 @@ export default class Shape extends Component {
         rotation = rotation - (rotation % snap)
 
         this.position = {x, y, width, height, rotation}
-    }
-
-    rotate(e) {
-        //if not selected or mouse is not down then don't move
-        if (/*!this.selected ||*/ e.buttons !== 1) {
-            return
-        }
-
-        let clickedVector = new Vector(this.clickX, this.clickY)
-        let dragVector = new Vector(e.pageX, e.pageY)
-        let commonPoint = new Vector(this.position.x + this.position.width / 2, this.position.y + this.position.height / 2)
-        let angle = clickedVector.angleBetween(dragVector, commonPoint)
-        let newAngle = this.shapePositionWhenClicked.rotation + angle
-
-        console.log('angle', newAngle)
-
-        this.position = {...this.position, rotation: newAngle}
     }
 
     up() {
@@ -272,8 +262,8 @@ export default class Shape extends Component {
         if (y < 0) y = 0
         if (width < 0) width = 0
         if (height < 0) height = 0
-        if (rotation === undefined || rotation < 0) rotation = 0
-        if (rotation > 360) rotation = 360
+        if (rotation === undefined) rotation = 0
+        if (rotation < 0 || rotation > 360) throw new Error('Rotation out of range.')
 
         this._gridPosition = {x, y, width, height, rotation};
         this.redraw();
