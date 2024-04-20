@@ -360,7 +360,7 @@ export default class Shape extends Component {
 
 // language=HTML
 const html = `
-    <div class="shape">
+    <div class="shape center-content">
         <div class="posText showWhenSelected"></div>
         <div class="widthText showWhenSelected"></div>
         <div class="heightText showWhenSelected"></div>
@@ -370,11 +370,17 @@ const html = `
         <div class="bottom-left rotation-handle showWhenSelected"></div>
         <div class="bottom-right rotation-handle showWhenSelected"></div>
         <div class="rotation-line showWhenRotating"></div>
+        <img src="/img/rotate-arrow-icon.svg" alt="" class="showWhenRotating rotateIcon">
     </div>
 `
 
 // language=CSS
 const style = `
+    .center-content {
+        display: flex;
+        justify-content: center;
+    }
+    
     .shape {
         box-sizing: border-box;
         position: absolute;
@@ -529,5 +535,12 @@ const style = `
         background-color: var(--link-hover, darkseagreen);
         left: 50%;
         top: 0;
+    }
+    
+    .rotateIcon {
+        color: var(--link-hover, darkseagreen);
+        opacity: 0.3;
+        max-width: 100%;
+        max-height: 100%;
     }
 `
