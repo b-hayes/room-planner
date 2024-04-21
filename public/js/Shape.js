@@ -1,5 +1,4 @@
 import Component from "./Scafold/Component.js";
-import Vector from "./Vector.js";
 
 export default class Shape extends Component {
 
@@ -19,7 +18,7 @@ export default class Shape extends Component {
             height: 300,
             x: undefined, //if undefined will center
             y: undefined, //if undefined will center
-            rotation: 45
+            rotation: 0
         }
     ) {
         super();
@@ -71,6 +70,7 @@ export default class Shape extends Component {
                 this.unselect()
                 return
             }
+
             //record where the click happened so that drag events can use it as a point of reference
             this.clickX = e.pageX
             this.clickY = e.pageY
@@ -122,7 +122,47 @@ export default class Shape extends Component {
 
     }
 
-    //change rotate an events
+    //Transform coordinates to be relative to the elements centre point, as if center was at 0,0.
+    //  e.g. a click to the left and below the shapes center would have negative x and y values.
+    getPointRelativeToCenter(x,y) {
+        let rect = this.element().getBoundingClientRect()
+        let centre = {
+            x: rect.left + (rect.width / 2),
+            y: rect.top + (rect.height / 2)
+        }
+
+        return {x: x - centre.x, y: y - centre.y}
+    }
+
+    //Get the clockwise angle for a point as if it was rotating around 0,0 starting from up direction being 0 degrees.
+    getPointAngle(x, y) {
+        //Atan operates in the range of -180 to 180deg with up being 0deg and returns the result in radians.
+        let radians = Math.atan2(y, x)
+        let degrees = radians * (180 / Math.PI)
+        return (degrees < 0) ? degrees + 360 : degrees
+    }
+
+    //Rotate coordinates around 0,0 to the rotation amount and return the new point location.
+    getPointRotated(x, y, rotation) {
+        const angleRadians = rotation * (Math.PI / 180);
+        const cosAngle = Math.cos(-angleRadians);
+        const sinAngle = Math.sin(-angleRadians);
+
+        const rotatedX = x * cosAngle - y * sinAngle;
+        const rotatedY = x * sinAngle + y * cosAngle;
+
+        return { x: rotatedX + x, y: rotatedY + y };
+    }
+
+    translateCoordinates(x, y) {
+        let relative = this.getPointRelativeToCenter(x, y)
+        let rotated = this.getPointRotated(relative.x, relative.y, this.position.rotation)
+        let clickAngle = this.getPointAngle(rotated.x, rotated.y)
+        return {x: rotated.x, y: rotated.y, rotation: clickAngle}
+    }
+
+
+    //the original way the worked for rotated resizing...
     translateMouseEvent(event, rotation) {
         const rect = this.element().getBoundingClientRect();
         const offsetX = rect.left + (rect.width / 2);
@@ -159,7 +199,8 @@ export default class Shape extends Component {
             return
         }
 
-        //for some functions we need the mouse position relative to the shapes current rotation
+        // let rotatedEventLocation = this.translateCoordinates(e.clientX, e.clientY);
+        // let rotatedClickLocation = this.translateCoordinates(this.clickX, this.clickY);
         let rotatedEventLocation = this.translateMouseEvent(e, this.position.rotation);
         let rotatedClickLocation = this.translateMouseEvent({clientX: this.clickX, clientY: this.clickY}, this.position.rotation);
 
@@ -187,15 +228,23 @@ export default class Shape extends Component {
                 }
                 break;
             case this.rotating:
-                // Calculate the center of the shape
-                const centerX = this.shapePositionWhenClicked.x + this.shapePositionWhenClicked.width / 2;
-                const centerY = this.shapePositionWhenClicked.y + this.shapePositionWhenClicked.height / 2;
+                // using atan2 assumes the center point of the angle is 0,0 and straight up is 0 radians/degrees.
+                // this allows it to calculate an angle based on a single point assumed to be the other end of the line.
+                //  x of 0 and any positive y is 0 degrees because +y is up. -y is down so 0, -anything is 180degrees.
+                //  once the line passes 180degrees however it becomes -179 because and starts working back up t 0 again
+                //  -5,-5 is -135 degrees, -5,0 is -90 etc
+                //  Just remember while I talk above in X and Y but atan2 in js take y first then x in param order.
 
-                // Calculate the angle between the center of the shape and the current mouse position
-                const angleRadians = Math.atan2(e.pageY - centerY, e.pageX - centerX);
-
-                // Convert the angle to degrees and add 90 to it so that 0 degrees is at the top
-                rotation = angleRadians * (180 / Math.PI) + this.shapePositionWhenClicked.rotation;
+                //the x and y of the shapes needs to be taken away from the click x and y for atan to treat the center of the shape as 0,0 and calculate correct angles.
+                //  relativePosition = eventPosition shapePosition
+                //  radians = atan2( relativePosition.y, .x)
+                //  degrees = radians * (180 / PI ) //this will be from -180 to 180 because of how atan works.
+                //because we would get -180 to 180 we should add 360 if we have a negative number because shape position uses in 0-360.
+                //  normalized = (degrees < 0) ? degrees + 360 : degrees
+                //now we should have done this same calculation for the first mouse click and recorded it so we can do a diff
+                //  shiftDeg = normalized normalizedDegreesOfInitialCLick
+                // todo: adjust the above logic because the final addition doesnt make sense. Perhaps we dont normalize it at all and treat the initial click as up/0 deg by rotating the events?
+                //  might even be easier to think about this if the rotation handle is straight up and the events are relative tot he current rotation via the translate function I use for other stuff.
 
                 // Normalize the rotation to be between 0 and 360
                 if (rotation < 0) rotation += 360;
@@ -222,6 +271,7 @@ export default class Shape extends Component {
         document.removeEventListener('mouseup', () => this.up(), false)
     }
 
+    //updates real position of the element and labels etc.
     redraw() {
         let pos = this.position
         // Calculate scaled position
@@ -233,6 +283,7 @@ export default class Shape extends Component {
         };
 
         //x and y are the center of the shape, so we need to adjust the position to be the top left corner
+        // because that's how the browser positions elements.
         sPos.x = sPos.x - sPos.width / 2
         sPos.y = sPos.y - sPos.height / 2
 
@@ -250,14 +301,13 @@ export default class Shape extends Component {
         this.rotationText.innerHTML = 'r: ' + pos.rotation
     }
 
+    //Virtual position. Not the real position of the element.
     get position() {
         return this._gridPosition;
     }
 
+    //Virtual position. Not the real position of the element.
     set position({x, y, width, height, rotation}) {
-        //these are the real world values of the shape and not the scaled values
-        // do not apply scaling, snapping or any other modifier here.
-        // aside from max and min value clamping
         if (x < 0) x = 0
         if (y < 0) y = 0
         if (width < 0) width = 0
@@ -439,8 +489,9 @@ const style = `
         pointer-events: none;
         user-select: none;
         position: absolute;
-        top: 0;
-        left: 5px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 
     .widthText {
@@ -457,7 +508,7 @@ const style = `
         user-select: none;
         position: absolute;
         bottom: 50%;
-        right: -10%;
+        right: -10px;
         transform: rotate(-90deg);
     }
 
@@ -465,8 +516,9 @@ const style = `
         pointer-events: none;
         user-select: none;
         position: absolute;
-        top: 50%;
+        top: 0;
         left: 50%;
+        transform: translate(-50%);
     }
 
     .rotation-handle {
