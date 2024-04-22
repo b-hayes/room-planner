@@ -119,19 +119,15 @@ export default class Shape extends Component {
 
             this.scale = e.detail.object.scale
         })
-
     }
 
-    //Transform coordinates to be relative to the elements centre point, as if center was at 0,0.
-    //  e.g. a click to the left and below the shapes center would have negative x and y values.
-    getPointRelativeToCenter(x,y) {
+    //Calculate the real location of the centre of the shape in the window.
+    getCentre() {
         let rect = this.element().getBoundingClientRect()
-        let centre = {
+        return {
             x: rect.left + (rect.width / 2),
             y: rect.top + (rect.height / 2)
         }
-
-        return {x: x - centre.x, y: y - centre.y}
     }
 
     //Get the clockwise angle for a point as if it was rotating around 0,0 starting from up direction being 0 degrees.
@@ -151,25 +147,20 @@ export default class Shape extends Component {
         const rotatedX = x * cosAngle - y * sinAngle;
         const rotatedY = x * sinAngle + y * cosAngle;
 
-        return { x: rotatedX + x, y: rotatedY + y };
-    }
-
-    translateCoordinates(x, y) {
-        let relative = this.getPointRelativeToCenter(x, y)
-        let rotated = this.getPointRotated(relative.x, relative.y, this.position.rotation)
-        let clickAngle = this.getPointAngle(rotated.x, rotated.y)
-        return {x: rotated.x, y: rotated.y, rotation: clickAngle}
+        return {x: rotatedX + x, y: rotatedY + y};
     }
 
 
     //the original way the worked for rotated resizing...
     translateMouseEvent(event, rotation) {
         const rect = this.element().getBoundingClientRect();
-        const offsetX = rect.left + (rect.width / 2);
-        const offsetY = rect.top + (rect.height / 2);
+        let centre = {
+            x: rect.left + (rect.width / 2),
+            y: rect.top + (rect.height / 2)
+        }
 
-        const mouseX = event.clientX - offsetX;
-        const mouseY = event.clientY - offsetY;
+        const mouseX = event.clientX - centre.x
+        const mouseY = event.clientY - centre.y
 
         const angleRadians = rotation * (Math.PI / 180);
         const cosAngle = Math.cos(-angleRadians);
@@ -178,7 +169,9 @@ export default class Shape extends Component {
         const rotatedX = mouseX * cosAngle - mouseY * sinAngle;
         const rotatedY = mouseX * sinAngle + mouseY * cosAngle;
 
-        return { x: rotatedX + offsetX, y: rotatedY + offsetY };
+        const clickAngle = Math.atan2(rotatedY, rotatedX) * (180 / Math.PI)
+
+        return {x: rotatedX + centre.x, y: rotatedY + centre.y, angle: clickAngle}
     }
 
     select() {
@@ -199,13 +192,16 @@ export default class Shape extends Component {
             return
         }
 
-        // let rotatedEventLocation = this.translateCoordinates(e.clientX, e.clientY);
-        // let rotatedClickLocation = this.translateCoordinates(this.clickX, this.clickY);
-        let rotatedEventLocation = this.translateMouseEvent(e, this.position.rotation);
-        let rotatedClickLocation = this.translateMouseEvent({clientX: this.clickX, clientY: this.clickY}, this.position.rotation);
+        let center = this.getCentre()
 
-        let rotatedShiftX = rotatedEventLocation.x - rotatedClickLocation.x
-        let rotatedShiftY = rotatedEventLocation.y - rotatedClickLocation.y
+        let translatedEvent = this.translateMouseEvent(e, this.position.rotation);
+        let rotatedClickLocation = this.translateMouseEvent({
+            clientX: this.clickX,
+            clientY: this.clickY
+        }, this.position.rotation);
+
+        let rotatedShiftX = translatedEvent.x - rotatedClickLocation.x
+        let rotatedShiftY = translatedEvent.y - rotatedClickLocation.y
 
         let shiftX = e.pageX - this.clickX;
         let shiftY = e.pageY - this.clickY;
@@ -228,23 +224,8 @@ export default class Shape extends Component {
                 }
                 break;
             case this.rotating:
-                // using atan2 assumes the center point of the angle is 0,0 and straight up is 0 radians/degrees.
-                // this allows it to calculate an angle based on a single point assumed to be the other end of the line.
-                //  x of 0 and any positive y is 0 degrees because +y is up. -y is down so 0, -anything is 180degrees.
-                //  once the line passes 180degrees however it becomes -179 because and starts working back up t 0 again
-                //  -5,-5 is -135 degrees, -5,0 is -90 etc
-                //  Just remember while I talk above in X and Y but atan2 in js take y first then x in param order.
-
-                //the x and y of the shapes needs to be taken away from the click x and y for atan to treat the center of the shape as 0,0 and calculate correct angles.
-                //  relativePosition = eventPosition shapePosition
-                //  radians = atan2( relativePosition.y, .x)
-                //  degrees = radians * (180 / PI ) //this will be from -180 to 180 because of how atan works.
-                //because we would get -180 to 180 we should add 360 if we have a negative number because shape position uses in 0-360.
-                //  normalized = (degrees < 0) ? degrees + 360 : degrees
-                //now we should have done this same calculation for the first mouse click and recorded it so we can do a diff
-                //  shiftDeg = normalized normalizedDegreesOfInitialCLick
-                // todo: adjust the above logic because the final addition doesnt make sense. Perhaps we dont normalize it at all and treat the initial click as up/0 deg by rotating the events?
-                //  might even be easier to think about this if the rotation handle is straight up and the events are relative tot he current rotation via the translate function I use for other stuff.
+                let angleShift = this.getPointAngle(e.x - center.x, e.y - center.y) - this.getPointAngle(this.clickX - center.x, this.clickY - center.y)
+                rotation = this.shapePositionWhenClicked.rotation + angleShift
 
                 // Normalize the rotation to be between 0 and 360
                 if (rotation < 0) rotation += 360;
@@ -396,6 +377,77 @@ export default class Shape extends Component {
         //add a css class to the element matching the resize mode
         if (this.resizing) this.element().classList.add('resize-' + this.resizing)
     }
+
+
+    /**
+     * Draw a small red dot at the given x and y coordinates for debugging purposes.
+     * Give the dot a name to track a point/update the dot instead of creating a new one.
+     */
+    debugDrawDot(x, y, name = undefined) {
+        // Keep a list of dots
+        if (!this.dots) {
+            this.dots = [];
+        }
+
+        // update the dot if one with the same name already exists
+        for (let dot of this.dots) {
+            if (dot.name === name) {
+                dot.dot.style.left = x + 'px';
+                dot.dot.style.top = y + 'px';
+                return;
+            }
+        }
+
+        // Do not create a dot if one already exists with the same x and y coordinates
+        for (let dot of this.dots) {
+            if (dot.style.left === x + 'px' && dot.style.top === y + 'px') {
+                return;
+            }
+        }
+
+        // Create a small red dot at the given x and y coordinates
+        const dot = document.createElement('div');
+        dot.style.position = 'absolute';
+        dot.style.width = '5px';
+        dot.style.height = '5px';
+        dot.style.backgroundColor = 'red';
+        dot.style.left = x + 'px';
+        dot.style.top = y + 'px';
+        document.body.appendChild(dot);
+
+        // Add the dot to the list
+        this.dots.push({name, dot});
+    }
+
+    debugDrawLine(x1, y1, x2, y2, name = 'line') {
+
+        // Keep a list of lines
+        if (!this.lines) {
+            this.lines = [];
+        }
+
+        //grab exiting line or create one
+        let line = this.lines.find(l => l.name === name)
+        if (line) {
+            line = line.line
+        } else {
+            line = document.createElement('div');
+        }
+
+        line.style.position = 'absolute';
+        line.style.width = '1px';
+        line.style.height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) + 'px';
+        line.style.backgroundColor = 'red';
+        line.style.left = x1 + 'px';
+        line.style.top = y1 + 'px';
+        line.style.transformOrigin = '0 0';
+        let angle = (Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI - 90 + 360) % 360;
+        line.style.transform = `rotate(${angle}deg)`;
+        document.body.appendChild(line);
+
+        // Add the line to the list
+        this.lines.push({name, line});
+    }
 }
 
 // language=HTML
@@ -420,7 +472,7 @@ const style = `
         display: flex;
         justify-content: center;
     }
-    
+
     .shape {
         box-sizing: border-box;
         position: absolute;
@@ -566,10 +618,11 @@ const style = `
     .rotating .showWhenRotating {
         display: block;
     }
+
     .showWhenRotating {
         display: none;
     }
-    
+
     .rotation-line {
         position: absolute;
         width: 1px;
@@ -578,7 +631,7 @@ const style = `
         left: 50%;
         top: 0;
     }
-    
+
     .rotateIcon {
         color: var(--link-hover, darkseagreen);
         opacity: 0.3;
