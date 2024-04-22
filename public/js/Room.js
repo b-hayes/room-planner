@@ -10,6 +10,7 @@ export default class Room extends Shape {
             height: 300,
             x: undefined, //if undefined will center
             y: undefined, //if undefined will center
+            rotation: 0
         }
     ) {
         super(id, parent, position)
