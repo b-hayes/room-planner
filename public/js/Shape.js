@@ -130,28 +130,17 @@ export default class Shape extends Component {
         }
     }
 
-    //Get the clockwise angle for a point as if it was rotating around 0,0 starting from up direction being 0 degrees.
+    //Get the angle for a point as if it was rotating around 0,0w with 0deg being up.
     getPointAngle(x, y) {
-        //Atan operates in the range of -180 to 180deg with up being 0deg and returns the result in radians.
-        let radians = Math.atan2(y, x)
-        let degrees = radians * (180 / Math.PI)
-        return (degrees < 0) ? degrees + 360 : degrees
+        // Atan operates in the range of -180 to 180deg with up being 0deg and returns the result in radians.
+        let radians = Math.atan2(y, x);
+        let degrees = radians * (180 / Math.PI);
+        degrees = (degrees < 0) ? degrees + 360 : degrees;
+        // Adjust the angle to be relevant to the orientation of CSS (Atan uses X axis as 0deg and CSS uses Y axis as 0deg).
+        return (degrees + 90) % 360;
     }
 
-    //Rotate coordinates around 0,0 to the rotation amount and return the new point location.
-    getPointRotated(x, y, rotation) {
-        const angleRadians = rotation * (Math.PI / 180);
-        const cosAngle = Math.cos(-angleRadians);
-        const sinAngle = Math.sin(-angleRadians);
-
-        const rotatedX = x * cosAngle - y * sinAngle;
-        const rotatedY = x * sinAngle + y * cosAngle;
-
-        return {x: rotatedX + x, y: rotatedY + y};
-    }
-
-
-    //the original way the worked for rotated resizing...
+    //Translate the event coordinates to match the rotation of the shape.
     translateMouseEvent(event, rotation) {
         const rect = this.element().getBoundingClientRect();
         let centre = {
@@ -309,8 +298,6 @@ export default class Shape extends Component {
         this.redraw()
     }
 
-
-    //change the cursor to a resize cursor when hovering within 3px of the border
     hover(event) {
         //if mouse is down change nothing because the set mode will now be used in the drag method.
         if (event.buttons === 1) {
