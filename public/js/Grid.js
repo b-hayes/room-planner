@@ -36,8 +36,8 @@ export default class Grid extends Component {
     }
 
     drag(e) {
-        //if the mouse is not held, then do nothing
-        if (!e.buttons) {
+        //if the mouse or none of the keys used here are held, then return
+        if (!e.buttons || !e.altKey) {
             return
         }
 

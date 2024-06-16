@@ -12,7 +12,7 @@ export default class Shape extends Component {
 
     constructor(
         id,
-        parent = document.body,
+        parent = undefined,
         position = {
             width: 300,
             height: 300,
