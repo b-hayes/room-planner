@@ -48,6 +48,18 @@ export default class Grid extends Component {
             let x = this.positionWhenClicked.scrollX + shiftX
             let y = this.positionWhenClicked.scrollY + shiftY
             this.element().scrollTo(x, y)
+
+            //TODO: determine the direction the mouse is moving
+            //  then based on the direction and the scroll position
+            //  determine if we have hit the max scroll position
+
+            // if (direction || x >= this.element().scrollWidth) {
+            //     console.log('scrolling past the right edge')
+            //     return //scrolling past the right edge
+            // }
+
+            //update the background offset to match the scroll change, inverted
+            this.background.style.backgroundPosition = `-${x}px -${y}px`
         }
     }
 

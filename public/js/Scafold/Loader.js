@@ -31,7 +31,7 @@ export default class Loader {
     }
 
     // This is totally unnecessary since it's only used for Grid.
-    // I could have just called new Grid() but I wanted to see how hard it is to dynamically load a component.
+    // I could have just called new Grid() but I wanted to see how hard it is to dynamically load all the components.
     static async replaceTagsWithComponents(parent) {
         let tags = parent.getElementsByTagName('*')
         for (let tag of tags) {
