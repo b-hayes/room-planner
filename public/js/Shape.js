@@ -176,7 +176,7 @@ export default class Shape extends Component {
     }
 
     drag(e) {
-        //if not selected or mouse is not down then don't move
+        //if not selected or mouse is not down then we don't process anything.
         if (!this.selected || e.buttons !== 1) {
             return
         }

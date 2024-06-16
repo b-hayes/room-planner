@@ -76,11 +76,6 @@ export default class Grid extends Component {
             this.dispatchEventWithDebounce(event, 0)
         }
 
-
-        //update the position of the tool tip so it stays in the top left corner
-        this.toolTip.style.top = this.element().scrollTop + 'px'
-        this.toolTip.style.left = this.element().scrollLeft + 'px'
-
         //update the background offset to match the scroll change, inverted
         this.background.style.backgroundPosition = `-${this.element().scrollLeft}px -${this.element().scrollTop}px`
     }

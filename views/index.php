@@ -36,6 +36,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         }
         ?>
     </div>
+    <div class="performance">Memory:</div>
     <div><a href="/feedback">🤔Feedback?</a></div>
 </div>
 </body>
@@ -280,4 +281,10 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         //add the menu to the document
         document.body.appendChild(menu)
     }, true)
+
+    //Show the memory usage in the performance div update every 1 second
+    setInterval(function () {
+        let memory = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
+        document.querySelector('.performance').innerText = `Memory: ${memory}MB`
+    }, 1000)
 </script>
