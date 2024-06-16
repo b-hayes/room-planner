@@ -17,25 +17,37 @@ export default class Grid extends Component {
             return
         }
 
-        this.clickX = e.pageX
-        this.clickY = e.pageY
+        // record click position and scroll position
+        this.positionWhenClicked = {
+            scrollX: this.element().scrollLeft,
+            scrollY: this.element().scrollTop,
+            clickX: e.pageX,
+            clickY: e.pageY
+        }
+
         document.addEventListener('mousemove', (e) => this.drag(e), false)
         document.addEventListener('mouseup', () => this.mouseUp(), false)
     }
 
     mouseUp() {
+        this.positionWhenClicked = null
         document.removeEventListener('mousemove', (e) => this.drag(e), false)
         document.removeEventListener('mouseup', () => this.mouseUp(), false)
     }
 
     drag(e) {
-        //if the alt key is held, then drag to pan
+        //if the mouse is not held, then do nothing
+        if (!e.buttons) {
+            return
+        }
+
+        //if the alt key is held, then scroll the grid
         if (e.altKey) {
-            let x = this.element().scrollLeft - e.pageX + this.clickX
-            let y = this.element().scrollTop - e.pageY + this.clickY
+            let shiftX = this.positionWhenClicked.clickX - e.pageX
+            let shiftY = this.positionWhenClicked.clickY - e.pageY
+            let x = this.positionWhenClicked.scrollX + shiftX
+            let y = this.positionWhenClicked.scrollY + shiftY
             this.element().scrollTo(x, y)
-            this.clickX = e.pageX
-            this.clickY = e.pageY
         }
     }
 

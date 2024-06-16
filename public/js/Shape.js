@@ -114,7 +114,7 @@ export default class Shape extends Component {
         this.parent.addEventListener('grid-scale-changed', (e) => {
             //if the grid is not the parent then don't bother
             if (e.detail.object !== this.parent) {
-                // return
+                // return //todo: this grid check is not working. If not fixed there can never be more than one grid.
             }
 
             this.scale = e.detail.object.scale
