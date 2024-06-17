@@ -1,4 +1,5 @@
 import Component from "./Scafold/Component.js"
+import Vector from "./Vector.js"
 
 export default class Grid extends Component {
 
@@ -37,29 +38,34 @@ export default class Grid extends Component {
 
     drag(e) {
         //if the mouse or none of the keys used here are held, then return
-        if (!e.buttons || !e.altKey) {
+        if (!(e.buttons || e.altKey)) {
             return
         }
 
-        //if the alt key is held, then scroll the grid
-        if (e.altKey) {
-            let shiftX = this.positionWhenClicked.clickX - e.pageX
-            let shiftY = this.positionWhenClicked.clickY - e.pageY
-            let x = this.positionWhenClicked.scrollX + shiftX
-            let y = this.positionWhenClicked.scrollY + shiftY
-            this.element().scrollTo(x, y)
+        console.log(e.buttons)
 
-            //TODO: determine the direction the mouse is moving
-            //  then based on the direction and the scroll position
-            //  determine if we have hit the max scroll position
+        let shift = new Vector(
+            this.positionWhenClicked.clickX - e.pageX,
+            this.positionWhenClicked.clickY - e.pageY
+        )
 
-            // if (direction || x >= this.element().scrollWidth) {
-            //     console.log('scrolling past the right edge')
-            //     return //scrolling past the right edge
-            // }
+        // Pan if the alt key is held, or middle mouse button is held
+        if (e.altKey || e.buttons === 4) {
+            let scroll = new Vector(
+                this.positionWhenClicked.scrollX + shift.x,
+                this.positionWhenClicked.scrollY + shift.y
+            )
+            //prevent numbers out of range
+            scroll.clamp(
+                0,
+                this.element().scrollWidth - this.element().clientWidth,
+                0,
+                this.element().scrollHeight - this.element().clientHeight
+            )
 
-            //update the background offset to match the scroll change, inverted
-            this.background.style.backgroundPosition = `-${x}px -${y}px`
+            //update scroll position and the background offset
+            this.element().scrollTo(scroll.x, scroll.y)
+            this.background.style.backgroundPosition = `-${scroll.x}px -${scroll.y}px`
         }
     }
 
