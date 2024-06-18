@@ -181,6 +181,11 @@ export default class Shape extends Component {
             return
         }
 
+        //currently using alt to pan in grid and don't want to move shapes around by accident.
+        if (e.altKey) {
+            return
+        }
+
         let center = this.getCentre()
 
         let translatedEvent = this.translateMouseEvent(e, this.position.rotation);
@@ -208,7 +213,6 @@ export default class Shape extends Component {
                 //resize the shape
                 if (this.resizing.includes('left')) {
                     width = this.shapePositionWhenClicked.width - rotatedShiftX * 2
-                    //width /= this.scale //remove the scale from the new value.
                 }
                 if (this.resizing.includes('right')) {
                     width = this.shapePositionWhenClicked.width + rotatedShiftX * 2
