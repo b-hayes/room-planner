@@ -12,7 +12,7 @@ export default class Shape extends Component {
 
     constructor(
         id,
-        parent = document.body,
+        parent = undefined,
         position = {
             width: 300,
             height: 300,
@@ -114,7 +114,7 @@ export default class Shape extends Component {
         this.parent.addEventListener('grid-scale-changed', (e) => {
             //if the grid is not the parent then don't bother
             if (e.detail.object !== this.parent) {
-                // return
+                // return //todo: this grid check is not working. If not fixed there can never be more than one grid.
             }
 
             this.scale = e.detail.object.scale
@@ -176,8 +176,13 @@ export default class Shape extends Component {
     }
 
     drag(e) {
-        //if not selected or mouse is not down then don't move
+        //if not selected or mouse is not down then we don't process anything.
         if (!this.selected || e.buttons !== 1) {
+            return
+        }
+
+        //currently using alt to pan in grid and don't want to move shapes around by accident.
+        if (e.altKey) {
             return
         }
 
@@ -195,6 +200,13 @@ export default class Shape extends Component {
         let shiftX = e.pageX - this.clickX;
         let shiftY = e.pageY - this.clickY;
         let {x, y, width, height, rotation} = this.shapePositionWhenClicked;
+
+        //apply an inverse scale to the shift values so the change in position is without the current vue scale.
+        let invertedScale = 1 / this.scale
+        shiftX *= invertedScale
+        shiftY *= invertedScale
+        rotatedShiftX *= invertedScale
+        rotatedShiftY *= invertedScale
 
         switch (true) {
             case this.resizing !== false:
@@ -241,16 +253,30 @@ export default class Shape extends Component {
         document.removeEventListener('mouseup', () => this.up(), false)
     }
 
+    /**
+     * Returns a copy of object with all numerical values in the object.
+     *  'rotation' is excluded from the scaling.
+     *
+     * @param object
+     * @param scale
+     */
+    getScaled(object, scale = this.scale) {
+        //clone the object
+        object = {...object}
+        for (let key in object) {
+            if (key === 'rotation') continue // dont scale rotation values.
+            if (typeof object[key] === 'number') {
+                object[key] = object[key] * scale
+            }
+        }
+        return object
+    }
+
     //updates real position of the element and labels etc.
     redraw() {
-        let pos = this.position
-        // Calculate scaled position
-        const sPos = {
-            x: pos.x * this.scale,
-            y: pos.y * this.scale,
-            width: pos.width * this.scale,
-            height: pos.height * this.scale,
-        };
+        const pos = this.position
+        const sPos = this.getScaled(pos)
+        // const ivertedSPost = this.getScaled(pos, 1 / this.scale)
 
         //x and y are the center of the shape, so we need to adjust the position to be the top left corner
         // because that's how the browser positions elements.
