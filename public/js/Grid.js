@@ -37,12 +37,10 @@ export default class Grid extends Component {
     }
 
     drag(e) {
-        //if the mouse or none of the keys used here are held, then return
-        if (!(e.buttons || e.altKey)) {
+        //if the mouse not held were not dragging
+        if (!e.buttons) {
             return
         }
-
-        console.log(e.buttons)
 
         let shift = new Vector(
             this.positionWhenClicked.clickX - e.pageX,
