@@ -7,7 +7,7 @@ export default class Loader {
     static addComponent(component) {
         Loader.components[component.instanceId] = component
         // Add a reference to the Loader class to the window.
-        window.Loader = Loader
+        if (!window.Loader) window.Loader = Loader
     }
 
     static getComponent(id) {
