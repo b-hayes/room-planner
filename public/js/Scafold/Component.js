@@ -7,7 +7,7 @@ export default class Component {
     constructor() {
         let styleId = this.constructor.name + '-' + Loader.hashString(this.style())
         Loader.loadStyles(this.style(), styleId)
-        this.instanceId = Object.keys(window.Loader.components).length
+        this.instanceId = Object.keys(Loader.components).length
         Loader.addComponent(this)
     }
 

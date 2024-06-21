@@ -2,25 +2,23 @@ import Component from "./Component.js"
 
 export default class Loader {
 
-    components = {}
+    static components = {}
 
     constructor() {
         window.Loader = this
     }
 
     static addComponent(component) {
-        window.Loader.components[component.instanceId] = component
+        Loader.components[component.instanceId] = component
     }
 
     static getComponent(id) {
-        return window.Loader.components[id]
+        return Loader.components[id]
     }
 
     static removeComponent(id) {
-        delete window.Loader.components[id]
+        delete Loader.components[id]
     }
-
-    static
 
     static loadStyles(style, styleId) {
         if (!style) {
