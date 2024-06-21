@@ -1,11 +1,14 @@
 import Loader from "./Loader.js"
 
 export default class Component {
+    instanceId = null
     static isComponent = true;
 
     constructor() {
         let styleId = this.constructor.name + '-' + Loader.hashString(this.style())
         Loader.loadStyles(this.style(), styleId)
+        this.instanceId = Object.keys(window.Loader.components).length
+        window.Loader.components[this.instanceId] = this
     }
 
     html() {
@@ -24,7 +27,7 @@ export default class Component {
 
     /**
      * Dispatches an event with a debounce time to improve performance.
-     *  If performance becomes an issue with the number of eliments reacting to realtime events this could help.
+     *  If performance becomes an issue with the number of elements reacting to realtime events this could help.
      *  100ms is enough for scroll events with a trackpad not to be triggered more than once during the wind down of the scroll.
      * @param event
      * @param debounceTime

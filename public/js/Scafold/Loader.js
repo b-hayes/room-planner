@@ -1,6 +1,13 @@
 import Component from "./Component.js"
 
 export default class Loader {
+
+    components = {}
+
+    constructor() {
+        window.Loader = this
+    }
+
     static loadStyles(style, styleId) {
         if (!style) {
             return
@@ -48,9 +55,15 @@ export default class Loader {
                 continue
             }
             //skip all tag defined in the html 5 specification from w3c
-            if (['article', 'aside', 'details', 'figcaption', 'figure', 'footer', 'header', 'main', 'mark', 'nav', 'section', 'summary', 'time', 'audio', 'video', 'canvas', 'progress', 'meter', 'embed', 'object', 'param', 'iframe', 'picture', 'source', 'svg',
-                'datalist', 'fieldset', 'legend', 'output', 'progress', 'meter', 'table', 'caption', 'colgroup', 'col', 'tbody', 'thead', 'tfoot', 'tr', 'td',
-                'th', 'button', 'datalist', 'fieldset', 'form', 'input', 'label', 'legend', 'meter', 'optgroup', 'option', 'output', 'progress', 'select', 'textarea'].includes(tagName)) {
+            if (
+                [
+                    'html', 'head', 'title', 'base', 'link', 'meta', 'style',
+                    'script', 'noscript', 'template', 'slot', 'img', 'picture', 'source', 'img', 'iframe', 'embed', 'object', 'param', 'video', 'audio', 'track', 'map', 'area', 'a', 'link', 'nav', 'ul', 'ol', 'li', 'dl', 'dt', 'dd', 'menu', 'menuitem', 'button', 'form', 'label', 'input', 'textarea', 'select', 'optgroup', 'option', 'fieldset', 'legend', 'datalist', 'output', 'progress', 'meter', 'details', 'summary', 'command', 'menu',
+                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'footer', 'address', 'main', 'section', 'article', 'aside', 'nav', 'figure', 'figcaption', 'blockquote', 'div', 'p',
+                    'article', 'aside', 'details', 'figcaption', 'figure', 'footer', 'header', 'main', 'mark', 'nav', 'section', 'summary', 'time', 'audio', 'video', 'canvas', 'progress', 'meter', 'embed', 'object', 'param', 'iframe', 'picture', 'source', 'svg',
+                    'datalist', 'fieldset', 'legend', 'output', 'progress', 'meter', 'table', 'caption', 'colgroup', 'col', 'tbody', 'thead', 'tfoot', 'tr', 'td',
+                    'th', 'button', 'datalist', 'fieldset', 'form', 'input', 'label', 'legend', 'meter', 'optgroup', 'option', 'output', 'progress', 'select', 'textarea'
+                ].includes(tagName)) {
                 continue
             }
 
