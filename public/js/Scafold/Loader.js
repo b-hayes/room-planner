@@ -8,6 +8,20 @@ export default class Loader {
         window.Loader = this
     }
 
+    static addComponent(component) {
+        window.Loader.components[component.instanceId] = component
+    }
+
+    static getComponent(id) {
+        return window.Loader.components[id]
+    }
+
+    static removeComponent(id) {
+        delete window.Loader.components[id]
+    }
+
+    static
+
     static loadStyles(style, styleId) {
         if (!style) {
             return
