@@ -4,12 +4,10 @@ export default class Loader {
 
     static components = {}
 
-    constructor() {
-        window.Loader = this
-    }
-
     static addComponent(component) {
         Loader.components[component.instanceId] = component
+        // Add a reference to the Loader class to the window.
+        window.Loader = Loader
     }
 
     static getComponent(id) {
