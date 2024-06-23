@@ -6,9 +6,9 @@ export default class TestComponent extends Component {
 
     constructor() {
         super()
-        //foreach property of this class instance, define a getter and setter that updates the html element.
+        // For each property of this class instance, initialize this['_' + property] and define a getter and setter that updates the HTML element.
         for (let property in this) {
-            console.log(property)
+            this['_' + property] = this[property]
             Object.defineProperty(this, property, {
                 get: () => {
                     return this['_' + property]
@@ -25,7 +25,7 @@ export default class TestComponent extends Component {
         return `
             <div>
                 <p>test databind {{ count }}</p>
-                <button onclick="window.Loader.components[0].count ++;console.log(window.Loader.components[0].count)">Click Count</button>
+                <button onclick="window.Loader.components[0].count++;console.log(window.Loader.components[0].count)">Click Count</button>
             </div>
         `
     }
