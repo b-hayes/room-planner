@@ -8,6 +8,7 @@ export default class Loader {
         Loader.components[component.instanceId] = component
         // Add a reference to the Loader class to the window.
         if (!window.Loader) window.Loader = Loader
+        //todo: give it cool name? Modulatte?
     }
 
     static getComponent(id) {
