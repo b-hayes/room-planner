@@ -6,6 +6,19 @@ export default class TestBind2 extends Component {
 
     constructor() {
         super()
+        // create a proxy to update the html when any property changes
+        let handler = {
+            set: (target, property, value) => {
+                target[property] = value
+                console.log('set via proxy', property, value)
+                return true
+            }
+        }
+
+        //todo: this should probably be in the component class as its not a proxy when its added to the laoder right now.
+        //  or perhaps the Loader can create the proxy when the addComponent is called.
+
+        return new Proxy(this, handler)
     }
 
     html() {
