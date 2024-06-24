@@ -4,9 +4,15 @@ export default class TestComponent extends Component {
 
     count = 0
 
+    _bindings = {}
+
     constructor() {
         super()
-        // For each property of this class instance, initialize this['_' + property] and define a getter and setter that updates the HTML element.
+
+        // TODO:  move this the component class whens its ready to be more generic.
+        // NOTE: that this would be a one line per property if it was specific to the component then you'd only need
+        //  to defined the setter.
+
         for (let property in this) {
             this['_' + property] = this[property]
             Object.defineProperty(this, property, {
