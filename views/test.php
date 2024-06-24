@@ -9,8 +9,11 @@ declare(strict_types=1);
 </head>
 <body>
 <h1>Testing ground</h1>
-<TestComponent>
-</TestComponent>
+<TestBind>
+</TestBind>
+
+<TestBind2>
+</TestBind2>
 
 </body>
 

@@ -1,6 +1,6 @@
 import Component from "./Scafold/Component.js"
 
-export default class TestComponent extends Component {
+export default class TestBind extends Component {
 
     count = 0
 
