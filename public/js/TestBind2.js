@@ -1,18 +1,15 @@
 import Component from "./Scafold/Component.js"
 
-// language=HTML
-const html = `
-    <div>
-        <p>test databind {{ count }}</p>
-        <button onclick="window.Loader.components[1].count++;console.log(window.Loader.components[1].count); console.log(me.count)">Click me.</button>
-    </div>
-`
-
 export default class TestBind2 extends Component {
 
     count = 0
 
     html() {
-        return html
+        return `
+    <div for="">
+        <p>test databind {{ count }}</p>
+        <button onclick="me.count++;">Click me.</button>
+    </div>
+`
     }
 }
