@@ -4,7 +4,7 @@ import Component from "./Scafold/Component.js"
 const html = `
     <div>
         <p>test databind {{ count }}</p>
-        <button onclick="window.Loader.components[1].count++;console.log(window.Loader.components[1].count); console.log(me.count)">Click Count</button>
+        <button onclick="window.Loader.components[1].count++;console.log(window.Loader.components[1].count); console.log(me.count)">Click me.</button>
     </div>
 `
 

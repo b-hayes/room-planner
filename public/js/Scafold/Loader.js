@@ -55,8 +55,8 @@ export default class Loader {
         }
 
         let me = data._instanceId ? 'window.Loader.components[' + data._instanceId + ']' : 'me'
-        //replace occurrences of "me." with the `me` variable
-        processedHtml = processedHtml.replace(/me\./g, me + '.')
+        //replace occurrences of "me." with the `me` variable, but only if it's followed by a word boundary.
+        processedHtml = processedHtml.replace(new RegExp(`me\\.(\\w+)\\b`, 'g'), `${me}.$1`)
 
         let template = document.createElement('template')
         template.innerHTML = processedHtml
