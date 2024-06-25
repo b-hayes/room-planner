@@ -10,7 +10,7 @@ export default class Loader {
             set: (target, property, value) => {
                 target[property] = value
                 console.log('set via proxy', property, value)
-                this.reloadComponent(target)
+                Loader.reloadComponent(target)
                 return true
             }
         }
@@ -64,9 +64,9 @@ export default class Loader {
     }
 
     static reloadComponent(Component) {
-        Component._element.replaceWith(
-            this.loadHtml(Component.html(), Component)
-        )
+        let newElement = this.loadHtml(Component.html(), Component)
+        Component._element.replaceWith(newElement)
+        Component._element = newElement
     }
 
     static hashString(string) {
