@@ -53,6 +53,11 @@ export default class Loader {
             console.log(property)
             processedHtml = processedHtml.replace(new RegExp(`{{\\s*${property}\\s*}}`, 'g'), data[property])
         }
+
+        let me = data._instanceId ? 'window.Loader.components[' + data._instanceId + ']' : 'me'
+        //replace occurrences of "me." with the `me` variable
+        processedHtml = processedHtml.replace(/me\./g, me + '.')
+
         let template = document.createElement('template')
         template.innerHTML = processedHtml
         return template.content.firstElementChild
