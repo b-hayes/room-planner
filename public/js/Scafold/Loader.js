@@ -5,10 +5,20 @@ export default class Loader {
     static components = {}
 
     static addComponent(component) {
-        Loader.components[component.instanceId] = component
+        // create a proxy to update the html when any property changes
+        let handler = {
+            set: (target, property, value) => {
+                target[property] = value
+                console.log('set via proxy', property, value)
+                this.reloadComponent(target)
+                return true
+            }
+        }
+        Loader.components[component._instanceId] = new Proxy(component, handler)
+
         // Add a reference to the Loader class to the window.
         if (!window.Loader) window.Loader = Loader
-        //todo: give it cool name? Modulatte?
+        //todo: give loader cool name? Modulatte?
     }
 
     static getComponent(id) {
@@ -34,10 +44,24 @@ export default class Loader {
         document.head.appendChild(styleElement)
     }
 
-    static loadHtml(html) {
+    static loadHtml(html, data = {}) {
+        let processedHtml = html;
+        for (let property in data) {
+            if (property.startsWith('_') || typeof data[property] === 'function') {
+                continue
+            }
+            console.log(property)
+            processedHtml = processedHtml.replace(new RegExp(`{{\\s*${property}\\s*}}`, 'g'), data[property])
+        }
         let template = document.createElement('template')
-        template.innerHTML = html
+        template.innerHTML = processedHtml
         return template.content.firstElementChild
+    }
+
+    static reloadComponent(Component) {
+        Component._element.replaceWith(
+            this.loadHtml(Component.html(), Component)
+        )
     }
 
     static hashString(string) {
