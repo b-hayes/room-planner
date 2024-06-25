@@ -65,6 +65,7 @@ export default class Loader {
 
     static reloadComponent(Component) {
         //todo: optimize this to only replace the parts that need changing somehow.
+        //todo: implement some kind of for x => y in y detection for repeating html tags.
         let newElement = this.loadHtml(Component.html(), Component)
         Component._element.replaceWith(newElement)
         Component._element = newElement
