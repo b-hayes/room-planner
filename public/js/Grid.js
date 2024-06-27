@@ -161,6 +161,13 @@ export default class Grid extends Component {
                 )
             }
 
+            //if shift is less than 100 then just scroll to the target
+            if (Math.abs(shift.x) < 100 && Math.abs(shift.y) < 100) {
+                this.element().scrollTo(this.scrollTarget.x, this.scrollTarget.y)
+                this.background.style.backgroundPosition = `-${this.scrollTarget.x}px -${this.scrollTarget.y}px`
+                return
+            }
+
             this.scrollToSmoothly(this.scrollTarget.x, this.scrollTarget.y, 150)
             this.lastShift = shift
         }
