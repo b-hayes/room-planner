@@ -135,15 +135,62 @@ export default class Grid extends Component {
         } else {
             e.preventDefault()
             //adjust the background offset to match the scroll position
-            let shiftX = e.deltaX //* .1
-            let shiftY = e.deltaY //* .1
-            let scroll = new Vector(
-                this.element().scrollLeft + shiftX,
-                this.element().scrollTop + shiftY
-            )
-            this.background.style.backgroundPosition = `-${scroll.x}px -${scroll.y}px`
-            this.element().scrollTo(scroll.x, scroll.y)
+            let shift =  new Vector(e.deltaX, e.deltaY)
+            if (e.shiftKey === true) {
+                shift = new Vector(e.deltaY, e.deltaX)//change the direction of the scroll if shift is held
+            }
+
+            //if scroll target exists then add the shift to it, otherwise create it
+            if (this.scrollTarget) {
+                this.scrollTarget.x += shift.x
+                this.scrollTarget.y += shift.y
+            } else {
+                this.scrollTarget = new Vector(
+                    this.element().scrollLeft + shift.x,
+                    this.element().scrollTop + shift.y
+                )
+            }
+
+            this.scrollToSmoothly(this.scrollTarget.x, this.scrollTarget.y, 150)
         }
+    }
+
+    scrollToSmoothly(targetX, targetY, duration) {
+        let startX = this.element().scrollLeft;
+        let startY = this.element().scrollTop;
+        let diffX = targetX - startX;
+        let diffY = targetY - startY;
+        let startTime = null;
+
+        //if animation exists cancel it
+        if (this.animationFrameId) {
+            window.cancelAnimationFrame(this.animationFrameId)
+        }
+
+        let animation = (currentTime) => {
+            if (startTime === null) startTime = currentTime;
+            let progress = Math.min((currentTime - startTime) / duration, 1)
+
+            let scroll = new Vector(
+                startX + diffX * progress,
+                startY + diffY * progress
+            )
+
+            scroll.clamp(
+                0,
+                this.element().scrollWidth - this.element().clientWidth,
+                0,
+                this.element().scrollHeight - this.element().clientHeight
+            )
+
+            this.background.style.backgroundPosition = `-${scroll.x}px -${scroll.y}px`
+            this.element().scrollTo(scroll.x, scroll.y);
+            if (progress < 1) {
+                this.animationFrameId = window.requestAnimationFrame(animation);
+            }
+        };
+
+        this.animationFrameId = window.requestAnimationFrame(animation);
     }
 
     html() {
