@@ -161,6 +161,14 @@ export default class Grid extends Component {
                 )
             }
 
+            //clamp the scroll target to the bounds of the scroll area
+            this.scrollTarget.clamp(
+                0,
+                this.element().scrollWidth - this.element().clientWidth,
+                0,
+                this.element().scrollHeight - this.element().clientHeight
+            )
+
             //if shift is less than 100 then just scroll to the target
             if (Math.abs(shift.x) < 100 && Math.abs(shift.y) < 100) {
                 this.element().scrollTo(this.scrollTarget.x, this.scrollTarget.y)
