@@ -117,7 +117,7 @@ export default class Grid extends Component {
                     , 100)
                 return
             }
-            //e.preventDefault()
+
             this.scale += e.deltaY * -0.001
             this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
             this.scale = Math.round(this.scale * 10000) / 10000;
@@ -132,6 +132,17 @@ export default class Grid extends Component {
                 }
             })
             this.dispatchEventWithDebounce(event, 0)
+        } else {
+            e.preventDefault()
+            //adjust the background offset to match the scroll position
+            let shiftX = e.deltaX //* .1
+            let shiftY = e.deltaY //* .1
+            let scroll = new Vector(
+                this.element().scrollLeft + shiftX,
+                this.element().scrollTop + shiftY
+            )
+            this.background.style.backgroundPosition = `-${scroll.x}px -${scroll.y}px`
+            this.element().scrollTo(scroll.x, scroll.y)
         }
     }
 
@@ -161,6 +172,9 @@ const style = `
         min-width: 100%;
         box-shadow: inset 5px 5px 10px 3px rgba(0, 0, 0, 0.5);
         overflow: scroll;
+        /* set the scrollbars to be the same colour as the background and be thin  */
+        scrollbar-width: thin;
+        scrollbar-color: var(--grid-background) var(--grid-foreground);
     }
 
     .grid-background {
