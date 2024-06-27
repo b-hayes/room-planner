@@ -1,5 +1,6 @@
 import Component from "./Scafold/Component.js"
 import Vector from "./Vector.js"
+import Shape from "./Shape.js"
 
 export default class Grid extends Component {
 
@@ -39,6 +40,16 @@ export default class Grid extends Component {
                 return false;
             }
         }
+    }
+
+
+    //TODO: update usages of grids and shapes to use the new addShape method and remove the old method of shapes needing a parent injected
+    addShape(shape) {
+        this.element().appendChild(shape.element())
+    }
+
+    shapes() {
+        return Array.from(this.element().children).filter(child => child instanceof Shape)
     }
 
     mouseDown(e) {
