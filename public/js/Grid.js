@@ -109,7 +109,15 @@ export default class Grid extends Component {
             let maxScale = 5
             let minScale = 0.25
             let toolTip = this.toolTip
-            if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
+            let scaleShift = e.deltaY * -0.001
+
+            //on windows using my scroll wheel the scaleShift is always 0.1 which isn't a smooth zoom amount
+            // so lets change it to .01 for a smoother zoom and more control
+            if (Math.abs(scaleShift) === 0.1 ) {
+                scaleShift = scaleShift / 10
+            }
+
+            if (this.scale + scaleShift > maxScale || this.scale + scaleShift < minScale) {
                 //make the tooltip flash red to indicate the scale is at its limit
                 //get the original color,  if not already red
                 if (toolTip.style.color !== 'red') {
@@ -124,10 +132,11 @@ export default class Grid extends Component {
                 return
             }
 
-            this.scale += e.deltaY * -0.001
+            this.scale += scaleShift
             this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
             this.scale = Math.round(this.scale * 10000) / 10000;
             toolTip.innerText = `Scale: 1px = ${this.scale}cm`
+
             this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
             let event = new CustomEvent('grid-scale-changed', {
                 detail: {
