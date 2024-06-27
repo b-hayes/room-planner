@@ -17,13 +17,13 @@ export default class Grid extends Component {
         //prevent the browser from scrolling when control is held and account for Chrome not letting us capture the first ctrl+scroll event
         let handlingScroll = false;
         window.addEventListener('keydown', function (event) {
-            if (event.ctrlKey === true && handlingScroll === true) {
+            if ((event.ctrlKey === true || event.metaKey === true) && handlingScroll === true) {
                 event.preventDefault();
             }
         }, {passive: false});
 
         window.addEventListener('wheel', function (event) {
-            if (event.ctrlKey === true) {
+            if (event.ctrlKey === true || event.metaKey === true) {
                 handlingScroll = true
                 //set timeout to reset the handlingScroll variable after the scroll event is finished
                 setTimeout(() => {
