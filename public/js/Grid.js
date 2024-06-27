@@ -107,7 +107,7 @@ export default class Grid extends Component {
         }
 
         //ZOOM in and out
-        if (e.ctrlKey) {
+        if (e.ctrlKey || e.metaKey) {
             let maxScale = 5
             let minScale = 0.25
             let toolTip = this.toolTip
