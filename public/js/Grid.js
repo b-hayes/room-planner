@@ -94,25 +94,12 @@ export default class Grid extends Component {
     }
 
     scroll(e) {
-
-        //if alt is held then ignore the scroll event
-        if (e.altKey) {
+        if (!this.element().contains(e.target)) {
             return
         }
 
-        // if control is held prevent the browser doing its normal scrolling
-        if (e.ctrlKey) {
-            this.handlingScroll = true
-            document.removeEventListener('wheel', this.preventDefaultBehaviour);
-            document.addEventListener('wheel', this.preventDefaultBehaviour, {passive: false});
-        } else {
-            this.element().removeEventListener('wheel', this.preventDefaultBehaviour);
-            this.handlingScroll = false
-            return;
-        }
-
         //ZOOM in and out
-        if (this.element().contains(e.target)) {
+        if (e.ctrlKey) {
             let maxScale = 5
             let minScale = 0.25
             let toolTip = this.toolTip
@@ -146,9 +133,6 @@ export default class Grid extends Component {
             })
             this.dispatchEventWithDebounce(event, 0)
         }
-
-        //update the background offset to match the scroll change, inverted
-        this.background.style.backgroundPosition = `-${this.element().scrollLeft}px -${this.element().scrollTop}px`
     }
 
     html() {
