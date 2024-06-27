@@ -3,14 +3,30 @@ import Vector from "./Vector.js"
 
 export default class Grid extends Component {
 
+    scale = 1
+
     constructor({scale = 1}) {
         super()
         this.scale = scale
         this.background = this.element() //the background is the element now.
         this.toolTip = this.element().getElementsByClassName('tool-tip')[0]
-
-        document.addEventListener('wheel', (e) => this.scroll(e), false)
         document.addEventListener('mousedown', (e) => this.mouseDown(e), false)
+
+        // determine the initial zoom level of the client browser so we can reset it to counter Chromes bug of not being able to prevent zoom on the first ctrl+scroll event.
+        // this.initialZoom = window.devicePixelRatio || (screen.logicalXDPI / screen.deviceXDPI);
+        document.addEventListener('wheel', (e) => this.scroll(e), {passive: false})
+
+        window.addEventListener('keydown', function (event) {
+            if ((event.ctrlKey === true) || (event.ctrlKey === true)) {
+                event.preventDefault();
+            }
+        }, {passive: false});
+
+        window.addEventListener('wheel', function (event) {
+            if (event.ctrlKey === true) {
+                event.preventDefault();
+            }
+        }, {passive: false});
     }
 
     mouseDown(e) {
@@ -67,8 +83,27 @@ export default class Grid extends Component {
         }
     }
 
+    preventDefaultBehaviour(e) {
+        e.preventDefault();
+    }
+
     scroll(e) {
-        //if ctrl or command is held, then scroll to zoom
+
+        //if alt is held then ignore the scroll event
+        if (e.altKey) {
+            return
+        }
+
+        // if control is held prevent the browser doing its normal scrolling
+        if (e.ctrlKey) {
+            document.removeEventListener('wheel', this.preventDefaultBehaviour);
+            document.addEventListener('wheel', this.preventDefaultBehaviour, {passive: false});
+        } else {
+            this.element().removeEventListener('wheel', preventDefaultBehaviour);
+            return;
+        }
+
+        //ZOOM in and out
         if (this.element().contains(e.target)) {
             let maxScale = 5
             let minScale = 0.25
@@ -133,7 +168,7 @@ const style = `
         min-height: 100%;
         min-width: 100%;
         box-shadow: inset 5px 5px 10px 3px rgba(0, 0, 0, 0.5);
-        overflow: hidden;
+        overflow: scroll;
     }
 
     .grid-background {
