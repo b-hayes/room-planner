@@ -3,8 +3,6 @@ import Vector from "./Vector.js"
 
 export default class Grid extends Component {
 
-    scale = 1
-
     constructor({scale = 1}) {
         super()
         this.scale = scale
