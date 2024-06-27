@@ -12,6 +12,7 @@ export default class Grid extends Component {
         this.toolTip = this.element().getElementsByClassName('tool-tip')[0]
         document.addEventListener('mousedown', (e) => this.mouseDown(e), false)
         document.addEventListener('wheel', (e) => this.scroll(e), {passive: false})
+        document.addEventListener('scroll', (e) => this.scroll(e), {passive: false})
 
         //prevent the browser from scrolling when control is held and account for Chrome not letting us capture the first ctrl+scroll event
         let handlingScroll = false;
@@ -33,6 +34,13 @@ export default class Grid extends Component {
                 handlingScroll = false
             }
         }, {passive: false});
+
+        document.body.onmousedown = function(e) {
+            if(e.button == 1) {
+                e.preventDefault();
+                return false;
+            }
+        }
     }
 
     mouseDown(e) {
@@ -221,7 +229,7 @@ const style = `
         min-height: 100%;
         min-width: 100%;
         box-shadow: inset 5px 5px 10px 3px rgba(0, 0, 0, 0.5);
-        overflow: scroll;
+        overflow: auto;
         /* set the scrollbars to be the same colour as the background and be thin  */
         scrollbar-width: thin;
         scrollbar-color: var(--grid-background) var(--grid-foreground);
