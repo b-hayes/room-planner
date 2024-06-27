@@ -140,8 +140,10 @@ export default class Grid extends Component {
                 shift = new Vector(e.deltaY, e.deltaX)//change the direction of the scroll if shift is held
             }
 
+            let changingDirection = this.lastShift && this.lastShift.x * shift.x < 0 || this.lastShift && this.lastShift.y * shift.y < 0;
+
             //if scroll target exists then add the shift to it, otherwise create it
-            if (this.scrollTarget) {
+            if (this.scrollTarget && !changingDirection) {
                 this.scrollTarget.x += shift.x
                 this.scrollTarget.y += shift.y
             } else {
@@ -152,6 +154,7 @@ export default class Grid extends Component {
             }
 
             this.scrollToSmoothly(this.scrollTarget.x, this.scrollTarget.y, 150)
+            this.lastShift = shift
         }
     }
 
