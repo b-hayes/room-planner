@@ -11,20 +11,26 @@ export default class Grid extends Component {
         this.background = this.element() //the background is the element now.
         this.toolTip = this.element().getElementsByClassName('tool-tip')[0]
         document.addEventListener('mousedown', (e) => this.mouseDown(e), false)
-
-        // determine the initial zoom level of the client browser so we can reset it to counter Chromes bug of not being able to prevent zoom on the first ctrl+scroll event.
-        // this.initialZoom = window.devicePixelRatio || (screen.logicalXDPI / screen.deviceXDPI);
         document.addEventListener('wheel', (e) => this.scroll(e), {passive: false})
 
+        //prevent the browser from scrolling when control is held and account for Chrome not letting us capture the first ctrl+scroll event
+        let handlingScroll = false;
         window.addEventListener('keydown', function (event) {
-            if ((event.ctrlKey === true) || (event.ctrlKey === true)) {
+            if (event.ctrlKey === true && handlingScroll === true) {
                 event.preventDefault();
             }
         }, {passive: false});
 
         window.addEventListener('wheel', function (event) {
             if (event.ctrlKey === true) {
+                handlingScroll = true
+                //set timeout to reset the handlingScroll variable after the scroll event is finished
+                setTimeout(() => {
+                    handlingScroll = false
+                }, 10)
                 event.preventDefault();
+            } else {
+                handlingScroll = false
             }
         }, {passive: false});
     }
@@ -96,10 +102,12 @@ export default class Grid extends Component {
 
         // if control is held prevent the browser doing its normal scrolling
         if (e.ctrlKey) {
+            this.handlingScroll = true
             document.removeEventListener('wheel', this.preventDefaultBehaviour);
             document.addEventListener('wheel', this.preventDefaultBehaviour, {passive: false});
         } else {
-            this.element().removeEventListener('wheel', preventDefaultBehaviour);
+            this.element().removeEventListener('wheel', this.preventDefaultBehaviour);
+            this.handlingScroll = false
             return;
         }
 
