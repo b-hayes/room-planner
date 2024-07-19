@@ -64,6 +64,7 @@ export default class Loader {
     }
 
     static reloadComponent(Component) {
+        console.log('reloading component: ' + Component.constructor.name)
         //todo: optimize this to only replace the parts that need changing somehow.
         //todo: implement some kind of for x => y in y detection for repeating html tags.
         let newElement = this.loadHtml(Component.html(), Component)
@@ -96,7 +97,7 @@ export default class Loader {
             if (['div', 'span', 'p', 'a', 'img', 'button', 'input', 'form', 'label', 'select', 'option', 'textarea', 'meta', 'head', 'script', 'link', 'html', 'body', 'title', 'style'].includes(tagName)) {
                 continue
             }
-            //skip all tag defined in the html 5 specification from w3c
+            //skip regular HTML tags
             if (
                 [
                     'html', 'head', 'title', 'base', 'link', 'meta', 'style',
