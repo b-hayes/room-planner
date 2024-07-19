@@ -36,7 +36,13 @@ export default class TestBind extends Component {
     }
 
     // The easiest solution is to simply define a setter manually every time you want to bind a property.
-
+    // This requires more work for your objects but give you full control over what happens when a property is set.
+    // like so...
+    _exampleProperty = 0
+    set exampleProperty(value) {
+        this._exampleProperty = value
+        this.element().querySelector('p').innerText = `test databind ${this.count}`
+    }
 
     html() {
         return `
