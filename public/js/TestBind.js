@@ -22,7 +22,7 @@ export default class TestBind extends Component {
                 set: (value) => {
                     this['_' + property] = value
                     this.element().querySelector('p').innerText = `test databind ${this.count}`
-                    //Im only accounting for a singe bind so its not going to work in this generic setup.
+                    //I'm only accounting for a singe bind here. so it's not going to work in this generic setup.
                     // This is where the hard part comes in. How are you going to define a single setter,
                     // that will work for all possible properties in all places.
                     // You cant just search and replace strings as the value could be anything that matches part
