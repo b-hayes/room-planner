@@ -11,8 +11,8 @@ export default class Grid extends Component {
         this.background = this.element() //the background is the element now.
         this.toolTip = this.element().getElementsByClassName('tool-tip')[0]
 
-        document.addEventListener('wheel', (e) => this.scroll(e), false)
-        document.addEventListener('mousedown', (e) => this.mouseDown(e), false)
+        document.addEventListener('wheel', (e) => this._onScroll(e), false)
+        document.addEventListener('mousedown', (e) => this._onMouseDown(e), false)
     }
 
     addShape(shape) {
@@ -35,7 +35,7 @@ export default class Grid extends Component {
         delete this._shapes[shapeId]
     }
 
-    mouseDown(e) {
+    _onMouseDown(e) {
         if (e.target !== this.element() && !this.element().contains(e.target)) {
             return
         }
@@ -48,17 +48,17 @@ export default class Grid extends Component {
             clickY: e.pageY
         }
 
-        document.addEventListener('mousemove', (e) => this.drag(e), false)
-        document.addEventListener('mouseup', () => this.mouseUp(), false)
+        document.addEventListener('mousemove', (e) => this._onDrag(e), false)
+        document.addEventListener('mouseup', () => this._onMouseUp(), false)
     }
 
-    mouseUp() {
+    _onMouseUp() {
         this.positionWhenClicked = null
-        document.removeEventListener('mousemove', (e) => this.drag(e), false)
-        document.removeEventListener('mouseup', () => this.mouseUp(), false)
+        document.removeEventListener('mousemove', (e) => this._onDrag(e), false)
+        document.removeEventListener('mouseup', () => this._onMouseUp(), false)
     }
 
-    drag(e) {
+    _onDrag(e) {
         //if the mouse not held were not dragging
         if (!e.buttons) {
             return
@@ -89,7 +89,7 @@ export default class Grid extends Component {
         }
     }
 
-    scroll(e) {
+    _onScroll(e) {
         //if ctrl or command is held, then scroll to zoom
         if (this.element().contains(e.target)) {
             let maxScale = 5
