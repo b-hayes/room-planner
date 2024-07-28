@@ -1,16 +1,38 @@
 import Component from "./Scafold/Component.js"
 import Vector from "./Vector.js"
+import Shape from "./Shape.js"
 
 export default class Grid extends Component {
 
     constructor({scale = 1}) {
         super()
+        this._shapes = []
         this.scale = scale
         this.background = this.element() //the background is the element now.
         this.toolTip = this.element().getElementsByClassName('tool-tip')[0]
 
         document.addEventListener('wheel', (e) => this.scroll(e), false)
         document.addEventListener('mousedown', (e) => this.mouseDown(e), false)
+    }
+
+    addShape(shape) {
+        if (! shape instanceof Shape) {
+            throw new Error('shape must be an instance of Shape')
+        }
+        shape.scale = this.scale
+        this.element().appendChild(shape.element())
+        this._shapes[shape.id] = shape
+    }
+
+    deleteShape(shapeId) {
+        if (!shapeId || typeof shapeId !== 'string') {
+            throw new Error('shapeId must be a non empty string, received ' + typeof shapeId)
+        }
+        if (!this._shapes[shapeId]) {
+            throw new Error('shape not found in grid')
+        }
+        this.element().removeChild(this._shapes[shapeId].element())
+        delete this._shapes[shapeId]
     }
 
     mouseDown(e) {
@@ -87,12 +109,19 @@ export default class Grid extends Component {
                     , 100)
                 return
             }
+
             //e.preventDefault()
             this.scale += e.deltaY * -0.001
             this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
             this.scale = Math.round(this.scale * 10000) / 10000;
             toolTip.innerText = `Scale: 1px = ${this.scale}cm`
             this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
+
+            // apply scale to all the shapes we have
+            for (let shapeId in this._shapes) {
+                this._shapes[shapeId].scale = this.scale
+            }
+
             let event = new CustomEvent('grid-scale-changed', {
                 detail: {
                     button: e.button,

@@ -133,31 +133,34 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     import Room from "/js/Room.js"
     import Loader from "../public/js/Scafold/Loader.js"
 
-    let shapes = []
+    window.shapes = []
 
     window.randomId = function () {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     }
 
     window.newShape = function () {
-        const shape = new Shape(randomId(), grid)
+        const shape = new Shape(randomId())
+        grid.addShape(shape)
         shape.select()
-        shapes.push(shape)
+        shapes.push(shape)// keep track of the shapes here for client storage.
+        console.log(window.shapes, shapes)
     }
 
     window.deleteShape = function (id) {
-        const shape = shapes.find(shape => shape.id === id)
+        const shape = window.shapes.find(shape => shape.id === id)
         if (!shape) {
             console.error(`Cant find shape to delete: '${id}'`)
         } else {
-            shape.element().remove()
+            grid.deleteShape(shape.id)
             //update the shapes list.
-            shapes = shapes.filter(shape => shape.id !== id)
+            window.shapes = window.shapes.filter(shape => shape.id !== id)
         }
     }
 
     window.newRoom = function () {
-        const room = new Room(randomId(), grid)
+        const room = new Room(randomId())
+        grid.addShape(room)
         room.select()
         shapes.push(room)
     }
@@ -204,35 +207,21 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         }
 
         let loadedShapes = []
-        data.shapes.forEach(shape => {
-            //check the class to use the correct constructor
-            if (shape.class === 'Shape') {
-                loadedShapes.push(
-                    new Shape(
-                        shape.id ?? randomId(), //previous versions didn't have ids so need to make them up
-                        grid,
-                        shape.position
-                    )
-                )
-                return
+        data.shapes.forEach(shapeData => {
+            let classMap = {
+                Shape,
+                Room
             }
-
-            if (shape.class === 'Room') {
-                loadedShapes.push(
-                    new Room(
-                        shape.id ?? randomId(),
-                        grid,
-                        shape.position
-                    )
-                )
-                return
-            }
+            let shape = new classMap[shapeData.class](shapeData.id, shapeData.position)
+            grid.addShape(shape)
+            loadedShapes.push(shape)
         })
-        shapes = loadedShapes
+        window.shapes = loadedShapes
     }
 
     await Loader.replaceTagsWithComponents(document)
     const grid = document.querySelector(".grid")
+        .componentInstance
     load()
 
     //Prevent the default right click menu
@@ -244,13 +233,12 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         event.preventDefault()
     }, true)
 
-    //Listen for shapes-click events to open a special context menu
-    grid.addEventListener('shape-click', function (event) {
+    // Context menu
+    grid.element().addEventListener('shape-click', function (event) {
         if (event.detail.button !== 2) {
             return
         }
 
-        //show a context menu with a delete option
         let menuHtml = `
             <div class="shape-context-menu">
                 <div class="context-menu-item" onclick="

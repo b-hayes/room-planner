@@ -2,6 +2,34 @@ import Component from "./Scafold/Component.js";
 
 export default class Shape extends Component {
 
+    // identity
+    id = '';
+
+    // grid
+    _gridSnap = 1;
+    _gridScale = 1;
+    _gridPosition = {x: 0, y: 0, width: 0, height: 0, rotation: 0};
+
+    // states
+    selected = false;
+    resizing = false;
+    rotating = false;
+
+    // debug
+    dots = [];
+    lines = [];
+
+    // event
+    clickX = 0;
+    clickY = 0;
+    shapePositionWhenClicked = {};
+
+    // labels (would be nice to use data binds instead of direct manipulations in future).
+    posText = undefined;
+    widthText = undefined;
+    heightText = undefined;
+    rotationText = undefined;
+
     html() {
         return html;
     }
@@ -12,27 +40,20 @@ export default class Shape extends Component {
 
     constructor(
         id,
-        parent = undefined,
         position = {
             width: 300,
             height: 300,
-            x: undefined, //if undefined will center
-            y: undefined, //if undefined will center
+            x: 150,
+            y: 150,
             rotation: 0
-        }
+        },
+        scale = 1
     ) {
         super();
-        if (typeof id !== 'string') {
-            throw new TypeError('id must be a string')
+        if (!id || typeof id !== 'string') {
+            throw new TypeError('id must be a unique string')
         }
         this.id = id
-
-        if (parent === undefined) {
-            parent = document.body
-        }
-        if (!(parent instanceof Node)) {
-            throw new TypeError('parent must be a node')
-        }
 
         // for each Position value if defined should be int/float
         for (let key in position) {
@@ -46,12 +67,12 @@ export default class Shape extends Component {
 
         //If no position then center while rounding to the nearest 100
         if (x === undefined) {
-            x = (parent.clientWidth / 2) - (width / 2)
-            x = x - (x % 100)
+            x = (position.width / 2) - (width / 2)
+            // x = x - (x % 100)
         }
         if (y === undefined) {
-            y = (parent.clientHeight / 2) - (height / 2)
-            y = y - (y % 100)
+            y = (position.height / 2) - (height / 2)
+            // y = y - (y % 100)
         }
 
         //get labels.
@@ -79,7 +100,7 @@ export default class Shape extends Component {
             //mark the shape as selected (important)
             this.select()
 
-            //trigger a custom event so the parent application can perform other actions.
+            //trigger a custom event so the rest of application can perform other actions.
             let event = new CustomEvent('shape-click', {
                 detail: {
                     button: e.button,
@@ -103,22 +124,9 @@ export default class Shape extends Component {
         //add event listener for hovering
         document.addEventListener('mousemove', (e) => this.hover(e), false)
 
-        //anything stored in this is needed by other functions
-        this.parent = parent
-
-        //Add the element to the parent, and position it.
-        this.parent.appendChild(this.element())
+        // set the initial position and scale (triggers a redraw twice for now).
         this.position = {x, y, width, height, rotation}
-
-        //add event listener for grid-scale-changed
-        this.parent.addEventListener('grid-scale-changed', (e) => {
-            //if the grid is not the parent then don't bother
-            if (e.detail.object !== this.parent) {
-                // return //todo: this grid check is not working. If not fixed there can never be more than one grid.
-            }
-
-            this.scale = e.detail.object.scale
-        })
+        this.scale = scale
     }
 
     //Calculate the real location of the centre of the shape in the window.
@@ -227,24 +235,12 @@ export default class Shape extends Component {
             case this.rotating:
                 let angleShift = this.getPointAngle(e.x - center.x, e.y - center.y) - this.getPointAngle(this.clickX - center.x, this.clickY - center.y)
                 rotation = this.shapePositionWhenClicked.rotation + angleShift
-
-                // Normalize the rotation to be between 0 and 360
-                if (rotation < 0) rotation += 360;
-                if (rotation > 360) rotation -= 360;
                 break;
             default:
                 //move the shape only
                 x = this.shapePositionWhenClicked.x + shiftX
                 y = this.shapePositionWhenClicked.y + shiftY
         }
-
-        //apply snap
-        let snap = this.parent.snap || 1
-        x = x - (x % snap)
-        y = y - (y % snap)
-        width = width - (width % snap)
-        height = height - (height % snap)
-        rotation = rotation - (rotation % snap)
 
         this.position = {x, y, width, height, rotation}
     }
@@ -304,24 +300,65 @@ export default class Shape extends Component {
 
     //Virtual position. Not the real position of the element.
     set position({x, y, width, height, rotation}) {
-        if (x < 0) x = 0
-        if (y < 0) y = 0
-        if (width < 0) width = 0
-        if (height < 0) height = 0
+        // make sure we have Numbers and not strings
+        width = parseFloat(width) ?? 300
+        height = parseFloat(height) ?? 300
+        x = parseFloat(x) ?? 150
+        y = parseFloat(y) ?? 150
+        rotation = parseFloat(rotation) ?? 0
+
+        // limits
+        let minX = width / 2
+        let minY = height / 2
+
+        //minx and Y should adjust for the rotation
+        let angle = rotation * (Math.PI / 180);
+        let cosAngle = Math.cos(angle);
+        let sinAngle = Math.sin(angle);
+        let rotatedWidth = Math.abs(width * cosAngle) + Math.abs(height * sinAngle);
+        let rotatedHeight = Math.abs(width * sinAngle) + Math.abs(height * cosAngle);
+        minX = rotatedWidth / 2
+        minY = rotatedHeight / 2
+
+        let minWidth = 10
+        let minHeight = 10
+
+        // clamp values
+        if (x < minX) x = minX
+        if (y < minY) y = minY
+        if (width < minWidth) width = minWidth
+        if (height < minHeight) height = minHeight
         if (rotation === undefined) rotation = 0
-        if (rotation < 0 || rotation > 360) throw new Error('Rotation out of range.')
+        if (rotation < 0) rotation += 360;
+        if (rotation > 360) rotation -= 360;
+
+        //apply snap
+        let snap = this.snap
+        x = x - (x % snap)
+        y = y - (y % snap)
+        width = width - (width % snap)
+        height = height - (height % snap)
+        rotation = rotation - (rotation % snap)
 
         this._gridPosition = {x, y, width, height, rotation};
         this.redraw();
     }
 
     get scale() {
-        return this._renderScale || 1;
+        return this._gridScale || 1;
     }
 
     set scale(value) {
-        this._renderScale = value
+        this._gridScale = value
         this.redraw()
+    }
+
+    get snap() {
+        return this._gridSnap || 1;
+    }
+
+    set snap(value) {
+        this._gridSnap = value
     }
 
     hover(event) {
@@ -364,28 +401,20 @@ export default class Shape extends Component {
 
         if (x < border && y < border) {
             this.resizing = 'top-left'
-            //this.parent.style.cursor = 'nwse-resize'
         } else if (x > width - border && y > height - border) {
             this.resizing = 'bottom-right'
-            //this.parent.style.cursor = 'nwse-resize'
         } else if (x < border && y > height - border) {
             this.resizing = 'bottom-left'
-            //this.parent.style.cursor = 'nesw-resize';
         } else if (x > width - border && y < border) {
             this.resizing = 'top-right'
-            //this.parent.style.cursor = 'nesw-resize'
         } else if (x < border) {
             this.resizing = 'left'
-            //this.parent.style.cursor = 'ew-resize'
         } else if (x > width - border) {
             this.resizing = 'right'
-            //this.parent.style.cursor = 'ew-resize'
         } else if (y < border) {
             this.resizing = 'top'
-            //this.parent.style.cursor = 'ns-resize'
         } else if (y > height - border) {
             this.resizing = 'bottom'
-            //this.parent.style.cursor = 'ns-resize';
         }
         //add a css class to the element matching the resize mode
         if (this.resizing) this.element().classList.add('resize-' + this.resizing)
