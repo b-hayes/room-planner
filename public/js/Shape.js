@@ -2,10 +2,33 @@ import Component from "./Scafold/Component.js";
 
 export default class Shape extends Component {
 
+    // identity
     id = '';
+
+    // grid
     _gridSnap = 1;
     _gridScale = 1;
     _gridPosition = {x: 0, y: 0, width: 0, height: 0, rotation: 0};
+
+    // states
+    selected = false;
+    resizing = false;
+    rotating = false;
+
+    // debug
+    dots = [];
+    lines = [];
+
+    // event
+    clickX = 0;
+    clickY = 0;
+    shapePositionWhenClicked = {};
+
+    // labels (would be nice to use data binds instead of direct manipulations in future).
+    posText = undefined;
+    widthText = undefined;
+    heightText = undefined;
+    rotationText = undefined;
 
     html() {
         return html;
@@ -310,7 +333,7 @@ export default class Shape extends Component {
         if (rotation > 360) rotation -= 360;
 
         //apply snap
-        let snap = this._gridSnap
+        let snap = this.snap
         x = x - (x % snap)
         y = y - (y % snap)
         width = width - (width % snap)
@@ -328,6 +351,14 @@ export default class Shape extends Component {
     set scale(value) {
         this._gridScale = value
         this.redraw()
+    }
+
+    get snap() {
+        return this._gridSnap || 1;
+    }
+
+    set snap(value) {
+        this._gridSnap = value
     }
 
     hover(event) {
