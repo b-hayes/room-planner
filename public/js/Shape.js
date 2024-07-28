@@ -2,6 +2,11 @@ import Component from "./Scafold/Component.js";
 
 export default class Shape extends Component {
 
+    id = '';
+    _gridSnap = 1;
+    _gridScale = 1;
+    _gridPosition = {x: 0, y: 0, width: 0, height: 0, rotation: 0};
+
     html() {
         return html;
     }
@@ -21,10 +26,9 @@ export default class Shape extends Component {
         },
         scale = 1
     ) {
-        console.log('Shape created with id:', id, 'position:', position, 'scale:', scale)
         super();
-        if (typeof id !== 'string') {
-            throw new TypeError('id must be a string')
+        if (!id || typeof id !== 'string') {
+            throw new TypeError('id must be a unique string')
         }
         this.id = id
 
@@ -215,14 +219,6 @@ export default class Shape extends Component {
                 y = this.shapePositionWhenClicked.y + shiftY
         }
 
-        //apply snap TODO: would be nice if the grid can set the snap value.
-        let snap = 1
-        x = x - (x % snap)
-        y = y - (y % snap)
-        width = width - (width % snap)
-        height = height - (height % snap)
-        rotation = rotation - (rotation % snap)
-
         this.position = {x, y, width, height, rotation}
     }
 
@@ -291,6 +287,16 @@ export default class Shape extends Component {
         // limits
         let minX = width / 2
         let minY = height / 2
+
+        //minx and Y should adjust for the rotation
+        let angle = rotation * (Math.PI / 180);
+        let cosAngle = Math.cos(angle);
+        let sinAngle = Math.sin(angle);
+        let rotatedWidth = Math.abs(width * cosAngle) + Math.abs(height * sinAngle);
+        let rotatedHeight = Math.abs(width * sinAngle) + Math.abs(height * cosAngle);
+        minX = rotatedWidth / 2
+        minY = rotatedHeight / 2
+
         let minWidth = 10
         let minHeight = 10
 
@@ -303,16 +309,24 @@ export default class Shape extends Component {
         if (rotation < 0) rotation += 360;
         if (rotation > 360) rotation -= 360;
 
+        //apply snap
+        let snap = this._gridSnap
+        x = x - (x % snap)
+        y = y - (y % snap)
+        width = width - (width % snap)
+        height = height - (height % snap)
+        rotation = rotation - (rotation % snap)
+
         this._gridPosition = {x, y, width, height, rotation};
         this.redraw();
     }
 
     get scale() {
-        return this._renderScale || 1;
+        return this._gridScale || 1;
     }
 
     set scale(value) {
-        this._renderScale = value
+        this._gridScale = value
         this.redraw()
     }
 
