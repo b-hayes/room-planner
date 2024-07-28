@@ -21,6 +21,7 @@ export default class Shape extends Component {
         },
         scale = 1
     ) {
+        console.log('Shape created with id:', id, 'position:', position, 'scale:', scale)
         super();
         if (typeof id !== 'string') {
             throw new TypeError('id must be a string')
@@ -207,10 +208,6 @@ export default class Shape extends Component {
             case this.rotating:
                 let angleShift = this.getPointAngle(e.x - center.x, e.y - center.y) - this.getPointAngle(this.clickX - center.x, this.clickY - center.y)
                 rotation = this.shapePositionWhenClicked.rotation + angleShift
-
-                // Normalize the rotation to be between 0 and 360
-                if (rotation < 0) rotation += 360;
-                if (rotation > 360) rotation -= 360;
                 break;
             default:
                 //move the shape only
@@ -284,12 +281,27 @@ export default class Shape extends Component {
 
     //Virtual position. Not the real position of the element.
     set position({x, y, width, height, rotation}) {
-        if (x < 0) x = 0
-        if (y < 0) y = 0
-        if (width < 0) width = 0
-        if (height < 0) height = 0
+        // make sure we have Numbers and not strings
+        width = parseFloat(width) ?? 300
+        height = parseFloat(height) ?? 300
+        x = parseFloat(x) ?? 150
+        y = parseFloat(y) ?? 150
+        rotation = parseFloat(rotation) ?? 0
+
+        // limits
+        let minX = width / 2
+        let minY = height / 2
+        let minWidth = 10
+        let minHeight = 10
+
+        // clamp values
+        if (x < minX) x = minX
+        if (y < minY) y = minY
+        if (width < minWidth) width = minWidth
+        if (height < minHeight) height = minHeight
         if (rotation === undefined) rotation = 0
-        if (rotation < 0 || rotation > 360) throw new Error('Rotation out of range.')
+        if (rotation < 0) rotation += 360;
+        if (rotation > 360) rotation -= 360;
 
         this._gridPosition = {x, y, width, height, rotation};
         this.redraw();
