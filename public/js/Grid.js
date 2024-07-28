@@ -109,17 +109,18 @@ export default class Grid extends Component {
                 return
             }
 
-            // apply scale to all the shapes we have
-            for (let shapeId in this._shapes) {
-                this._shapes[shapeId].scale = this.scale
-            }
-
             //e.preventDefault()
             this.scale += e.deltaY * -0.001
             this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
             this.scale = Math.round(this.scale * 10000) / 10000;
             toolTip.innerText = `Scale: 1px = ${this.scale}cm`
             this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
+
+            // apply scale to all the shapes we have
+            for (let shapeId in this._shapes) {
+                this._shapes[shapeId].scale = this.scale
+            }
+
             let event = new CustomEvent('grid-scale-changed', {
                 detail: {
                     button: e.button,
