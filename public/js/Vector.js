@@ -10,6 +10,7 @@ export default class Vector {
     clamp(minX, maxX, minY, maxY) {
         this.x = this.clampNumber(this.x, minX, maxX)
         this.y = this.clampNumber(this.y, minY, maxY)
+        return this
     }
 
     clampNumber(num, a, b){

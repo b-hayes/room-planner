@@ -25,7 +25,7 @@ export default class Component {
 
     /**
      * Dispatches an event with a debounce time to improve performance.
-     *  If performance becomes an issue with the number of eliments reacting to realtime events this could help.
+     *  If performance becomes an issue with the number of elements reacting to realtime events this could help.
      *  100ms is enough for scroll events with a trackpad not to be triggered more than once during the wind down of the scroll.
      * @param event
      * @param debounceTime

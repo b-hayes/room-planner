@@ -110,7 +110,6 @@ export default class Grid extends Component {
             }
 
             // apply scale to all the shapes we have
-            console.log(this._shapes)
             for (let shapeId in this._shapes) {
                 this._shapes[shapeId].scale = this.scale
             }
