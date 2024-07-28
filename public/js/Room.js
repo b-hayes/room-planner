@@ -13,7 +13,7 @@ export default class Room extends Shape {
             rotation: 0
         }
     ) {
-        super(id, parent, position)
+        super(id, position)
         this.element().classList.add('room')
     }
 

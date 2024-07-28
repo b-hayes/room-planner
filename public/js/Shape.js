@@ -12,7 +12,6 @@ export default class Shape extends Component {
 
     constructor(
         id,
-        parent = undefined,
         position = {
             width: 300,
             height: 300,
@@ -27,13 +26,6 @@ export default class Shape extends Component {
         }
         this.id = id
 
-        if (parent === undefined) {
-            parent = document.body
-        }
-        if (!(parent instanceof Node)) {
-            throw new TypeError('parent must be a node')
-        }
-
         // for each Position value if defined should be int/float
         for (let key in position) {
             if (position[key] !== undefined && typeof position[key] !== 'number') {
@@ -46,12 +38,12 @@ export default class Shape extends Component {
 
         //If no position then center while rounding to the nearest 100
         if (x === undefined) {
-            x = (parent.clientWidth / 2) - (width / 2)
-            x = x - (x % 100)
+            x = (position.width / 2) - (width / 2)
+            // x = x - (x % 100)
         }
         if (y === undefined) {
-            y = (parent.clientHeight / 2) - (height / 2)
-            y = y - (y % 100)
+            y = (position.height / 2) - (height / 2)
+            // y = y - (y % 100)
         }
 
         //get labels.
@@ -79,7 +71,7 @@ export default class Shape extends Component {
             //mark the shape as selected (important)
             this.select()
 
-            //trigger a custom event so the parent application can perform other actions.
+            //trigger a custom event so the rest of application can perform other actions.
             let event = new CustomEvent('shape-click', {
                 detail: {
                     button: e.button,
@@ -103,20 +95,14 @@ export default class Shape extends Component {
         //add event listener for hovering
         document.addEventListener('mousemove', (e) => this.hover(e), false)
 
-        //anything stored in this is needed by other functions
-        this.parent = parent
-
-        //Add the element to the parent, and position it.
-        this.parent.appendChild(this.element())
+        // set the initial position.
         this.position = {x, y, width, height, rotation}
 
         //add event listener for grid-scale-changed
-        this.parent.addEventListener('grid-scale-changed', (e) => {
-            //if the grid is not the parent then don't bother
-            if (e.detail.object !== this.parent) {
-                // return //todo: this grid check is not working. If not fixed there can never be more than one grid.
-            }
-
+        this.element().addEventListener('grid-scale-changed', (e) => {
+            //TODO: if e.detail.object is not the correct grid do nothing. Until this is implemented we can't have multiple grids.
+            //TODO: alternatively, if the grid is going to contain the list of shapes then it could apply the scale directly
+            //  without the use of event listeners.
             this.scale = e.detail.object.scale
         })
     }
@@ -238,8 +224,8 @@ export default class Shape extends Component {
                 y = this.shapePositionWhenClicked.y + shiftY
         }
 
-        //apply snap
-        let snap = this.parent.snap || 1
+        //apply snap TODO: would be nice if the grid can set the snap value.
+        let snap = 1
         x = x - (x % snap)
         y = y - (y % snap)
         width = width - (width % snap)
@@ -364,28 +350,20 @@ export default class Shape extends Component {
 
         if (x < border && y < border) {
             this.resizing = 'top-left'
-            //this.parent.style.cursor = 'nwse-resize'
         } else if (x > width - border && y > height - border) {
             this.resizing = 'bottom-right'
-            //this.parent.style.cursor = 'nwse-resize'
         } else if (x < border && y > height - border) {
             this.resizing = 'bottom-left'
-            //this.parent.style.cursor = 'nesw-resize';
         } else if (x > width - border && y < border) {
             this.resizing = 'top-right'
-            //this.parent.style.cursor = 'nesw-resize'
         } else if (x < border) {
             this.resizing = 'left'
-            //this.parent.style.cursor = 'ew-resize'
         } else if (x > width - border) {
             this.resizing = 'right'
-            //this.parent.style.cursor = 'ew-resize'
         } else if (y < border) {
             this.resizing = 'top'
-            //this.parent.style.cursor = 'ns-resize'
         } else if (y > height - border) {
             this.resizing = 'bottom'
-            //this.parent.style.cursor = 'ns-resize';
         }
         //add a css class to the element matching the resize mode
         if (this.resizing) this.element().classList.add('resize-' + this.resizing)

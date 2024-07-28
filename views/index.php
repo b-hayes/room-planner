@@ -140,7 +140,8 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     }
 
     window.newShape = function () {
-        const shape = new Shape(randomId(), grid)
+        const shape = new Shape(randomId())
+        grid.appendChild(shape.element())
         shape.select()
         shapes.push(shape)
     }
@@ -157,7 +158,8 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     }
 
     window.newRoom = function () {
-        const room = new Room(randomId(), grid)
+        const room = new Room(randomId())
+        grid.appendChild(room.element())
         room.select()
         shapes.push(room)
     }
@@ -204,29 +206,14 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         }
 
         let loadedShapes = []
-        data.shapes.forEach(shape => {
-            //check the class to use the correct constructor
-            if (shape.class === 'Shape') {
-                loadedShapes.push(
-                    new Shape(
-                        shape.id ?? randomId(), //previous versions didn't have ids so need to make them up
-                        grid,
-                        shape.position
-                    )
-                )
-                return
+        data.shapes.forEach(shapeData => {
+            let classMap = {
+                Shape,
+                Room
             }
-
-            if (shape.class === 'Room') {
-                loadedShapes.push(
-                    new Room(
-                        shape.id ?? randomId(),
-                        grid,
-                        shape.position
-                    )
-                )
-                return
-            }
+            let shape = new classMap[shapeData.class](shapeData.id)
+            grid.appendChild(shape.element())
+            shape.position = shapeData.position
         })
         shapes = loadedShapes
     }
