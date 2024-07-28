@@ -4,7 +4,6 @@ export default class Room extends Shape {
 
     constructor(
         id,
-        parent = document.body,
         position = {
             width: 300,
             height: 300,

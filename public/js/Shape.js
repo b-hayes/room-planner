@@ -15,10 +15,11 @@ export default class Shape extends Component {
         position = {
             width: 300,
             height: 300,
-            x: undefined, //if undefined will center
-            y: undefined, //if undefined will center
+            x: 150,
+            y: 150,
             rotation: 0
-        }
+        },
+        scale = 1
     ) {
         super();
         if (typeof id !== 'string') {
@@ -95,16 +96,9 @@ export default class Shape extends Component {
         //add event listener for hovering
         document.addEventListener('mousemove', (e) => this.hover(e), false)
 
-        // set the initial position.
+        // set the initial position and scale (triggers a redraw twice for now).
         this.position = {x, y, width, height, rotation}
-
-        //add event listener for grid-scale-changed
-        this.element().addEventListener('grid-scale-changed', (e) => {
-            //TODO: if e.detail.object is not the correct grid do nothing. Until this is implemented we can't have multiple grids.
-            //TODO: alternatively, if the grid is going to contain the list of shapes then it could apply the scale directly
-            //  without the use of event listeners.
-            this.scale = e.detail.object.scale
-        })
+        this.scale = scale
     }
 
     //Calculate the real location of the centre of the shape in the window.

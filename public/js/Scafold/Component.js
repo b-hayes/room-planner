@@ -19,6 +19,7 @@ export default class Component {
         if (this._element === undefined) {
             this._element = Loader.loadHtml(this.html())
         }
+        this._element.componentInstance = this
         return this._element
     }
 
