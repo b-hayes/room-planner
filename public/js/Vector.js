@@ -1,7 +1,10 @@
 export default class Vector {
     constructor(x, y) {
-        this.x = x;
-        this.y = y;
+        this.x = parseFloat(x);
+        this.y = parseFloat(y);
+        if (isNaN(this.x) || isNaN(this.y)) {
+            throw new Error('x and y must be numbers')
+        }
     }
 
     /**
