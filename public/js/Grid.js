@@ -117,6 +117,7 @@ export default class Grid extends Component {
             this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
             this.scale = Math.round(this.scale * 10000) / 10000;
 
+            //TODO: would be nice if zoom was focused on the mouse position instead of being centered.
             let scaleDiff = this.scale - oldScale
             this.element().scrollLeft += this.element().clientWidth * scaleDiff
             this.element().scrollTop += this.element().clientHeight * scaleDiff
