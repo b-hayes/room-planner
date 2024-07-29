@@ -95,6 +95,8 @@ export default class Grid extends Component {
             let maxScale = 5
             let minScale = 0.25
             let toolTip = this.toolTip
+            let oldScale = this.scale
+
             if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
                 //make the tooltip flash red to indicate the scale is at its limit
                 //get the original color,  if not already red
@@ -114,6 +116,11 @@ export default class Grid extends Component {
             this.scale += e.deltaY * -0.001
             this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
             this.scale = Math.round(this.scale * 10000) / 10000;
+
+            let scaleDiff = this.scale - oldScale
+            this.element().scrollLeft += this.element().clientWidth * scaleDiff
+            this.element().scrollTop += this.element().clientHeight * scaleDiff
+
             toolTip.innerText = `Scale: 1px = ${this.scale}cm`
             this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
 
@@ -122,6 +129,7 @@ export default class Grid extends Component {
                 this._shapes[shapeId].scale = this.scale
             }
 
+            // Dispatch event to let the rest of app know the scale has changed
             let event = new CustomEvent('grid-scale-changed', {
                 detail: {
                     button: e.button,
