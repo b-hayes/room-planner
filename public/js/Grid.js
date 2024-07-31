@@ -90,57 +90,67 @@ export default class Grid extends Component {
     }
 
     _onScroll(e) {
-        //if ctrl or command is held, then scroll to zoom
-        if (this.element().contains(e.target)) {
-            let maxScale = 5
-            let minScale = 0.25
-            let toolTip = this.toolTip
-            let oldScale = this.scale
 
-            if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
-                //make the tooltip flash red to indicate the scale is at its limit
-                //get the original color,  if not already red
-                if (toolTip.style.color !== 'red') {
-                    var originalColor = toolTip.style.color
-                }
-
-                toolTip.style.color = 'red'
-                setTimeout(() => {
-                        toolTip.style.color = originalColor
-                    }
-                    , 100)
-                return
-            }
-
-            //e.preventDefault()
-            this.scale += e.deltaY * -0.001
-            this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
-            this.scale = Math.round(this.scale * 10000) / 10000;
-
-            //TODO: would be nice if zoom was focused on the mouse position instead of being centered.
-            let scaleDiff = this.scale - oldScale
-            this.element().scrollLeft += this.element().clientWidth * scaleDiff
-            this.element().scrollTop += this.element().clientHeight * scaleDiff
-
-            toolTip.innerText = `Scale: 1px = ${this.scale}cm`
-            this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
-
-            // apply scale to all the shapes we have
-            for (let shapeId in this._shapes) {
-                this._shapes[shapeId].scale = this.scale
-            }
-
-            // Dispatch event to let the rest of app know the scale has changed
-            let event = new CustomEvent('grid-scale-changed', {
-                detail: {
-                    button: e.button,
-                    x: e.pageX,
-                    y: e.pageY,
-                    object: this
-                }
-            })
-            this.dispatchEventWithDebounce(event, 0)
+        if (!this.element().contains(e.target)) {
+            return //if the target is not the grid, ignore the event
         }
+
+        //if alt is held pan instead of zoom
+        if (e.altKey) {
+            //todo: copy the pan code into its own function and call it here
+            return
+        }
+
+        //TODO: move zoom code into its own function and call it here
+        //ZOOM IN AND OUT
+        let maxScale = 5
+        let minScale = 0.25
+        let toolTip = this.toolTip
+        let oldScale = this.scale
+
+        if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
+            //make the tooltip flash red to indicate the scale is at its limit
+            //get the original color,  if not already red
+            if (toolTip.style.color !== 'red') {
+                var originalColor = toolTip.style.color
+            }
+
+            toolTip.style.color = 'red'
+            setTimeout(() => {
+                    toolTip.style.color = originalColor
+                }
+                , 100)
+            return
+        }
+
+        //e.preventDefault()
+        this.scale += e.deltaY * -0.001
+        this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
+        this.scale = Math.round(this.scale * 10000) / 10000;
+
+        //TODO: would be nice if zoom was focused on the mouse position instead of being centered.
+        let scaleDiff = this.scale - oldScale
+        this.element().scrollLeft += this.element().clientWidth * scaleDiff
+        this.element().scrollTop += this.element().clientHeight * scaleDiff
+
+        toolTip.innerText = `Scale: 1px = ${this.scale}cm`
+        this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
+
+        // apply scale to all the shapes we have
+        for (let shapeId in this._shapes) {
+            this._shapes[shapeId].scale = this.scale
+        }
+
+        // Dispatch event to let the rest of app know the scale has changed
+        let event = new CustomEvent('grid-scale-changed', {
+            detail: {
+                button: e.button,
+                x: e.pageX,
+                y: e.pageY,
+                object: this
+            }
+        })
+        this.dispatchEventWithDebounce(event, 0)
 
         //update the background offset to match the scroll change, inverted
         this.background.style.backgroundPosition = `-${this.element().scrollLeft}px -${this.element().scrollTop}px`
