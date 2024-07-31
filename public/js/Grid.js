@@ -137,6 +137,8 @@ export default class Grid extends Component {
         this.element().scrollLeft += (viewPortWidth + (viewPortWidth/2)) * scaleDiff
         this.element().scrollTop += (viewPortHeight + (viewPortHeight/2)) * scaleDiff
 
+        //todo: I think we need to account for the size fo teh grid space including its entire scrollable area.
+
         toolTip.innerText = `Scale: 1px = ${this.scale}cm`
         this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
 
