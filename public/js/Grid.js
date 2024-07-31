@@ -130,6 +130,8 @@ export default class Grid extends Component {
 
         //TODO: would be nice if zoom was focused on the mouse position instead of being centered.
         //  or could possible zoom in on the selected shape
+
+        //This keeps the zoom centered instead of drifting to the top left (mostly).
         let scaleDiff = this.scale - oldScale
         this.element().scrollLeft += this.element().clientWidth * scaleDiff
         this.element().scrollTop += this.element().clientHeight * scaleDiff
