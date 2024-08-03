@@ -119,7 +119,15 @@ export default class Grid extends Component {
 
         if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
 
-            //TODO: this should just trigger an event that the tooltip can listen for and take care of itself.
+            //TODO: make the tooltip listen for this event and update itself
+            // this.dispatchEventWithDebounce(new CustomEvent('grid-scale-limit-reached', {
+            //     detail: {
+            //         scale: this.scale,
+            //         maxScale,
+            //         minScale,
+            //         lookingAtGridPoint
+            //     }
+            // }), 0)
 
             //make the tooltip flash red to indicate the scale is at its limit
             //get the original color,  if not already red
@@ -155,8 +163,6 @@ export default class Grid extends Component {
             }
         })
         this.dispatchEventWithDebounce(event, 0)
-
-
 
         //update the background and info text
         toolTip.innerText = `Scale: 1px = ${this.scale}cm`
