@@ -107,6 +107,7 @@ export default class Grid extends Component {
         let minScale = 0.25
         let toolTip = this.toolTip
         let oldScale = this.scale
+        let oldScrollArea = new Vector(this.element().scrollWidth, this.element().scrollHeight)
 
         if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
             //make the tooltip flash red to indicate the scale is at its limit
@@ -128,19 +129,7 @@ export default class Grid extends Component {
         this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
         this.scale = Math.round(this.scale * 10000) / 10000;
 
-        //TODO: would be nice if zoom was focused on the mouse position instead of being centered.
-        //  or could possible zoom in on the selected shape
-        //This keeps the zoom centered instead of drifting to the top left (mostly).
         let scaleDiff = this.scale - oldScale
-        let viewPortWidth = this.element().clientWidth
-        let viewPortHeight = this.element().clientHeight
-        this.element().scrollLeft += (viewPortWidth + (viewPortWidth/2)) * scaleDiff
-        this.element().scrollTop += (viewPortHeight + (viewPortHeight/2)) * scaleDiff
-
-        //todo: I think we need to account for the size fo teh grid space including its entire scrollable area.
-
-        toolTip.innerText = `Scale: 1px = ${this.scale}cm`
-        this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
 
         // apply scale to all the shapes we have
         for (let shapeId in this._shapes) {
@@ -158,7 +147,29 @@ export default class Grid extends Component {
         })
         this.dispatchEventWithDebounce(event, 0)
 
-        //update the background offset to match the scroll change, inverted
+        //update the scroll position
+        let newScrollArea = new Vector(this.element().scrollWidth, this.element().scrollHeight)
+        let spaceDiff = new Vector(
+            (oldScrollArea.x - this.element().clientWidth) * scaleDiff,
+            (oldScrollArea.y - this.element().clientHeight) * scaleDiff
+        )
+        let rect = this.element().getBoundingClientRect()
+        let scrollChange = new Vector(
+            rect.width /2 * scaleDiff,
+            rect.height /2 * scaleDiff
+        )
+        //apply scroll
+        this.element().scrollLeft += scrollChange.x
+        this.element().scrollTop += scrollChange.y
+
+        //debug
+        console.log('spaceDiff:', spaceDiff)
+        console.log('scrollChange:', scrollChange)
+        console.log('scrollPosition:', this.element().scrollLeft, this.element().scrollTop)
+
+        //update the background and info text
+        toolTip.innerText = `Scale: 1px = ${this.scale}cm`
+        this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
         this.background.style.backgroundPosition = `-${this.element().scrollLeft}px -${this.element().scrollTop}px`
     }
 
