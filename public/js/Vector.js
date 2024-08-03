@@ -16,6 +16,12 @@ export default class Vector {
         return this
     }
 
+    scale(scalar) {
+        this.x *= scalar
+        this.y *= scalar
+        return this
+    }
+
     clampNumber(num, a, b){
         return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b))
     }

@@ -16,7 +16,7 @@ export default class Grid extends Component {
     }
 
     addShape(shape) {
-        if (! shape instanceof Shape) {
+        if (!shape instanceof Shape) {
             throw new Error('shape must be an instance of Shape')
         }
         shape.scale = this.scale
@@ -86,6 +86,15 @@ export default class Grid extends Component {
             //update scroll position and the background offset
             this.element().scrollTo(scroll.x, scroll.y)
             this.background.style.backgroundPosition = `-${scroll.x}px -${scroll.y}px`
+
+            let viewCenter = new Vector(this.element().scrollLeft + this.element().clientWidth / 2, this.element().scrollTop + this.element().clientHeight / 2)
+            // this.debugDrawDot(viewCenter.x, viewCenter.y, 'view center')
+            let viewCenterToGridPoint = new Vector(viewCenter.x / this.scale, viewCenter.y / this.scale)
+            this.debugDrawDot(viewCenterToGridPoint.x, viewCenterToGridPoint.y, 'viewCenter to gridPoint')
+
+            let scrollPosition = new Vector(this.element().scrollLeft, this.element().scrollTop)
+            console.log('scrollPosition', scrollPosition)
+            this.debugDrawDot(scrollPosition.x, scrollPosition.y, 'scrollPosition')
         }
     }
 
@@ -106,10 +115,12 @@ export default class Grid extends Component {
         let maxScale = 5
         let minScale = 0.25
         let toolTip = this.toolTip
-        let oldScale = this.scale
-        let oldScrollArea = new Vector(this.element().scrollWidth, this.element().scrollHeight)
+        let lookingAtGridPoint = new Vector(this.element().scrollLeft + this.element().clientWidth / 2, this.element().scrollTop + this.element().clientHeight / 2)
 
         if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
+
+            //TODO: this should just trigger an event that the tooltip can listen for and take care of itself.
+
             //make the tooltip flash red to indicate the scale is at its limit
             //get the original color,  if not already red
             if (toolTip.style.color !== 'red') {
@@ -129,8 +140,6 @@ export default class Grid extends Component {
         this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
         this.scale = Math.round(this.scale * 10000) / 10000;
 
-        let scaleDiff = this.scale - oldScale
-
         // apply scale to all the shapes we have
         for (let shapeId in this._shapes) {
             this._shapes[shapeId].scale = this.scale
@@ -147,30 +156,74 @@ export default class Grid extends Component {
         })
         this.dispatchEventWithDebounce(event, 0)
 
-        //update the scroll position
-        let newScrollArea = new Vector(this.element().scrollWidth, this.element().scrollHeight)
-        let spaceDiff = new Vector(
-            (oldScrollArea.x - this.element().clientWidth) * scaleDiff,
-            (oldScrollArea.y - this.element().clientHeight) * scaleDiff
-        )
-        let rect = this.element().getBoundingClientRect()
-        let scrollChange = new Vector(
-            rect.width /2 * scaleDiff,
-            rect.height /2 * scaleDiff
-        )
-        //apply scroll
-        this.element().scrollLeft += scrollChange.x
-        this.element().scrollTop += scrollChange.y
 
-        //debug
-        console.log('spaceDiff:', spaceDiff)
-        console.log('scrollChange:', scrollChange)
-        console.log('scrollPosition:', this.element().scrollLeft, this.element().scrollTop)
 
         //update the background and info text
         toolTip.innerText = `Scale: 1px = ${this.scale}cm`
         this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
         this.background.style.backgroundPosition = `-${this.element().scrollLeft}px -${this.element().scrollTop}px`
+    }
+
+
+    // copied from shape
+    //  TODO: another reason this class should extend shape (use this version its updated).
+    debugDrawDot(x, y, name = undefined) {
+
+        console.log(name)
+        if (name === undefined) {
+            name = randomId()
+        } else {
+            console.log('debugDot:' + name, x, y)
+        }
+
+        // Keep a list of dots
+        if (!this.dots) {
+            this.dots = [];
+        }
+
+        // update the dot if one with the same name already exists
+        for (let dot of this.dots) {
+            if (dot.name === name) {
+                dot.dot.style.left = x + 'px';
+                dot.dot.style.top = y + 'px';
+                // update the label if it has one
+                if (dot.label) {
+                    dot.label.innerHTML = name + '<br/> ' + x + '<br/> ' + y;
+                }
+                return;
+            }
+        }
+
+        // Do not create a dot if one already exists with the same x and y coordinates
+        for (let dot of this.dots) {
+            if (dot.dot.style.left === x + 'px' && dot.dot.style.top === y + 'px') {
+                return;
+            }
+        }
+
+        // Create a small red dot at the given x and y coordinates
+        const dot = document.createElement('div');
+        dot.style.position = 'absolute';
+        dot.style.width = '5px';
+        dot.style.height = '5px';
+        dot.style.backgroundColor = 'red';
+        dot.style.left = x + 'px';
+        dot.style.top = y + 'px';
+        dot.style.zIndex = '999999999999999';
+        this.element().appendChild(dot);
+
+        // add label to the dot so we can see what it is
+        const label = document.createElement('div');
+        label.style.position = 'absolute';
+        label.style.left = 10 + 'px';
+        label.style.top = -5 + 'px';
+        label.style.zIndex = '999999999999999';
+        label.innerHTML = name + '<br/> ' + x + '<br/> ' + y;
+        label.style.width = '300px';
+        dot.appendChild(label);
+
+        // Add the dot to the list
+        this.dots.push({name, dot, label});
     }
 
     html() {
