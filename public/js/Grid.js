@@ -89,6 +89,7 @@ export default class Grid extends Component {
 
             let viewCenter = new Vector(this.element().scrollLeft + this.element().clientWidth / 2, this.element().scrollTop + this.element().clientHeight / 2)
             // this.debugDrawDot(viewCenter.x, viewCenter.y, 'view center')
+            // TODO: This is wrong \/ it only works if the scale is 1
             let viewCenterToGridPoint = new Vector(viewCenter.x / this.scale, viewCenter.y / this.scale)
             this.debugDrawDot(viewCenterToGridPoint.x, viewCenterToGridPoint.y, 'viewCenter to gridPoint')
 
