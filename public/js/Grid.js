@@ -91,6 +91,51 @@ export default class Grid extends Component {
             // this.debugDrawDot(viewCenter.x, viewCenter.y, 'view center')
             // TODO: This is wrong \/ it only works if the scale is 1
             let viewCenterToGridPoint = new Vector(viewCenter.x / this.scale, viewCenter.y / this.scale)
+
+            /**
+             * Ok lets define some terms and what they cover because focusing zoom as been confusing to get right.
+             *
+             * ViewSpace: The part of the GridSpace you can see. ViewSpace = clientWidth * clientHeight of the dom element.
+             *  ViewPoint: A point inside the View. The views centre ViewPoint would be: (clientWidth/2, clientHeight/2).
+             *
+             * GridSpace: The entire scrollable area inside the Grids dom element. GridSpace = scrollWidth * scrollHeight of the dom element.
+             *  GridPoint:      The X,Y position of anything inside the grids scrollable area.
+             *  ScrollPoint:    Scrollbars left and top position as x,y. Directly maps to a GridPoint and is the 0,0 ViewPoint.
+             *
+             * VirtualSpace: Conceptual dimension using Centimetres as its measurement unit.
+             *  Scale:          How many pixels of GridSpace that each cm of VirtualSpace takes up. if scale is 2 then 1
+             *  VirtualPoint:   x, y position in VirtualSpace for Shapes.
+             *
+             * Conversions:
+             *  GridPoint = ViewPoint + ScrollPoint
+             *  GridPoint = VirtualPoint * Scale
+             *  VirtualPoint = GridPoint / Scale
+             *
+             * As the scale increases:
+             *  - Shapes are moving and growing bigger but have not changed at all in the VirtualSpace.
+             *  - According to VirtualSpace, the scroll position and the view are moving and shrinking in size when in reality/GridSpace they are doing nothing.
+             *
+             * So if we want the View to stay still according to VirtualSpace then, we need to calculate the VirtualPoint the view is looking at,
+             *  record, scale everything and then reposition the view, so it's centered on that same VirtualPoint again.
+             *
+             * Steps:
+             *  - Calculate the centre of the View. VP = clientWidth/2, clientHeight/2
+             *  - Add the ScrollPoint to turn it into a GridPoint. GP =
+             *  - Convert the GridPoint into a VirtualPoint.
+             *  -
+             *  - ↕ Scale everything up.
+             *  -
+             *  - Convert the VirtualPoint back into a GridPoint.
+             *  - Minus the centre ViewPoint to get the ScrollPoint.
+             *  - Set the new scroll position.
+             *
+             */
+
+
+            console.log('client Width, Height', this.element().clientWidth, this.element().clientHeight)
+            console.log('Offset Width, Height', this.element().offsetWidth, this.element().offsetHeight)
+            console.log('rect Width, Height', this.element().getBoundingClientRect().width, this.element().getBoundingClientRect().height)
+
             this.debugDrawDot(viewCenterToGridPoint.x, viewCenterToGridPoint.y, 'viewCenter to gridPoint')
 
             let scrollPosition = new Vector(this.element().scrollLeft, this.element().scrollTop)
