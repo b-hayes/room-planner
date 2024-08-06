@@ -99,7 +99,7 @@ export default class Grid extends Component {
             console.log('Offset Width, Height', this.element().offsetWidth, this.element().offsetHeight)
             console.log('rect Width, Height', this.element().getBoundingClientRect().width, this.element().getBoundingClientRect().height)
 
-            this.debugDrawDot(gridPoint.x, gridPoint.y, 'viewCenter to gridPoint')
+            this.debugDrawDot(gridPoint.x, gridPoint.y, 'viewCenter as gridPoint')
 
             let scrollPosition = new Vector(this.element().scrollLeft, this.element().scrollTop)
             console.log('scrollPosition', scrollPosition)
