@@ -11,12 +11,12 @@ export default class Grid extends Component {
         this.background = this.element() //the background is the element now.
         this.toolTip = this.element().getElementsByClassName('tool-tip')[0]
 
-        document.addEventListener('wheel', (e) => this.scroll(e), false)
-        document.addEventListener('mousedown', (e) => this.mouseDown(e), false)
+        document.addEventListener('wheel', (e) => this._onScroll(e), false)
+        document.addEventListener('mousedown', (e) => this._onMouseDown(e), false)
     }
 
     addShape(shape) {
-        if (! shape instanceof Shape) {
+        if (!shape instanceof Shape) {
             throw new Error('shape must be an instance of Shape')
         }
         shape.scale = this.scale
@@ -35,7 +35,7 @@ export default class Grid extends Component {
         delete this._shapes[shapeId]
     }
 
-    mouseDown(e) {
+    _onMouseDown(e) {
         if (e.target !== this.element() && !this.element().contains(e.target)) {
             return
         }
@@ -48,17 +48,17 @@ export default class Grid extends Component {
             clickY: e.pageY
         }
 
-        document.addEventListener('mousemove', (e) => this.drag(e), false)
-        document.addEventListener('mouseup', () => this.mouseUp(), false)
+        document.addEventListener('mousemove', (e) => this._onDrag(e), false)
+        document.addEventListener('mouseup', () => this._onMouseUp(), false)
     }
 
-    mouseUp() {
+    _onMouseUp() {
         this.positionWhenClicked = null
-        document.removeEventListener('mousemove', (e) => this.drag(e), false)
-        document.removeEventListener('mouseup', () => this.mouseUp(), false)
+        document.removeEventListener('mousemove', (e) => this._onDrag(e), false)
+        document.removeEventListener('mouseup', () => this._onMouseUp(), false)
     }
 
-    drag(e) {
+    _onDrag(e) {
         //if the mouse not held were not dragging
         if (!e.buttons) {
             return
@@ -86,55 +86,230 @@ export default class Grid extends Component {
             //update scroll position and the background offset
             this.element().scrollTo(scroll.x, scroll.y)
             this.background.style.backgroundPosition = `-${scroll.x}px -${scroll.y}px`
+
+            // Calculate the centre of the View.
+            let viewCentre = new Vector(this.element().clientWidth / 2, this.element().clientHeight / 2);
+            // Add the ScrollPoint to turn it into a GridPoint. TODO: somehow this is still off I cant for the life of me understand why I have thought through this so thoroughly its driving me nuts!
+            let gridPoint = new Vector(
+                viewCentre.x + this.element().scrollLeft,
+                viewCentre.y + this.element().scrollTop
+            )
+
+            console.log('client Width, Height', this.element().clientWidth, this.element().clientHeight)
+            console.log('Offset Width, Height', this.element().offsetWidth, this.element().offsetHeight)
+            console.log('rect Width, Height', this.element().getBoundingClientRect().width, this.element().getBoundingClientRect().height)
+
+            this.debugDrawDot(gridPoint.x, gridPoint.y, 'viewCenter as gridPoint')
+
+            let scrollPosition = new Vector(this.element().scrollLeft, this.element().scrollTop)
+            console.log('scrollPosition', scrollPosition)
+            this.debugDrawDot(scrollPosition.x, scrollPosition.y, 'scrollPosition')
         }
     }
 
-    scroll(e) {
-        //if ctrl or command is held, then scroll to zoom
-        if (this.element().contains(e.target)) {
-            let maxScale = 5
-            let minScale = 0.25
-            let toolTip = this.toolTip
-            if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
-                //make the tooltip flash red to indicate the scale is at its limit
-                //get the original color,  if not already red
-                if (toolTip.style.color !== 'red') {
-                    var originalColor = toolTip.style.color
-                }
+    _onScroll(e) {
 
-                toolTip.style.color = 'red'
-                setTimeout(() => {
-                        toolTip.style.color = originalColor
-                    }
-                    , 100)
-                return
-            }
-
-            //e.preventDefault()
-            this.scale += e.deltaY * -0.001
-            this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
-            this.scale = Math.round(this.scale * 10000) / 10000;
-            toolTip.innerText = `Scale: 1px = ${this.scale}cm`
-            this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
-
-            // apply scale to all the shapes we have
-            for (let shapeId in this._shapes) {
-                this._shapes[shapeId].scale = this.scale
-            }
-
-            let event = new CustomEvent('grid-scale-changed', {
-                detail: {
-                    button: e.button,
-                    x: e.pageX,
-                    y: e.pageY,
-                    object: this
-                }
-            })
-            this.dispatchEventWithDebounce(event, 0)
+        if (!this.element().contains(e.target)) {
+            return //if the target is not the grid, ignore the event
         }
 
-        //update the background offset to match the scroll change, inverted
+        //if alt is held pan instead of zoom
+        if (e.altKey) {
+            //todo: copy the pan code into its own function and call it here
+            return
+        }
+
+        //TODO: move zoom code into its own function and call it here
+        //ZOOM IN AND OUT
+        let maxScale = 5
+        let minScale = 0.25
+        let toolTip = this.toolTip
+        let lookingAtGridPoint = new Vector(this.element().scrollLeft + this.element().clientWidth / 2, this.element().scrollTop + this.element().clientHeight / 2)
+
+        if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
+
+            //TODO: make the tooltip listen for this event and update itself
+            // this.dispatchEventWithDebounce(new CustomEvent('grid-scale-limit-reached', {
+            //     detail: {
+            //         scale: this.scale,
+            //         maxScale,
+            //         minScale,
+            //         lookingAtGridPoint
+            //     }
+            // }), 0)
+
+            //make the tooltip flash red to indicate the scale is at its limit
+            //get the original color,  if not already red
+            if (toolTip.style.color !== 'red') {
+                var originalColor = toolTip.style.color
+            }
+
+            toolTip.style.color = 'red'
+            setTimeout(() => {
+                    toolTip.style.color = originalColor
+                }
+                , 100)
+            return
+        }
+
+        /**
+         * Ok lets define some terms and what they cover because focusing zoom as been confusing to get right.
+         *
+         * ViewSpace: The part of the GridSpace you can see. ViewSpace = clientWidth * clientHeight of the dom element.
+         *  ViewPoint: A point inside the View. The views centre ViewPoint would be: (clientWidth/2, clientHeight/2).
+         *
+         * GridSpace: The entire scrollable area inside the Grids dom element. GridSpace = scrollWidth * scrollHeight of the dom element.
+         *  GridPoint:      The X,Y position of anything inside the grids scrollable area.
+         *  ScrollPoint:    Scrollbars left and top position as x,y. Directly maps to a GridPoint and is the 0,0 ViewPoint.
+         *
+         * VirtualSpace: Conceptual dimension using Centimetres as its measurement unit.
+         *  Scale:          How many pixels of GridSpace that each cm of VirtualSpace takes up. if scale is 2 then 1
+         *  VirtualPoint:   x, y position in VirtualSpace for Shapes.
+         *
+         * Conversions:
+         *  GridPoint = ViewPoint + ScrollPoint
+         *  GridPoint = VirtualPoint * Scale
+         *  VirtualPoint = GridPoint / Scale
+         *
+         * As the scale increases:
+         *  - Shapes are moving and growing bigger but have not changed at all in the VirtualSpace.
+         *  - According to VirtualSpace, the scroll position and the view are moving and shrinking in size when in reality/GridSpace they are doing nothing.
+         *
+         * So if we want the View to stay still according to VirtualSpace then, we need to calculate the VirtualPoint the view is looking at,
+         *  record, scale everything and then reposition the view, so it's centered on that same VirtualPoint again.
+         *
+         * Steps:
+         *  - Calculate the centre of the View.
+         *  - Add the ScrollPoint to turn it into a GridPoint.
+         *  - Convert the GridPoint into a VirtualPoint.
+         *  -
+         *  - ↕ Scale everything up.
+         *  -
+         *  - Convert the VirtualPoint back into a GridPoint.
+         *  - Minus the centre ViewPoint to get the ScrollPoint.
+         *  - Set the new scroll position.
+         *
+        */
+
+        // Calculate the centre of the View.
+        let viewCentre = new Vector(this.element().clientWidth / 2, this.element().clientHeight / 2);
+        // Add the ScrollPoint to turn it into a GridPoint.
+        let gridPoint = new Vector(
+        viewCentre.x + this.element().scrollLeft,
+            viewCentre.y + this.element().scrollTop
+        )
+        // Convert the GridPoint into a VirtualPoint.
+        let virtualPoint = new Vector(
+            gridPoint.x / this.scale,
+            gridPoint.y / this.scale
+        )
+
+        // ↕ Scale everything up.
+
+        //e.preventDefault()
+        this.scale += e.deltaY * -0.001
+        this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
+        this.scale = Math.round(this.scale * 10000) / 10000;
+
+        // apply scale to all the shapes we have
+        for (let shapeId in this._shapes) {
+            this._shapes[shapeId].scale = this.scale
+        }
+
+        // Dispatch event to let the rest of app know the scale has changed
+        let event = new CustomEvent('grid-scale-changed', {
+            detail: {
+                button: e.button,
+                x: e.pageX,
+                y: e.pageY,
+                object: this
+            }
+        })
+        this.dispatchEventWithDebounce(event, 0)
+
+        // Convert the VirtualPoint back into a GridPoint.
+        let newGridPoint = new Vector(
+            virtualPoint.x * this.scale,
+            virtualPoint.y * this.scale
+        )
+
+        //Minus the centre ViewPoint to get the ScrollPoint.
+        let scrollPoint = new Vector(
+            newGridPoint.x = viewCentre.x,
+            newGridPoint.y = viewCentre.y,
+        )
+
+        // Set the new scroll position.
+        this.element().scrollLeft = scrollPoint.x
+        this.element().scrollTop = scrollPoint.y
+
+
+        //update the background and info text
+        toolTip.innerText = `Scale: 1px = ${this.scale}cm`
+        this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
         this.background.style.backgroundPosition = `-${this.element().scrollLeft}px -${this.element().scrollTop}px`
+    }
+
+
+    // copied from shape
+    //  TODO: another reason this class should extend shape (use this version its updated).
+    debugDrawDot(x, y, name = undefined) {
+
+        console.log(name)
+        if (name === undefined) {
+            name = randomId()
+        } else {
+            console.log('debugDot:' + name, x, y)
+        }
+
+        // Keep a list of dots
+        if (!this.dots) {
+            this.dots = [];
+        }
+
+        // update the dot if one with the same name already exists
+        for (let dot of this.dots) {
+            if (dot.name === name) {
+                dot.dot.style.left = x + 'px';
+                dot.dot.style.top = y + 'px';
+                // update the label if it has one
+                if (dot.label) {
+                    dot.label.innerHTML = name + '<br/> ' + x + '<br/> ' + y;
+                }
+                return;
+            }
+        }
+
+        // Do not create a dot if one already exists with the same x and y coordinates
+        for (let dot of this.dots) {
+            if (dot.dot.style.left === x + 'px' && dot.dot.style.top === y + 'px') {
+                return;
+            }
+        }
+
+        // Create a small red dot at the given x and y coordinates
+        const dot = document.createElement('div');
+        dot.style.position = 'absolute';
+        dot.style.width = '5px';
+        dot.style.height = '5px';
+        dot.style.backgroundColor = 'red';
+        dot.style.left = x + 'px';
+        dot.style.top = y + 'px';
+        dot.style.zIndex = '999999999999999';
+        this.element().appendChild(dot);
+
+        // add label to the dot so we can see what it is
+        const label = document.createElement('div');
+        label.style.position = 'absolute';
+        label.style.left = 10 + 'px';
+        label.style.top = -5 + 'px';
+        label.style.zIndex = '999999999999999';
+        label.innerHTML = name + '<br/> ' + x + '<br/> ' + y;
+        label.style.width = '300px';
+        dot.appendChild(label);
+
+        // Add the dot to the list
+        this.dots.push({name, dot, label});
     }
 
     html() {
