@@ -220,7 +220,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     }
 
     await Loader.replaceTagsWithComponents(document)
-    const grid = document.querySelector(".grid")
+    window.grid = document.querySelector(".grid")
         .componentInstance
     load()
 
