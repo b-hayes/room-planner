@@ -13,6 +13,7 @@ export default class Grid extends Component {
 
         document.addEventListener('wheel', (e) => this._onScroll(e), false)
         document.addEventListener('mousedown', (e) => this._onMouseDown(e), false)
+        this.spacer = this.element().getElementsByClassName('grid-spacer')[0]
     }
 
     html() {
@@ -119,7 +120,7 @@ export default class Grid extends Component {
         // calculate the scale change
         let scaleShift = e.deltaY * -0.001
         let newScale = this.scale + scaleShift
-        newScale = this.round(newScale, 3)
+        newScale = Math.round(newScale * 1000) / 1000 //round to 3 decimal places
         scaleShift = newScale - this.scale
 
         if (this.scale + scaleShift > maxScale || this.scale + scaleShift < minScale) {
@@ -202,6 +203,8 @@ export default class Grid extends Component {
         for (let shapeId in this._shapes) {
             this._shapes[shapeId].scale = this.scale
         }
+        this.spacer.style.height = Math.max(this.element().clientHeight, (this.element().clientHeight * this.scale)) + 'px'
+        this.spacer.style.width = Math.max(this.element().clientWidth, (this.element().clientWidth * this.scale)) + 'px'
 
         // Convert the VirtualPoint we want to keep looking at, back into a GridPoint with the new scale.
         let newGridPoint = new Vector(
@@ -223,6 +226,9 @@ export default class Grid extends Component {
         toolTip.innerText = `Scale: 1px = ${this.scale}cm`
         this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
         this.background.style.backgroundPosition = `-${this.element().scrollLeft}px -${this.element().scrollTop}px`
+        //keep tooltip in the top left of the ViewSpace
+        this.toolTip.style.left = this.element().scrollLeft + 'px'
+        this.toolTip.style.top = this.element().scrollTop + 'px'
 
         // Let the rest of app know the scale has changed
         let event = new CustomEvent('grid-scale-changed', {
@@ -234,11 +240,6 @@ export default class Grid extends Component {
             }
         })
         this.dispatchEventWithDebounce(event, 0)
-    }
-
-    round = (n, dp) => {
-        const h = +('1'.padEnd(dp + 1, '0')) // 10 or 100 or 1000 or etc
-        return Math.round(n * h) / h
     }
 
     // copied from shape
@@ -304,8 +305,10 @@ const html = `
     <div class="grid grid-background">
         <div class="tool-tip">Scale: 1px = 1cm</div>
         <slot></slot>
+        <div class="grid-spacer"></div>
     </div>
 `
+
 
 // language=CSS
 const style = `
@@ -316,6 +319,12 @@ const style = `
         min-width: 100%;
         box-shadow: inset 5px 5px 10px 3px rgba(0, 0, 0, 0.5);
         overflow: hidden;
+        /* overflow hidden still allows scrolling if child nodes use position absolute */
+    }
+    
+    /* make all .grid children use position absolute */
+    .grid > * {
+        position: absolute;
     }
 
     .grid-background {
@@ -325,12 +334,19 @@ const style = `
     }
 
     .tool-tip {
-        position: absolute;
         top: 0;
         left: 0;
         color: var(--foreground, black);
         padding: 5px;
         font-size: 16px;
         z-index: 100;
+        width: 100%;
+        text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .grid-spacer {
+        /* spacer expands the scrollable space when zooming so point focus still works when no shapes are scaling out of view */
+        opacity: 0;
+        background-color: rgba(127, 255, 212, 0.26);
     }
 `
