@@ -95,14 +95,9 @@ export default class Grid extends Component {
                 viewCentre.y + this.element().scrollTop
             )
 
-            console.log('client Width, Height', this.element().clientWidth, this.element().clientHeight)
-            console.log('Offset Width, Height', this.element().offsetWidth, this.element().offsetHeight)
-            console.log('rect Width, Height', this.element().getBoundingClientRect().width, this.element().getBoundingClientRect().height)
-
             this.debugDrawDot(gridPoint.x, gridPoint.y, 'viewCenter as gridPoint')
 
             let scrollPosition = new Vector(this.element().scrollLeft, this.element().scrollTop)
-            console.log('scrollPosition', scrollPosition)
             this.debugDrawDot(scrollPosition.x, scrollPosition.y, 'scrollPosition')
         }
     }
@@ -126,7 +121,12 @@ export default class Grid extends Component {
         let toolTip = this.toolTip
         let lookingAtGridPoint = new Vector(this.element().scrollLeft + this.element().clientWidth / 2, this.element().scrollTop + this.element().clientHeight / 2)
 
-        if (this.scale + e.deltaY * -0.001 > maxScale || this.scale + e.deltaY * -0.001 < minScale) {
+        // calculate the scale change
+        let scaleShift = e.deltaY * -0.001
+        // round to 3 decimal places todo: wrong way around it. SHould rount what the final scale will be and then calculate the shift.
+        //scaleShift = this.round(scaleShift, 3)
+
+        if (this.scale + scaleShift > maxScale || this.scale + scaleShift < minScale) {
 
             //TODO: make the tooltip listen for this event and update itself
             // this.dispatchEventWithDebounce(new CustomEvent('grid-scale-limit-reached', {
@@ -153,41 +153,37 @@ export default class Grid extends Component {
         }
 
         /**
-         * Ok lets define some terms and what they cover because focusing zoom as been confusing to get right.
+         * Defining some terms to clarify what's going on.
          *
          * ViewSpace: The part of the GridSpace you can see. ViewSpace = clientWidth * clientHeight of the dom element.
          *  ViewPoint: A point inside the View. The views centre ViewPoint would be: (clientWidth/2, clientHeight/2).
          *
          * GridSpace: The entire scrollable area inside the Grids dom element. GridSpace = scrollWidth * scrollHeight of the dom element.
-         *  GridPoint:      The X,Y position of anything inside the grids scrollable area.
+         *  GridPoint:      The real X,Y position of anything inside the grids scrollable area.
          *  ScrollPoint:    Scrollbars left and top position as x,y. Directly maps to a GridPoint and is the 0,0 ViewPoint.
          *
-         * VirtualSpace: Conceptual dimension using Centimetres as its measurement unit.
-         *  Scale:          How many pixels of GridSpace that each cm of VirtualSpace takes up. if scale is 2 then 1
-         *  VirtualPoint:   x, y position in VirtualSpace for Shapes.
+         * VirtualSpace: Conceptual space using Centimetres as its measurement unit.
+         *  Scale:          How many pixels of GridSpace each cm of VirtualSpace takes up. if scale is 2 then 1cm = 2px.
+         *  VirtualPoint:   x, y position in VirtualSpace. A Shapes position is VirtualPoint.
          *
          * Conversions:
          *  GridPoint = ViewPoint + ScrollPoint
          *  GridPoint = VirtualPoint * Scale
          *  VirtualPoint = GridPoint / Scale
          *
-         * As the scale increases:
-         *  - Shapes are moving and growing bigger but have not changed at all in the VirtualSpace.
-         *  - According to VirtualSpace, the scroll position and the view are moving and shrinking in size when in reality/GridSpace they are doing nothing.
-         *
-         * So if we want the View to stay still according to VirtualSpace then, we need to calculate the VirtualPoint the view is looking at,
-         *  record, scale everything and then reposition the view, so it's centered on that same VirtualPoint again.
+         * Zooming the view, in/decreases the scale of Shapes
+         * and adjusts the scroll position to keep looking at the same VirtualPoint.
          *
          * Steps:
          *  - Calculate the centre of the View.
          *  - Add the ScrollPoint to turn it into a GridPoint.
-         *  - Convert the GridPoint into a VirtualPoint.
+         *  - Convert the GridPoint into a VirtualPoint (the point we are looking at).
          *  -
          *  - ↕ Scale everything up.
          *  -
-         *  - Convert the VirtualPoint back into a GridPoint.
-         *  - Minus the centre ViewPoint to get the ScrollPoint.
-         *  - Set the new scroll position.
+         *  - Convert the VirtualPoint back into a GridPoint with the new scale.
+         *  - Calculate the difference of the new GridPoint
+         *  - Adjust the scroll by x and y difference to center on the same VirtualPoint again.
          *
         */
 
@@ -198,25 +194,42 @@ export default class Grid extends Component {
         viewCentre.x + this.element().scrollLeft,
             viewCentre.y + this.element().scrollTop
         )
+
         // Convert the GridPoint into a VirtualPoint.
         let virtualPoint = new Vector(
             gridPoint.x / this.scale,
             gridPoint.y / this.scale
         )
+        console.log('virtual point', virtualPoint)
 
-        // ↕ Scale everything up.
-
-        //e.preventDefault()
-        this.scale += e.deltaY * -0.001
-        this.scale = Math.max(minScale, Math.min(maxScale, this.scale))
-        this.scale = Math.round(this.scale * 10000) / 10000;
-
-        // apply scale to all the shapes we have
+        // ↕ Scale everything up...
+        this.scale += scaleShift
         for (let shapeId in this._shapes) {
             this._shapes[shapeId].scale = this.scale
         }
 
-        // Dispatch event to let the rest of app know the scale has changed
+        // Convert the VirtualPoint we want to keep looking at, back into a GridPoint with the new scale.
+        let newGridPoint = new Vector(
+            virtualPoint.x * this.scale,
+            virtualPoint.y * this.scale
+        )
+
+        // the amount to scroll to keep looking at the virtual point is the difference between the grid points
+        let scrollShift =  new Vector(
+            newGridPoint.x - gridPoint.x,
+            newGridPoint.y - gridPoint.y
+        )
+
+        // Set the new scroll position.
+        this.element().scrollLeft += scrollShift.x
+        this.element().scrollTop += scrollShift.y
+
+        //update the background and info text
+        toolTip.innerText = `Scale: 1px = ${this.scale}cm`
+        this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
+        this.background.style.backgroundPosition = `-${this.element().scrollLeft}px -${this.element().scrollTop}px`
+
+        // Let the rest of app know the scale has changed
         let event = new CustomEvent('grid-scale-changed', {
             detail: {
                 button: e.button,
@@ -226,40 +239,18 @@ export default class Grid extends Component {
             }
         })
         this.dispatchEventWithDebounce(event, 0)
-
-        // Convert the VirtualPoint back into a GridPoint.
-        let newGridPoint = new Vector(
-            virtualPoint.x * this.scale,
-            virtualPoint.y * this.scale
-        )
-
-        //Minus the centre ViewPoint to get the ScrollPoint.
-        let scrollPoint = new Vector(
-            newGridPoint.x = viewCentre.x,
-            newGridPoint.y = viewCentre.y,
-        )
-
-        // Set the new scroll position.
-        this.element().scrollLeft = scrollPoint.x
-        this.element().scrollTop = scrollPoint.y
-
-
-        //update the background and info text
-        toolTip.innerText = `Scale: 1px = ${this.scale}cm`
-        this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
-        this.background.style.backgroundPosition = `-${this.element().scrollLeft}px -${this.element().scrollTop}px`
     }
 
+    round = (n, dp) => {
+        const h = +('1'.padEnd(dp + 1, '0')) // 10 or 100 or 1000 or etc
+        return Math.round(n * h) / h
+    }
 
     // copied from shape
     //  TODO: another reason this class should extend shape (use this version its updated).
     debugDrawDot(x, y, name = undefined) {
-
-        console.log(name)
         if (name === undefined) {
             name = randomId()
-        } else {
-            console.log('debugDot:' + name, x, y)
         }
 
         // Keep a list of dots
@@ -298,7 +289,7 @@ export default class Grid extends Component {
         dot.style.zIndex = '999999999999999';
         this.element().appendChild(dot);
 
-        // add label to the dot so we can see what it is
+        // add label to the dot, so we can see what it is
         const label = document.createElement('div');
         label.style.position = 'absolute';
         label.style.left = 10 + 'px';

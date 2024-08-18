@@ -272,7 +272,6 @@ export default class Shape extends Component {
     redraw() {
         const pos = this.position
         const sPos = this.getScaled(pos)
-        // const ivertedSPost = this.getScaled(pos, 1 / this.scale)
 
         //x and y are the center of the shape, so we need to adjust the position to be the top left corner
         // because that's how the browser positions elements.
