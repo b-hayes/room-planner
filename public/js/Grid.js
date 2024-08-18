@@ -95,6 +95,9 @@ export default class Grid extends Component {
             //update scroll position and the background offset
             this.element().scrollTo(scroll.x, scroll.y)
             this.background.style.backgroundPosition = `-${scroll.x}px -${scroll.y}px`
+            // update tooltip position
+            this.toolTip.style.left = scroll.x + 'px'
+            this.toolTip.style.top = scroll.y + 'px'
         }
     }
 
