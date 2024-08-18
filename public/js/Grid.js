@@ -15,6 +15,14 @@ export default class Grid extends Component {
         document.addEventListener('mousedown', (e) => this._onMouseDown(e), false)
     }
 
+    html() {
+        return html
+    }
+
+    style() {
+        return style
+    }
+
     addShape(shape) {
         if (!shape instanceof Shape) {
             throw new Error('shape must be an instance of Shape')
@@ -288,14 +296,6 @@ export default class Grid extends Component {
 
         // Add the dot to the list
         this.dots.push({name, dot, label});
-    }
-
-    html() {
-        return html
-    }
-
-    style() {
-        return style
     }
 }
 
