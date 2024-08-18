@@ -86,19 +86,6 @@ export default class Grid extends Component {
             //update scroll position and the background offset
             this.element().scrollTo(scroll.x, scroll.y)
             this.background.style.backgroundPosition = `-${scroll.x}px -${scroll.y}px`
-
-            // Calculate the centre of the View.
-            let viewCentre = new Vector(this.element().clientWidth / 2, this.element().clientHeight / 2);
-            // Add the ScrollPoint to turn it into a GridPoint. TODO: somehow this is still off I cant for the life of me understand why I have thought through this so thoroughly its driving me nuts!
-            let gridPoint = new Vector(
-                viewCentre.x + this.element().scrollLeft,
-                viewCentre.y + this.element().scrollTop
-            )
-
-            this.debugDrawDot(gridPoint.x, gridPoint.y, 'viewCenter as gridPoint')
-
-            let scrollPosition = new Vector(this.element().scrollLeft, this.element().scrollTop)
-            this.debugDrawDot(scrollPosition.x, scrollPosition.y, 'scrollPosition')
         }
     }
 
@@ -123,8 +110,9 @@ export default class Grid extends Component {
 
         // calculate the scale change
         let scaleShift = e.deltaY * -0.001
-        // round to 3 decimal places todo: wrong way around it. SHould rount what the final scale will be and then calculate the shift.
-        //scaleShift = this.round(scaleShift, 3)
+        let newScale = this.scale + scaleShift
+        newScale = this.round(newScale, 3)
+        scaleShift = newScale - this.scale
 
         if (this.scale + scaleShift > maxScale || this.scale + scaleShift < minScale) {
 
@@ -200,7 +188,6 @@ export default class Grid extends Component {
             gridPoint.x / this.scale,
             gridPoint.y / this.scale
         )
-        console.log('virtual point', virtualPoint)
 
         // ↕ Scale everything up...
         this.scale += scaleShift
