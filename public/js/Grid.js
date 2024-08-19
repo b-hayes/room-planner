@@ -1,6 +1,7 @@
 import Component from "./Scafold/Component.js"
 import Vector from "./Vector.js"
 import Shape from "./Shape.js"
+import Float from "./Float.js"
 
 export default class Grid extends Component {
 
@@ -121,13 +122,15 @@ export default class Grid extends Component {
         let lookingAtGridPoint = new Vector(this.element().scrollLeft + this.element().clientWidth / 2, this.element().scrollTop + this.element().clientHeight / 2)
 
         // calculate the scale change
-        let scaleShift = e.deltaY * -0.001
-        let newScale = this.scale + scaleShift
-        newScale = Math.round(newScale * 1000) / 1000 //round to 3 decimal places
-        scaleShift = newScale - this.scale
+        let scaleInput = e.deltaY * -0.001
+        let newScale = this.scale + scaleInput
+        newScale = Float.round(newScale, 0.001) //round to 3 decimal places
+        newScale = Float.clamp(newScale, minScale, maxScale) // keep new scale within limits
 
-        if (this.scale + scaleShift > maxScale || this.scale + scaleShift < minScale) {
-
+        if (
+            (this.scale === maxScale && this.scale + scaleInput > maxScale) ||
+            (this.scale === minScale && this.scale + scaleInput < minScale)
+        ) {
             //TODO: make the tooltip listen for this event and update itself
             // this.dispatchEventWithDebounce(new CustomEvent('grid-scale-limit-reached', {
             //     detail: {
@@ -202,7 +205,7 @@ export default class Grid extends Component {
         )
 
         // ↕ Scale everything up...
-        this.scale += scaleShift
+        this.scale = newScale
         for (let shapeId in this._shapes) {
             this._shapes[shapeId].scale = this.scale
         }
