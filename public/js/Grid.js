@@ -89,14 +89,14 @@ export default class Grid extends Component {
         }
     }
 
-    pan(shift, from = null) {
-        //check that shift and from are Vectors
-        if (!shift instanceof Vector) {
-            throw new Error('shift must be an instance of Vector')
-        }
-        if (from !== null && !from instanceof Vector) {
-            throw new Error('from must be an instance of Vector')
-        }
+    /**
+     * Pan the grid by the shift amount.
+     * @param {Vector} shift
+     * @param {Vector|undefined} from
+     */
+    pan(shift, from = undefined) {
+        if (!shift instanceof Vector) throw new Error('[shift] must be an instance of Vector')
+        if (from !== null && !from instanceof Vector) throw new Error('[from] must be an instance of Vector')
 
         if (from) {
             shift.x += from.x
@@ -121,20 +121,29 @@ export default class Grid extends Component {
         this.toolTip.style.top = shift.y + 'px'
     }
 
-    _onScroll(e) {
-
-        if (!this.element().contains(e.target)) {
+    /**
+     * Handle scroll events on the grid.
+     * @param {Event} event
+     * @private
+     */
+    _onScroll(event) {
+        if (!this.element().contains(event.target)) {
             return //if the target is not the grid, ignore the event
         }
 
         //if alt is held pan instead of zoom. This is great for trackpads.
-        if (e.altKey) {
-            this.pan(new Vector(e.deltaX, e.deltaY))
+        if (event.altKey) {
+            let shift = new Vector(event.deltaX, event.deltaY)
+            //if shift key swap the x and y values
+            if (event.shiftKey) {
+                shift = new Vector(event.deltaY, event.deltaX)
+            }
+            this.pan(shift)
             return
         }
 
         //ZOOM IN AND OUT
-        let scaleInput = e.deltaY * -0.001
+        let scaleInput = event.deltaY * -0.001
         this.zoom(scaleInput)
     }
 
@@ -281,7 +290,8 @@ export default class Grid extends Component {
         this.requireType(x, 'number')
         this.requireType(y, 'number')
         this.requireType(name, 'string')
-        if (name === '') {
+
+        if (!name) {
             name = randomId()
         }
 

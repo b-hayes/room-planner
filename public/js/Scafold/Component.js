@@ -52,11 +52,13 @@ export default class Component {
         if (typeof value !== type) {
             throw new Error(message)
         }
+        return true
     }
 
     requireInstance(value, instance, message = 'Expected instance of ' + instance + ' but received ' + value.constructor.name) {
         if (!(value instanceof instance)) {
             throw new Error(message)
         }
+        return true
     }
 }
