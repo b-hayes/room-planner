@@ -78,28 +78,47 @@ export default class Grid extends Component {
             this.positionWhenClicked.clickX - e.pageX,
             this.positionWhenClicked.clickY - e.pageY
         )
+        let from = new Vector(
+            this.positionWhenClicked.scrollX,
+            this.positionWhenClicked.scrollY
+        )
 
         // Pan if the alt key is held, or middle mouse button is held
         if (e.altKey || e.buttons === 4) {
-            let scroll = new Vector(
-                this.positionWhenClicked.scrollX + shift.x,
-                this.positionWhenClicked.scrollY + shift.y
-            )
-            //prevent numbers out of range
-            scroll.clamp(
-                0,
-                this.element().scrollWidth - this.element().clientWidth,
-                0,
-                this.element().scrollHeight - this.element().clientHeight
-            )
-
-            //update scroll position and the background offset
-            this.element().scrollTo(scroll.x, scroll.y)
-            this.background.style.backgroundPosition = `-${scroll.x}px -${scroll.y}px`
-            // update tooltip position
-            this.toolTip.style.left = scroll.x + 'px'
-            this.toolTip.style.top = scroll.y + 'px'
+            this.pan(shift, from)
         }
+    }
+
+    pan(shift, from = null) {
+        //check that shift and from are Vectors
+        if (!shift instanceof Vector) {
+            throw new Error('shift must be an instance of Vector')
+        }
+        if (from !== null && !from instanceof Vector) {
+            throw new Error('from must be an instance of Vector')
+        }
+
+        if (from) {
+            shift.x += from.x
+            shift.y += from.y
+        } else {
+            shift.x += this.element().scrollLeft
+            shift.y += this.element().scrollTop
+        }
+        //prevent numbers out of range
+        shift.clamp(
+            0,
+            this.element().scrollWidth - this.element().clientWidth,
+            0,
+            this.element().scrollHeight - this.element().clientHeight
+        )
+
+        //update scroll position and the background offset
+        this.element().scrollTo(shift.x, shift.y)
+        this.background.style.backgroundPosition = `-${shift.x}px -${shift.y}px`
+        // update tooltip position
+        this.toolTip.style.left = shift.x + 'px'
+        this.toolTip.style.top = shift.y + 'px'
     }
 
     _onScroll(e) {
@@ -108,9 +127,10 @@ export default class Grid extends Component {
             return //if the target is not the grid, ignore the event
         }
 
-        //if alt is held pan instead of zoom
+        //if alt is held pan instead of zoom, for touch pads
         if (e.altKey) {
-            //todo: copy the pan code into its own function and call it here
+            let shift = new Vector(e.deltaX, e.deltaY)
+            this.pan(shift)
             return
         }
 
