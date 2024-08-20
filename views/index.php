@@ -139,6 +139,10 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     }
 
+    window.error = function (message) {
+        throw new Error(message)
+    }
+
     window.newShape = function () {
         const shape = new Shape(randomId())
         grid.addShape(shape)
