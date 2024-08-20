@@ -127,31 +127,39 @@ export default class Grid extends Component {
             return //if the target is not the grid, ignore the event
         }
 
-        //if alt is held pan instead of zoom, for touch pads
+        //if alt is held pan instead of zoom. This is great for trackpads.
         if (e.altKey) {
-            let shift = new Vector(e.deltaX, e.deltaY)
-            this.pan(shift)
+            this.pan(new Vector(e.deltaX, e.deltaY))
             return
         }
 
-        //TODO: move zoom code into its own function and call it here
         //ZOOM IN AND OUT
+        let scaleInput = e.deltaY * -0.001
+        this.zoom(scaleInput)
+    }
+
+    /**
+     * Zoom in or out by the shift amount.
+     * @param {number} shift
+     */
+    zoom(shift) {
+        shift = Float.parse(shift, 'zoom shift must be a number')
+
         let maxScale = 5
         let minScale = 0.25
         let toolTip = this.toolTip
-        let lookingAtGridPoint = new Vector(this.element().scrollLeft + this.element().clientWidth / 2, this.element().scrollTop + this.element().clientHeight / 2)
 
         // calculate the scale change
-        let scaleInput = e.deltaY * -0.001
-        let newScale = this.scale + scaleInput
+        const oldScale = this.scale
+        let newScale = this.scale + shift
         newScale = Float.round(newScale, 0.001) //round to 3 decimal places
         newScale = Float.clamp(newScale, minScale, maxScale) // keep new scale within limits
 
         if (
-            (this.scale === maxScale && this.scale + scaleInput > maxScale) ||
-            (this.scale === minScale && this.scale + scaleInput < minScale)
+            (this.scale === maxScale && this.scale + shift > maxScale) ||
+            (this.scale === minScale && this.scale + shift < minScale)
         ) {
-            //TODO: make the tooltip listen for this event and update itself
+            //TODO: make the tooltip component listen for this event and update itself instead of requiring us to do it manually.
             // this.dispatchEventWithDebounce(new CustomEvent('grid-scale-limit-reached', {
             //     detail: {
             //         scale: this.scale,
@@ -208,13 +216,13 @@ export default class Grid extends Component {
          *  - Calculate the difference of the new GridPoint
          *  - Adjust the scroll by x and y difference to center on the same VirtualPoint again.
          *
-        */
+         */
 
         // Calculate the centre of the View.
         let viewCentre = new Vector(this.element().clientWidth / 2, this.element().clientHeight / 2);
         // Add the ScrollPoint to turn it into a GridPoint.
         let gridPoint = new Vector(
-        viewCentre.x + this.element().scrollLeft,
+            viewCentre.x + this.element().scrollLeft,
             viewCentre.y + this.element().scrollTop
         )
 
@@ -239,7 +247,7 @@ export default class Grid extends Component {
         )
 
         // the amount to scroll to keep looking at the virtual point is the difference between the grid points
-        let scrollShift =  new Vector(
+        let scrollShift = new Vector(
             newGridPoint.x - gridPoint.x,
             newGridPoint.y - gridPoint.y
         )
@@ -259,19 +267,21 @@ export default class Grid extends Component {
         // Let the rest of app know the scale has changed
         let event = new CustomEvent('grid-scale-changed', {
             detail: {
-                button: e.button,
-                x: e.pageX,
-                y: e.pageY,
+                newScale: this.scale,
+                oldScale: oldScale,
                 object: this
             }
         })
-        this.dispatchEventWithDebounce(event, 0)
+        this.dispatchEventWithDebounce(event)
     }
 
     // copied from shape
     //  TODO: another reason this class should extend shape (use this version its updated).
-    debugDrawDot(x, y, name = undefined) {
-        if (name === undefined) {
+    debugDrawDot(x, y, name = '') {
+        this.requireType(x, 'number')
+        this.requireType(y, 'number')
+        this.requireType(name, 'string')
+        if (name === '') {
             name = randomId()
         }
 

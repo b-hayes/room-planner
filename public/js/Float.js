@@ -1,6 +1,7 @@
 export default class Float {
     static round(n, nearest) {
         n = this.parse(n)
+        nearest = this.parse(nearest, 'nearest must be a number')
         const scale = 1 / nearest
         const roundedScaledValue = Math.round(n * scale)
         return roundedScaledValue / scale;
@@ -8,13 +9,15 @@ export default class Float {
 
     static clamp(n, min, max){
         n = this.parse(n)
+        min = this.parse(min, 'min must be a number')
+        max = this.parse(max, 'max must be a number')
         return Math.max(Math.min(n, Math.max(min, max)), Math.min(min,max))
     }
 
-    static parse(n) {
+    static parse(n, message = 'n must be a number') {
         n = parseFloat(n)
         if (isNaN(n)) {
-            throw new Error('n must be a number')
+            throw new Error(message)
         }
         return n
     }

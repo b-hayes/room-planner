@@ -27,10 +27,13 @@ export default class Component {
      * Dispatches an event with a debounce time to improve performance.
      *  If performance becomes an issue with the number of elements reacting to realtime events this could help.
      *  100ms is enough for scroll events with a trackpad not to be triggered more than once during the wind down of the scroll.
-     * @param event
-     * @param debounceTime
+     * @param {Event} event
+     * @param {number} debounceTime
      */
     dispatchEventWithDebounce(event, debounceTime = 100) {
+        this.requireInstance(event, Event)
+        this.requireType(debounceTime, 'number', 'debounceTime must be a number')
+
         //if the timeout is 0 then just dispatch the event
         if (debounceTime === 0) {
             this.element().dispatchEvent(event)
@@ -43,5 +46,17 @@ export default class Component {
         this.debounceTimeout = setTimeout(() => {
             this.element().dispatchEvent(event)
         }, debounceTime)
+    }
+
+    requireType(value, type, message = 'expected ' + type + ' but received ' + typeof value) {
+        if (typeof value !== type) {
+            throw new Error(message)
+        }
+    }
+
+    requireInstance(value, instance, message = 'Expected instance of ' + instance + ' but received ' + value.constructor.name) {
+        if (!(value instanceof instance)) {
+            throw new Error(message)
+        }
     }
 }
