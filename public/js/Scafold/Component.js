@@ -1,7 +1,7 @@
 import Loader from "./Loader.js"
 
 export default class Component {
-    static isComponent = true;
+    static isComponent = true
 
     constructor() {
         let styleId = this.constructor.name + '-' + Loader.hashString(this.style())
@@ -31,8 +31,8 @@ export default class Component {
      * @param {number} debounceTime
      */
     dispatchEventWithDebounce(event, debounceTime = 100) {
-        this.requireInstance(event, Event)
-        this.requireType(debounceTime, 'number', 'debounceTime must be a number')
+        if (!(event instanceof Event)) throw new Error('event must be an instance of Event')
+        if (typeof debounceTime !== 'number') throw new Error('debounceTime must be a number')
 
         //if the timeout is 0 then just dispatch the event
         if (debounceTime === 0) {
@@ -48,16 +48,29 @@ export default class Component {
         }, debounceTime)
     }
 
-    requireType(value, type, message = 'expected ' + type + ' but received ' + typeof value) {
+    /**
+     * Helper to throw a clear error value is not the right type
+     * @param value
+     * @param type
+     * @param message
+     * @returns {boolean}
+     */
+    assertType(value, type) {
         if (typeof value !== type) {
-            throw new Error(message)
+            throw new Error('expected ' + type + ' but received ' + typeof value)
         }
         return true
     }
 
-    requireInstance(value, instance, message = 'Expected instance of ' + instance + ' but received ' + value.constructor.name) {
-        if (!(value instanceof instance)) {
-            throw new Error(message)
+    /**
+     * Helper to throw a clear error value is not an instance of classDefinition
+     * @param value
+     * @param {function} classDefinition
+     * @returns {boolean}
+     */
+    assertInstance(value, classDefinition) {
+        if (!(value instanceof classDefinition)) {
+            throw new Error(`Expected instance of ${classDefinition.name} but received ${value.constructor.name}`)
         }
         return true
     }
@@ -70,9 +83,9 @@ export default class Component {
      * @param {string} name
      */
     debugDrawDot(x, y, name = '') {
-        this.requireType(x, 'number')
-        this.requireType(y, 'number')
-        this.requireType(name, 'string')
+        if (typeof x !== 'number') throw new Error('x must be a number')
+        if (typeof y !== 'number') throw new Error('y must be a number')
+        if (typeof name !== 'string') throw new Error('name must be a string')
 
         if (!name) {
             name = randomId()
@@ -80,52 +93,52 @@ export default class Component {
 
         // Keep a list of dots
         if (!this.dots) {
-            this.dots = [];
+            this.dots = []
         }
 
         // update the dot if one with the same name already exists
         for (let dot of this.dots) {
             if (dot.name === name) {
-                dot.dot.style.left = x + 'px';
-                dot.dot.style.top = y + 'px';
+                dot.dot.style.left = x + 'px'
+                dot.dot.style.top = y + 'px'
                 // update the label if it has one
                 if (dot.label) {
-                    dot.label.innerHTML = name + '<br/> ' + x + '<br/> ' + y;
+                    dot.label.innerHTML = name + '<br/> ' + x + '<br/> ' + y
                 }
-                return;
+                return
             }
         }
 
         // Do not create a dot if one already exists with the same x and y coordinates
         for (let dot of this.dots) {
             if (dot.dot.style.left === x + 'px' && dot.dot.style.top === y + 'px') {
-                return;
+                return
             }
         }
 
         // Create a small red dot at the given x and y coordinates
-        const dot = document.createElement('div');
-        dot.style.position = 'absolute';
-        dot.style.width = '5px';
-        dot.style.height = '5px';
-        dot.style.backgroundColor = 'red';
-        dot.style.left = x + 'px';
-        dot.style.top = y + 'px';
-        dot.style.zIndex = '999999999999999';
-        this.element().appendChild(dot);
+        const dot = document.createElement('div')
+        dot.style.position = 'absolute'
+        dot.style.width = '5px'
+        dot.style.height = '5px'
+        dot.style.backgroundColor = 'red'
+        dot.style.left = x + 'px'
+        dot.style.top = y + 'px'
+        dot.style.zIndex = '999999999999999'
+        this.element().appendChild(dot)
 
         // add label to the dot, so we can see what it is
-        const label = document.createElement('div');
-        label.style.position = 'absolute';
-        label.style.left = 10 + 'px';
-        label.style.top = -5 + 'px';
-        label.style.zIndex = '999999999999999';
-        label.innerHTML = name + '<br/> ' + x + '<br/> ' + y;
-        label.style.width = '300px';
-        dot.appendChild(label);
+        const label = document.createElement('div')
+        label.style.position = 'absolute'
+        label.style.left = 10 + 'px'
+        label.style.top = -5 + 'px'
+        label.style.zIndex = '999999999999999'
+        label.innerHTML = name + '<br/> ' + x + '<br/> ' + y
+        label.style.width = '300px'
+        dot.appendChild(label)
 
         // Add the dot to the list
-        this.dots.push({name, dot, label});
+        this.dots.push({name, dot, label})
     }
 
     /**
@@ -140,7 +153,7 @@ export default class Component {
 
         // Keep a list of lines
         if (!this.lines) {
-            this.lines = [];
+            this.lines = []
         }
 
         //grab exiting line or create one
@@ -148,21 +161,21 @@ export default class Component {
         if (line) {
             line = line.line
         } else {
-            line = document.createElement('div');
+            line = document.createElement('div')
         }
 
-        line.style.position = 'absolute';
-        line.style.width = '1px';
-        line.style.height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) + 'px';
-        line.style.backgroundColor = 'red';
-        line.style.left = x1 + 'px';
-        line.style.top = y1 + 'px';
-        line.style.transformOrigin = '0 0';
-        let angle = (Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI - 90 + 360) % 360;
-        line.style.transform = `rotate(${angle}deg)`;
-        document.body.appendChild(line);
+        line.style.position = 'absolute'
+        line.style.width = '1px'
+        line.style.height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) + 'px'
+        line.style.backgroundColor = 'red'
+        line.style.left = x1 + 'px'
+        line.style.top = y1 + 'px'
+        line.style.transformOrigin = '0 0'
+        let angle = (Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI - 90 + 360) % 360
+        line.style.transform = `rotate(${angle}deg)`
+        document.body.appendChild(line)
 
         // Add the line to the list
-        this.lines.push({name, line});
+        this.lines.push({name, line})
     }
 }

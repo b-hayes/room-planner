@@ -25,8 +25,13 @@ export default class Grid extends Component {
         return style
     }
 
+    /**
+     * Add a shape to the grid.
+     * @param {Shape} shape
+     */
     addShape(shape) {
-        shape instanceof Shape || error('shape must be an instance of Shape')
+        this.assertInstance(shape, Shape)
+        if (!shape instanceof Shape) throw new Error('shape must be an instance of Shape')
         shape.scale = this.scale
         this.element().appendChild(shape.element())
         this._shapes[shape.id] = shape
