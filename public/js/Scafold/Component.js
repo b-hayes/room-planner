@@ -8,13 +8,26 @@ export default class Component {
         Loader.loadStyles(this.style(), styleId)
     }
 
+    /**
+     * Override this method to return the html for you component
+     * @returns {string}
+     */
     html() {
         return ''
     }
+
+    /**
+     * Override this method to return the css for you component
+     * @returns {string}
+     */
     style() {
         return ''
     }
 
+    /**
+     * Returns the dom node/element for the component
+     * @returns {Element}
+     */
     element() {
         if (this._element === undefined) {
             this._element = Loader.loadHtml(this.html())
@@ -77,8 +90,8 @@ export default class Component {
     }
 
     /**
-     * Draw a small red dot at the given x and y coordinates for debugging purposes.
-     * Give the dot a name to track a point/update the dot instead of creating a new one.
+     * Draw a small red dot at the given x and y coordinates within the component element.
+     * Give the dot a name to update on consecutive calls instead of creating a new one.
      * @param {number} x
      * @param {number} y
      * @param {string} name
@@ -143,14 +156,21 @@ export default class Component {
     }
 
     /**
-     * Draw a line between two points for debugging purposes.
+     * Draw a red line between two points inside the component element.
      * @param {number} x1
      * @param {number} y1
      * @param {number} x2
      * @param {number} y2
      * @param {string} name
      */
-    debugDrawLine(x1, y1, x2, y2, name = 'line') {
+    debugDrawLine(x1, y1, x2, y2, name = '') {
+        if (typeof x1 !== 'number') throw new Error('x1 must be a number')
+        if (typeof y1 !== 'number') throw new Error('y1 must be a number')
+        if (typeof x2 !== 'number') throw new Error('x2 must be a number')
+        if (typeof y2 !== 'number') throw new Error('y2 must be a number')
+        if (typeof name !== 'string') throw new Error('name must be a string')
+
+        //TODO: update this to track names and update lines, copy the dot code
 
         // Keep a list of lines
         if (!this.lines) {
