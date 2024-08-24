@@ -61,4 +61,108 @@ export default class Component {
         }
         return true
     }
+
+    /**
+     * Draw a small red dot at the given x and y coordinates for debugging purposes.
+     * Give the dot a name to track a point/update the dot instead of creating a new one.
+     * @param {number} x
+     * @param {number} y
+     * @param {string} name
+     */
+    debugDrawDot(x, y, name = '') {
+        this.requireType(x, 'number')
+        this.requireType(y, 'number')
+        this.requireType(name, 'string')
+
+        if (!name) {
+            name = randomId()
+        }
+
+        // Keep a list of dots
+        if (!this.dots) {
+            this.dots = [];
+        }
+
+        // update the dot if one with the same name already exists
+        for (let dot of this.dots) {
+            if (dot.name === name) {
+                dot.dot.style.left = x + 'px';
+                dot.dot.style.top = y + 'px';
+                // update the label if it has one
+                if (dot.label) {
+                    dot.label.innerHTML = name + '<br/> ' + x + '<br/> ' + y;
+                }
+                return;
+            }
+        }
+
+        // Do not create a dot if one already exists with the same x and y coordinates
+        for (let dot of this.dots) {
+            if (dot.dot.style.left === x + 'px' && dot.dot.style.top === y + 'px') {
+                return;
+            }
+        }
+
+        // Create a small red dot at the given x and y coordinates
+        const dot = document.createElement('div');
+        dot.style.position = 'absolute';
+        dot.style.width = '5px';
+        dot.style.height = '5px';
+        dot.style.backgroundColor = 'red';
+        dot.style.left = x + 'px';
+        dot.style.top = y + 'px';
+        dot.style.zIndex = '999999999999999';
+        this.element().appendChild(dot);
+
+        // add label to the dot, so we can see what it is
+        const label = document.createElement('div');
+        label.style.position = 'absolute';
+        label.style.left = 10 + 'px';
+        label.style.top = -5 + 'px';
+        label.style.zIndex = '999999999999999';
+        label.innerHTML = name + '<br/> ' + x + '<br/> ' + y;
+        label.style.width = '300px';
+        dot.appendChild(label);
+
+        // Add the dot to the list
+        this.dots.push({name, dot, label});
+    }
+
+    /**
+     * Draw a line between two points for debugging purposes.
+     * @param {number} x1
+     * @param {number} y1
+     * @param {number} x2
+     * @param {number} y2
+     * @param {string} name
+     */
+    debugDrawLine(x1, y1, x2, y2, name = 'line') {
+
+        // Keep a list of lines
+        if (!this.lines) {
+            this.lines = [];
+        }
+
+        //grab exiting line or create one
+        let line = this.lines.find(l => l.name === name)
+        if (line) {
+            line = line.line
+        } else {
+            line = document.createElement('div');
+        }
+
+        line.style.position = 'absolute';
+        line.style.width = '1px';
+        line.style.height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) + 'px';
+        line.style.backgroundColor = 'red';
+        line.style.left = x1 + 'px';
+        line.style.top = y1 + 'px';
+        line.style.transformOrigin = '0 0';
+        let angle = (Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI - 90 + 360) % 360;
+        line.style.transform = `rotate(${angle}deg)`;
+        document.body.appendChild(line);
+
+        // Add the line to the list
+        this.lines.push({name, line});
+    }
 }
