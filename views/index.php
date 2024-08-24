@@ -232,9 +232,6 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
     window.shapedef = Shape
 
-    //testing error
-    grid.addShape({not: 'a shape'})
-
     //Prevent the default right click menu
     document.addEventListener('contextmenu', function (event) {
         //unless the control/command key is held down

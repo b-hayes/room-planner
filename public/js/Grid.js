@@ -30,8 +30,7 @@ export default class Grid extends Component {
      * @param {Shape} shape
      */
     addShape(shape) {
-        this.assertInstance(shape, Shape)
-        if (!shape instanceof Shape) throw new Error('shape must be an instance of Shape')
+        if (!shape instanceof Shape) throw new Error('shape must be an instance of Shape but received ' + typeof shape)
         shape.scale = this.scale
         this.element().appendChild(shape.element())
         this._shapes[shape.id] = shape
