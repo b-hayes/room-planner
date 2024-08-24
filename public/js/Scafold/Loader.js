@@ -47,7 +47,7 @@ export default class Loader {
             if (['div', 'span', 'p', 'a', 'img', 'button', 'input', 'form', 'label', 'select', 'option', 'textarea', 'meta', 'head', 'script', 'link', 'html', 'body', 'title', 'style'].includes(tagName)) {
                 continue
             }
-            //skip all tag defined in the html 5 specification from w3c
+            //skip all tags defined in the html 5 specification from w3c (might have missed some I was not thorough).
             if (['article', 'aside', 'details', 'figcaption', 'figure', 'footer', 'header', 'main', 'mark', 'nav', 'section', 'summary', 'time', 'audio', 'video', 'canvas', 'progress', 'meter', 'embed', 'object', 'param', 'iframe', 'picture', 'source', 'svg',
                 'datalist', 'fieldset', 'legend', 'output', 'progress', 'meter', 'table', 'caption', 'colgroup', 'col', 'tbody', 'thead', 'tfoot', 'tr', 'td',
                 'th', 'button', 'datalist', 'fieldset', 'form', 'input', 'label', 'legend', 'meter', 'optgroup', 'option', 'output', 'progress', 'select', 'textarea'].includes(tagName)) {
@@ -55,40 +55,35 @@ export default class Loader {
             }
 
             // Dynamically import the module
-            try {
-                let module = await import(`/js/${className}.js`)
-                // Access the class using the variable
-                const LoadedClass = module.default; // Assuming the class is the default export
+            let module = await import(`/js/${className}.js`)
+            // Access the class using the variable
+            const LoadedClass = module.default; // Assuming the class is the default export
 
-                if (!typeof LoadedClass === 'function') {
-                    throw new Error('Class ' + className + ' is not a function')
-                }
-
-                // Check for a params attribute and parse it. todo: this should probably just copy all attributes to the component in general.
-                let params = {}
-                if (tag.hasAttribute('params')) {
-                    params = JSON.parse(tag.getAttribute('params'))
-                }
-
-                if (!LoadedClass.prototype instanceof Component) {
-                    throw new Error('Class ' + className + ' does not extend Component')
-                }
-
-                // Create a new instance
-                let newInstance = new LoadedClass(params)
-                let newElement = newInstance.element()
-
-                // Replace slot content
-                if (tag.innerHTML && newElement.getElementsByTagName('slot').length > 0) {
-                    newElement.innerHTML = newElement.innerHTML.replace(/<slot>/g, tag.innerHTML)
-                }
-
-                tag.parentNode.replaceChild(newElement, tag)
-            } catch (e) {
-                console.error(e)
-                continue
+            if (!typeof LoadedClass === 'function') {
+                throw new Error('Class ' + className + ' is not a function')
             }
 
+            // Check for a params attribute and parse it. todo: this should probably just copy all attributes to the component in general.
+            let params = {}
+            if (tag.hasAttribute('params')) {
+                params = JSON.parse(tag.getAttribute('params'))
+            }
+
+            if (!LoadedClass.prototype instanceof Component) {
+                console.error('Class ' + className + ' does not extend Component')
+                continue;
+            }
+
+            // Create a new instance
+            let newInstance = new LoadedClass(params)
+            let newElement = newInstance.element()
+
+            // Replace slot content
+            if (tag.innerHTML && newElement.getElementsByTagName('slot').length > 0) {
+                newElement.innerHTML = newElement.innerHTML.replace(/<slot>/g, tag.innerHTML)
+            }
+
+            tag.parentNode.replaceChild(newElement, tag)
         }
     }
 

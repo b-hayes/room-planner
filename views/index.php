@@ -128,6 +128,8 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
 <script type="module">
     //import Grid from "/js/Grid.js" //this import isn't needed because of the dynamic component loading.
+    //  just leaving here as an example of how it would look if my special loader wasn't in place.
+    //  the other imports are still needed because they are directly referenced before the loader is called.
     import Shape from "/js/Shape.js"
     import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"

@@ -26,9 +26,7 @@ export default class Grid extends Component {
     }
 
     addShape(shape) {
-        // todo: is this the cleanest way to type check?
         shape instanceof Shape || error('shape must be an instance of Shape')
-
         shape.scale = this.scale
         this.element().appendChild(shape.element())
         this._shapes[shape.id] = shape
