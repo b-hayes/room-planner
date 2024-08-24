@@ -51,13 +51,13 @@ export default class Component {
     /**
      * Helper to throw a clear error value is not the right type
      * @param value
-     * @param type
-     * @param message
+     * @param {string} type
+     * @param {string} parameterName
      * @returns {boolean}
      */
-    assertType(value, type) {
+    assertType(value, type, parameterName = 'value') {
         if (typeof value !== type) {
-            throw new Error('expected ' + type + ' but received ' + typeof value)
+            throw new Error('Expected ' + parameterName + ' to be of type ' + type + ' but received ' + typeof value)
         }
         return true
     }
@@ -66,11 +66,12 @@ export default class Component {
      * Helper to throw a clear error value is not an instance of classDefinition
      * @param value
      * @param {function} classDefinition
+     * @param {string} parameterName
      * @returns {boolean}
      */
-    assertInstance(value, classDefinition) {
+    assertInstance(value, classDefinition, parameterName = 'value') {
         if (!(value instanceof classDefinition)) {
-            throw new Error(`Expected instance of ${classDefinition.name} but received ${value.constructor.name}`)
+            throw new Error(`Expected ${parameterName} to be an instance of ${classDefinition.name} but received ${value.constructor.name}`)
         }
         return true
     }
