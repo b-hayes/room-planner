@@ -36,6 +36,8 @@ export default class Component {
         return this._element
     }
 
+    // TODO: move the debugDraw methods to shape when grid can extend shape without issues.
+
     /**
      * Dispatches an event with a debounce time to improve performance.
      *  If performance becomes an issue with the number of elements reacting to realtime events this could help.
