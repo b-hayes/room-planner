@@ -60,25 +60,29 @@ export default class Component {
         for (let i in properties) {
             let prop = properties[i]
             if (typeof this[prop] !== 'function') continue
-            let listenName = ''
-            if (prop.startsWith('on')) listenName = prop.substring(2).toLowerCase()
-            if (prop.startsWith('_on')) listenName = prop.substring(3).toLowerCase()// _on will take precedence over on if both exist
-            if (!listenName) {
+            if (!prop.startsWith('on')) {
                 continue
             }
-            // Special case for onScroll. There is no scroll event, but it's intuitive to think so.
-            if (listenName === 'scroll') listenName = 'wheel'
+            // using any function that starts with on also opens the door for onCustomEventName as well.
+            //  also possible that we bind a listener to a non-existent event, but it's probably not an issue.
+            let listenFor = prop.substring(2).toLowerCase()
+            if (!listenFor) {
+                continue // prevent a listener for a function called 'on'
+            }
 
-            // Special case for onDrag. If the element does not have the draggable property, the drag method needs to be called for mousemove when the mouse is down.
-            //  Adding the draggable property makes a ghost of the element go with the mouse which is often not what is wanted.
-            if (listenName === 'drag'){
-                listenName = 'mousemove'
-                this._mouseDrag = true // tells the event handler to call the drag method when the mouse is down
+            // Special case for onScroll. There is no 'scroll' event, but it's intuitive to think so.
+            if (listenFor === 'scroll') listenFor = 'wheel'
+
+            // Special case for onDrag. Drag is a real event but without the draggable property it does nothing.
+            //  Adding the draggable property it has a set of behaviours and visual effect that is often not what is wanted.
+            //  So I made a simple drag trigger via mousedown, mousemove and mouseup listeners.
+            if (listenFor === 'drag' && !this._element.draggable) {
+                this._element.addEventListener('mousedown', (e) => this._mouseDragStart(e), false)
             }
 
             // Add event listener
-            console.log('Handler detected',this.constructor.name + '.' + prop, 'will be executed for', listenName)
-            this._element.addEventListener(listenName, (e) => this._event(e, prop), false)
+            console.log('Handler detected',this.constructor.name + '.' + prop, 'will be executed for', listenFor)
+            this._element.addEventListener(listenFor, (e) => this._event(e, prop), false)
         }
     }
 
@@ -99,20 +103,31 @@ export default class Component {
         this[method](event)
     }
 
-    _mouseDragStart(e) {
-        this._dragStartEvent = e
-        this.dragListener = (e) => this._event(e, 'drag')
-        document.addEventListener('mousemove', this.dragListener, false)
-        document.addEventListener('mouseup', () => this._event(e, 'mouseup'), false)
+    _onMouseDrag(mouseMoveEvent, initialMouseDownEvent, userMethod) {
+        this[userMethod](mouseMoveEvent, initialMouseDownEvent)
+    }
+
+    /**
+     * To be called by mousedown listener when custom drag event is used.
+     * - Creates a mousemove listener to call the drag function whenever the mouse is moved.
+     *    The mousemove listener also passes along the initial mousedown event, so they can calculate the distance dragged.
+     * - Creates a mouseup listener to call the drag end function when the mouse is released.
+     * @param {Event} mouseDownEvent
+     * @private
+     */
+    _mouseDragStart(mouseDownEvent) {
+        this._mouseDragListener = (mouseMoveEvent) => this._onMouseDrag(mouseMoveEvent, mouseDownEvent)
+        document.addEventListener('mousemove', this._mouseDragListener, false)
+        this._mouseDragEndListener = (mouseUpEvent) => this._event(mouseUpEvent, 'mouseup')
+        document.addEventListener('mouseup', this._mouseDragEndListener, false)
     }
 
     _mouseDragEnd(e) {
-        this._dragStartEvent = undefined
-        document.removeEventListener('mousemove', this.dragListener, false)
-        document.removeEventListener('mouseup', () => this._onMouseUp(), false)
+        document.removeEventListener('mousemove', this._mouseDragListener, false)
+        document.removeEventListener('mouseup', this._mouseDragEndListener, false)
     }
 
-    // TODO: move the debugDraw methods to shape when grid can extend shape without issues.
+    // TODO: move the debugDraw methods to shape (or a new box class for a lower level) when grid can extend shape without issues.
 
     /**
      * Dispatches an event with a debounce time to improve performance.
