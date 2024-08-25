@@ -11,9 +11,6 @@ export default class Grid extends Component {
         this.scale = scale
         this.background = this.element() //the background is the element now.
         this.toolTip = this.element().getElementsByClassName('tool-tip')[0]
-
-        // document.addEventListener('wheel', (e) => this._onScroll(e), false)
-        // document.addEventListener('mousedown', (e) => this._onMouseDown(e), false)
         this.spacer = this.element().getElementsByClassName('grid-spacer')[0]
     }
 
@@ -45,12 +42,6 @@ export default class Grid extends Component {
         }
         this.element().removeChild(this._shapes[shapeId].element())
         delete this._shapes[shapeId]
-    }
-
-    _onMouseUp() {
-        this.positionWhenClicked = null
-        document.removeEventListener('mousemove', (e) => this._onDrag(e), false)
-        document.removeEventListener('mouseup', () => this._onMouseUp(), false)
     }
 
     _onDrag(e) {

@@ -63,17 +63,53 @@ export default class Component {
             let listenName = ''
             if (prop.startsWith('on')) listenName = prop.substring(2).toLowerCase()
             if (prop.startsWith('_on')) listenName = prop.substring(3).toLowerCase()// _on will take precedence over on if both exist
-            if (listenName) {
-                console.log('Handler detected',this.constructor.name + '.' + prop, 'will be executed for', listenName)
-                this._element.addEventListener(listenName, (e) => this._event(e, prop), false)
+            if (!listenName) {
+                continue
             }
+            // Special case for onScroll. There is no scroll event, but it's intuitive to think so.
+            if (listenName === 'scroll') listenName = 'wheel'
+
+            // Special case for onDrag. If the element does not have the draggable property, the drag method needs to be called for mousemove when the mouse is down.
+            //  Adding the draggable property makes a ghost of the element go with the mouse which is often not what is wanted.
+            if (listenName === 'drag'){
+                listenName = 'mousemove'
+                this._mouseDrag = true // tells the event handler to call the drag method when the mouse is down
+            }
+
+            // Add event listener
+            console.log('Handler detected',this.constructor.name + '.' + prop, 'will be executed for', listenName)
+            this._element.addEventListener(listenName, (e) => this._event(e, prop), false)
         }
     }
 
     _event(event, method) {
+        // if event is mousemove and useMouseDrag is true then call the drag method
+        if (event.type === 'mousemove' && this._mouseDrag && event.buttons) {
+            method = 'onDrag'
+        }
+        if (event.type === 'mousedown' && this._mouseDrag) {
+            this._mouseDragStarted = event // store the initial mousedown event to calculate the drag distance
+        }
+        // if event is mouseup and useMouseDrag is true then call the drag end
+        if (event.type === 'mouseup' && this._mouseDrag) {
+            method = '_mouseDragEnd'
+        }
+
         console.log(`${method} about to be executed for event`, event)
-        this._state = method //this could be used outside for dataBinding a state to a css style or something use state instead of isDragging isHovering etc.
         this[method](event)
+    }
+
+    _mouseDragStart(e) {
+        this._dragStartEvent = e
+        this.dragListener = (e) => this._event(e, 'drag')
+        document.addEventListener('mousemove', this.dragListener, false)
+        document.addEventListener('mouseup', () => this._event(e, 'mouseup'), false)
+    }
+
+    _mouseDragEnd(e) {
+        this._dragStartEvent = undefined
+        document.removeEventListener('mousemove', this.dragListener, false)
+        document.removeEventListener('mouseup', () => this._onMouseUp(), false)
     }
 
     // TODO: move the debugDraw methods to shape when grid can extend shape without issues.
