@@ -55,22 +55,16 @@ export default class Grid extends Component {
     }
 
     onDrag(e, initialMouseDownEvent) {
-        //if the mouse not held were not dragging
-        if (!e.buttons) {
-            return
-        }
-
-        let shift = new Vector(
-            this.positionWhenClicked.clickX - e.pageX,
-            this.positionWhenClicked.clickY - e.pageY
-        )
-        let from = new Vector(
-            this.positionWhenClicked.scrollX,
-            this.positionWhenClicked.scrollY
-        )
-
         // Pan if the alt key is held, or middle mouse button is held
         if (e.altKey || e.buttons === 4) {
+            let shift = new Vector(
+                this.positionWhenClicked.clickX - e.pageX,
+                this.positionWhenClicked.clickY - e.pageY
+            )
+            let from = new Vector(
+                this.positionWhenClicked.scrollX,
+                this.positionWhenClicked.scrollY
+            )
             this.pan(shift, from)
         }
     }
@@ -81,8 +75,8 @@ export default class Grid extends Component {
      * @param {Vector|undefined} from
      */
     pan(shift, from = undefined) {
-        if (!shift instanceof Vector) throw new Error('[shift] must be an instance of Vector')
-        if (from !== null && !from instanceof Vector) throw new Error('[from] must be an instance of Vector')
+        if (!shift instanceof Vector) throw new Error('shift must be an instance of Vector')
+        if (from !== null && !from instanceof Vector) throw new Error('[from must be an instance of Vector')
 
         if (from) {
             shift.x += from.x
