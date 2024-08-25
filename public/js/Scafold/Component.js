@@ -69,9 +69,8 @@ export default class Component {
             // Special case for onScroll. There is no 'scroll' event, but it's intuitive to think so.
             if (listenFor === 'scroll') listenFor = 'wheel'
 
-            // Special case for onDrag. Drag is a real event but without the draggable property it does nothing.
-            //  Adding the draggable property it has a set of behaviours and visual effect that is often not what is wanted.
-            //  So I made a simple drag trigger via mousedown, mousemove and mouseup listeners.
+            // Special case for drag. Drag event only triggers if draggable property is set.
+            //  The behaviour of draggable property is often not what is wanted, so I added a custom drag implementation.
             if (listenFor === 'drag' && !this._element.draggable) {
                 this._element.addEventListener('mousedown', (e) => this._mouseDragStart(e, prop), false)
             }
