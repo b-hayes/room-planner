@@ -44,17 +44,13 @@ export default class Component {
         return this._element
     }
 
-    onTest(event) {
-        console.log('test event:', event)
-    }
-
     _load() {
         let styleId = this.constructor.name + '-' + Loader.hashString(this.style())
         Loader.loadStyles(this.style(), styleId)
         this._element = Loader.loadHtml(this.html())
         this._element.componentInstance = this
 
-        // Setup event listeners
+        // Setup event listeners for every onEventName function that exists
         const prototype = Object.getPrototypeOf(this)
         const properties = Object.getOwnPropertyNames(prototype)
         for (let i in properties) {
@@ -77,7 +73,7 @@ export default class Component {
             //  Adding the draggable property it has a set of behaviours and visual effect that is often not what is wanted.
             //  So I made a simple drag trigger via mousedown, mousemove and mouseup listeners.
             if (listenFor === 'drag' && !this._element.draggable) {
-                this._element.addEventListener('mousedown', (e) => this._mouseDragStart(e), false)
+                this._element.addEventListener('mousedown', (e) => this._mouseDragStart(e, prop), false)
             }
 
             // Add event listener
@@ -87,20 +83,11 @@ export default class Component {
     }
 
     _event(event, method) {
-        // if event is mousemove and useMouseDrag is true then call the drag method
-        if (event.type === 'mousemove' && this._mouseDrag && event.buttons) {
-            method = 'onDrag'
+        let _method = '_' + method
+        if (typeof this[_method] === 'function') {// might have wrapper methods defined in here at some point.
+            return this[_method](event, method)
         }
-        if (event.type === 'mousedown' && this._mouseDrag) {
-            this._mouseDragStarted = event // store the initial mousedown event to calculate the drag distance
-        }
-        // if event is mouseup and useMouseDrag is true then call the drag end
-        if (event.type === 'mouseup' && this._mouseDrag) {
-            method = '_mouseDragEnd'
-        }
-
-        console.log(`${method} about to be executed for event`, event)
-        this[method](event)
+        return this[method](event)
     }
 
     _onMouseDrag(mouseMoveEvent, initialMouseDownEvent, userMethod) {
@@ -113,10 +100,11 @@ export default class Component {
      *    The mousemove listener also passes along the initial mousedown event, so they can calculate the distance dragged.
      * - Creates a mouseup listener to call the drag end function when the mouse is released.
      * @param {Event} mouseDownEvent
+     * @param {string} userMethod
      * @private
      */
-    _mouseDragStart(mouseDownEvent) {
-        this._mouseDragListener = (mouseMoveEvent) => this._onMouseDrag(mouseMoveEvent, mouseDownEvent)
+    _mouseDragStart(mouseDownEvent, userMethod) {
+        this._mouseDragListener = (mouseMoveEvent) => this._onMouseDrag(mouseMoveEvent, mouseDownEvent, userMethod)
         document.addEventListener('mousemove', this._mouseDragListener, false)
         this._mouseDragEndListener = (mouseUpEvent) => this._event(mouseUpEvent, 'mouseup')
         document.addEventListener('mouseup', this._mouseDragEndListener, false)

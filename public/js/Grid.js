@@ -44,6 +44,10 @@ export default class Grid extends Component {
         delete this._shapes[shapeId]
     }
 
+    onDrag(current, from) {
+        console.log('dragging')
+    }
+
     _onDrag(e) {
         //if the mouse not held were not dragging
         if (!e.buttons) {
