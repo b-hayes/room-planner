@@ -1,11 +1,21 @@
 import Loader from "./Loader.js"
+import Vector from "../Vector.js"
 
+/**
+ * Sensitive methods:
+ *  do not override the element method but use it to access the dom node.
+ *  do not use _underscored methods in your components they are only for internal use here.
+ * Requirements:
+ *  you need to override the html and style methods.
+ * Events:
+ *  you don't need to bind event listeners, they will be added for you if you simply function for it like:
+ *  onScroll, onMouseMove, onMouseDown, onMouseUp, onDrag, onDragEnter etc.
+ */
 export default class Component {
     static isComponent = true
 
     constructor() {
-        let styleId = this.constructor.name + '-' + Loader.hashString(this.style())
-        Loader.loadStyles(this.style(), styleId)
+        // Nothing is loaded until the element is requested
     }
 
     /**
@@ -25,15 +35,45 @@ export default class Component {
     }
 
     /**
-     * Returns the dom node/element for the component
+     * Returns the dom node component.
+     * Loads the css, html and event listeners on first call
      * @returns {Element}
      */
     element() {
-        if (this._element === undefined) {
-            this._element = Loader.loadHtml(this.html())
-        }
-        this._element.componentInstance = this
+        if (this._element === undefined) this._load()
         return this._element
+    }
+
+    onTest(event) {
+        console.log('test event:', event)
+    }
+
+    _load() {
+        let styleId = this.constructor.name + '-' + Loader.hashString(this.style())
+        Loader.loadStyles(this.style(), styleId)
+        this._element = Loader.loadHtml(this.html())
+        this._element.componentInstance = this
+
+        // Setup event listeners
+        const prototype = Object.getPrototypeOf(this)
+        const properties = Object.getOwnPropertyNames(prototype)
+        for (let i in properties) {
+            let prop = properties[i]
+            if (typeof this[prop] !== 'function') continue
+            let listenName = ''
+            if (prop.startsWith('on')) listenName = prop.substring(2).toLowerCase()
+            if (prop.startsWith('_on')) listenName = prop.substring(3).toLowerCase()// _on will take precedence over on if both exist
+            if (listenName) {
+                console.log('Handler detected',this.constructor.name + '.' + prop, 'will be executed for', listenName)
+                this._element.addEventListener(listenName, (e) => this._event(e, prop), false)
+            }
+        }
+    }
+
+    _event(event, method) {
+        console.log(`${method} about to be executed for event`, event)
+        this._state = method //this could be used outside for dataBinding a state to a css style or something use state instead of isDragging isHovering etc.
+        this[method](event)
     }
 
     // TODO: move the debugDraw methods to shape when grid can extend shape without issues.
@@ -200,5 +240,20 @@ export default class Component {
 
         // Add the line to the list
         this.lines.push({name, line})
+    }
+
+
+    debugListPossibleEvents() {
+        //this method was going ot be used for auto binding event but there is a LOT of possible events so seemed more
+        // efficient to loop over the functions instead. But wanted to keep a copy of this, so I can see the list when I want.
+        const element = this.element();
+        const possibleEvents = [];
+        for (let key in element) {
+            if (key.startsWith('on')) {
+                possibleEvents.push(key.slice(2)); // Remove 'on' to get the event name that can be used with addEventListener() function
+            }
+        }
+
+        return possibleEvents;
     }
 }

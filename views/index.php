@@ -225,12 +225,19 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         window.shapes = loadedShapes
     }
 
+    //todo: remove this when done playing around
+    // var eventList = [];
+    // for (var x in document) {
+    //     if (/^on/.test(x)) {
+    //         eventList.push(x);
+    //     }
+    // }
+    // console.log('all the possible events you could call on document:', eventList);
+
     await Loader.replaceTagsWithComponents(document)
     window.grid = document.querySelector(".grid")
         .componentInstance
     load()
-
-    window.shapedef = Shape
 
     //Prevent the default right click menu
     document.addEventListener('contextmenu', function (event) {

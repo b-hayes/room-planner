@@ -12,8 +12,8 @@ export default class Grid extends Component {
         this.background = this.element() //the background is the element now.
         this.toolTip = this.element().getElementsByClassName('tool-tip')[0]
 
-        document.addEventListener('wheel', (e) => this._onScroll(e), false)
-        document.addEventListener('mousedown', (e) => this._onMouseDown(e), false)
+        // document.addEventListener('wheel', (e) => this._onScroll(e), false)
+        // document.addEventListener('mousedown', (e) => this._onMouseDown(e), false)
         this.spacer = this.element().getElementsByClassName('grid-spacer')[0]
     }
 
@@ -45,23 +45,6 @@ export default class Grid extends Component {
         }
         this.element().removeChild(this._shapes[shapeId].element())
         delete this._shapes[shapeId]
-    }
-
-    _onMouseDown(e) {
-        if (e.target !== this.element() && !this.element().contains(e.target)) {
-            return
-        }
-
-        // record click position and scroll position
-        this.positionWhenClicked = {
-            scrollX: this.element().scrollLeft,
-            scrollY: this.element().scrollTop,
-            clickX: e.pageX,
-            clickY: e.pageY
-        }
-
-        document.addEventListener('mousemove', (e) => this._onDrag(e), false)
-        document.addEventListener('mouseup', () => this._onMouseUp(), false)
     }
 
     _onMouseUp() {
@@ -128,7 +111,7 @@ export default class Grid extends Component {
      * @param {Event} event
      * @private
      */
-    _onScroll(event) {
+    onScroll(event) {
         if (!this.element().contains(event.target)) {
             return //if the target is not the grid, ignore the event
         }
