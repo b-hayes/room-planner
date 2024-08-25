@@ -44,6 +44,16 @@ export default class Grid extends Component {
         delete this._shapes[shapeId]
     }
 
+    onMouseDown(e) {
+        // record click position and scroll position for drag event to compare to
+        this.positionWhenClicked = {
+            scrollX: this.element().scrollLeft,
+            scrollY: this.element().scrollTop,
+            clickX: e.pageX,
+            clickY: e.pageY
+        }
+    }
+
     onDrag(e, initialMouseDownEvent) {
         //if the mouse not held were not dragging
         if (!e.buttons) {
