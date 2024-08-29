@@ -14,6 +14,7 @@ import Vector from "../Vector.js"
  */
 export default class Component {
     static isComponent = true
+    _eventListeners = []
 
     constructor() {
         // Nothing is loaded until the element is requested
@@ -99,6 +100,20 @@ export default class Component {
         }
     }
 
+    /**
+     * Helper to collect all the listener for this component, so they can be removed from memory if it is deleted.
+     *
+     * @param {Element} element
+     * @param {String} eventName
+     * @param {Function} handlerFn
+     * @param {Boolean|AddEventListenerOptions} options
+     * @private
+     */
+    _addListener(element, eventName, handlerFn, options = false) {
+        element.addEventListener(eventName, handlerFn, options)
+        this._eventListeners.push({element, eventName, handlerFn, options})
+    }
+
     _event(event, method) {
         let _method = '_' + method
         if (typeof this[_method] === 'function') {// might have wrapper methods defined in here at some point.
@@ -130,6 +145,17 @@ export default class Component {
     _mouseDragEnd(e) {
         document.removeEventListener('mousemove', this._mouseDragListener, false)
         document.removeEventListener('mouseup', this._mouseDragEndListener, false)
+    }
+
+    /**
+     * Removes event listeners and delete its dom element.
+     */
+    destroy() {
+        for (let listener of this._eventListeners) {
+            listener.element.removeEventListener(listener.eventName, listener.handlerFn, listener.options)
+        }
+        this._element.remove()
+        // all reference to this instance would need to be unset on the outside for this to be removed from memory.
     }
 
     // TODO: move the debugDraw methods to shape (or a new box class for a lower level) when grid can extend shape without issues.
