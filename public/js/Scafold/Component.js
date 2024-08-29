@@ -10,6 +10,7 @@ import Vector from "../Vector.js"
  * Events:
  *  you don't need to bind event listeners, they will be added for you if you simply function for it like:
  *  onScroll, onMouseMove, onMouseDown, onMouseUp, onDrag, onDragEnter etc.
+ *  If you need listeners on the document instead call them onDocScroll, onDocMouseMove etc.
  */
 export default class Component {
     static isComponent = true
@@ -50,6 +51,18 @@ export default class Component {
         this._element = Loader.loadHtml(this.html())
         this._element.componentInstance = this
 
+        //NOTE: so after doing all the work to automate this, I then realized I cant use it for Shape class
+        //  because Shapes also need to react to events that are NOT on their own element.
+        // Eg. resizing wouldn't work unless the mousemove events were global and were read outside its element.
+
+        // So I have added onDoc auto handlers as well, and it works however...
+        //  Now I am wondering if this is an inefficient way of doing it.
+        //  Perhaps the grid should listen to custom events and handle the deselecting and resizing etc.
+        //  This would be a little more tricky, but it would mean only one event listener instead one for every shape
+        //  that gets created.
+
+        //TODO: make a decision on the approach re: above before continuing.
+
         // Setup event listeners for every onEventName function that exists
         const prototype = Object.getPrototypeOf(this)
         const properties = Object.getOwnPropertyNames(prototype)
@@ -59,9 +72,14 @@ export default class Component {
             if (!prop.startsWith('on')) {
                 continue
             }
+            let listenFor = prop.substring(2).toLowerCase()
+            let onElement = this._element
+            if (prop.startsWith('onDoc')) {
+                listenFor = prop.substring(5).toLowerCase()
+                onElement = document
+            }
             // using any function that starts with on also opens the door for onCustomEventName as well.
             //  also possible that we bind a listener to a non-existent event, but it's probably not an issue.
-            let listenFor = prop.substring(2).toLowerCase()
             if (!listenFor) {
                 continue // prevent a listener for a function called 'on'
             }
@@ -72,12 +90,12 @@ export default class Component {
             // Special case for drag. Drag event only triggers if draggable property is set.
             //  The behaviour of draggable property is often not what is wanted, so I added a custom drag implementation.
             if (listenFor === 'drag' && !this._element.draggable) {
-                this._element.addEventListener('mousedown', (e) => this._mouseDragStart(e, prop), false)
+                onElement.addEventListener('mousedown', (e) => this._mouseDragStart(e, prop), false)
             }
 
             // Add event listener
             console.log('Handler detected',this.constructor.name + '.' + prop, 'will be executed for', listenFor)
-            this._element.addEventListener(listenFor, (e) => this._event(e, prop), false)
+            onElement.addEventListener(listenFor, (e) => this._event(e, prop), false)
         }
     }
 
@@ -105,7 +123,7 @@ export default class Component {
     _mouseDragStart(mouseDownEvent, userMethod) {
         this._mouseDragListener = (mouseMoveEvent) => this._onMouseDrag(mouseMoveEvent, mouseDownEvent, userMethod)
         document.addEventListener('mousemove', this._mouseDragListener, false)
-        this._mouseDragEndListener = (mouseUpEvent) => this._event(mouseUpEvent, 'mouseup')
+        this._mouseDragEndListener = (mouseUpEvent) => this._mouseDragEnd(mouseUpEvent)
         document.addEventListener('mouseup', this._mouseDragEndListener, false)
     }
 

@@ -129,6 +129,10 @@ export default class Shape extends Component {
         this.scale = scale
     }
 
+    onDocMouseDown(e) {
+        console.log('onDocMouseDown')
+    }
+
     //Calculate the real location of the centre of the shape in the window.
     getCentre() {
         let rect = this.element().getBoundingClientRect()
