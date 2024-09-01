@@ -101,14 +101,14 @@ export default class Shape extends Component {
 
         document.addEventListener('mousedown', (e) => {
             //unselect if anything other than this is clicked on
-            if (
-                e.target !== this.element() &&
-                //if the target is a child of the shape then don't unselect
-                this.element().contains(e.target) === false
-            ) {
-                this.selected = false
-                return
-            }
+            // if (
+            //     e.target !== this.element() &&
+            //     //if the target is a child of the shape then don't unselect
+            //     this.element().contains(e.target) === false
+            // ) {
+            //     this.selected = false
+            //     return
+            // }
 
             //record where the click happened so that drag events can use it as a point of reference
             this.clickX = e.pageX
@@ -116,7 +116,7 @@ export default class Shape extends Component {
             this.shapePositionWhenClicked = this.position
 
             //mark the shape as selected (important)
-            this.selected = true
+            //this.selected = true
 
             //trigger a custom event so the rest of application can perform other actions.
             let event = new CustomEvent('shape-click', {

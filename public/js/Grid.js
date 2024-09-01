@@ -5,6 +5,9 @@ import Float from "./Float.js"
 
 export default class Grid extends Component {
 
+    _shapes = []
+    _selectedShape
+
     constructor({scale = 1}) {
         super()
         this._shapes = []
@@ -44,13 +47,32 @@ export default class Grid extends Component {
         delete this._shapes[shapeId]
     }
 
-    onMouseDown(e) {
-        // record click position and scroll position for drag event to compare to
+    /**
+     * @param {Shape} shape
+     */
+    set selectedShape(shape) {
+        if (!shape instanceof Shape) throw new Error('shape must be an instance of Shape but received ' + typeof shape)
+        if (this._selectedShape && this._selectedShape !== shape) {
+            this._selectedShape.selected = false
+        }
+        shape.selected = true
+        this._selectedShape = shape
+    }
+    get selectedShape() {
+        return this._selectedShape
+    }
+
+    onMouseDown(event) {
+        // record click position and scroll position for other event to reference.
         this.positionWhenClicked = {
             scrollX: this.element().scrollLeft,
             scrollY: this.element().scrollTop,
-            clickX: e.pageX,
-            clickY: e.pageY
+            clickX: event.pageX,
+            clickY: event.pageY
+        }
+
+        if (event.target.componentInstance ?? null instanceof Shape) {
+            this.selectedShape = event.target.componentInstance
         }
     }
 
