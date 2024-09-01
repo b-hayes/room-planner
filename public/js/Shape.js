@@ -11,9 +11,27 @@ export default class Shape extends Component {
     _gridPosition = {x: 0, y: 0, width: 0, height: 0, rotation: 0};
 
     // states
-    selected = false;
+    _selected = false;
     resizing = false;
     rotating = false;
+
+    get selected() {
+        return this._selected
+    }
+
+    /**
+     * @param {boolean} value
+     */
+    set selected(value) {
+        if (typeof value !== "boolean") throw new Error("selected must be a boolean, received " + typeof value)
+        this._selected = value
+        if (this._selected) {
+            this.element().classList.add('selected')
+        } else {
+            this.element().classList.remove('selected')
+        }
+    }
+
 
     // debug
     dots = [];
@@ -88,7 +106,7 @@ export default class Shape extends Component {
                 //if the target is a child of the shape then don't unselect
                 this.element().contains(e.target) === false
             ) {
-                this.unselect()
+                this.selected = false
                 return
             }
 
@@ -98,7 +116,7 @@ export default class Shape extends Component {
             this.shapePositionWhenClicked = this.position
 
             //mark the shape as selected (important)
-            this.select()
+            this.selected = true
 
             //trigger a custom event so the rest of application can perform other actions.
             let event = new CustomEvent('shape-click', {
@@ -175,21 +193,9 @@ export default class Shape extends Component {
         return {x: rotatedX + centre.x, y: rotatedY + centre.y, angle: clickAngle}
     }
 
-    select() {
-        this.selected = true
-        //add selected class
-        this.element().classList.add('selected')
-    }
-
-    unselect() {
-        this.selected = false
-        //remove selected class
-        this.element().classList.remove('selected')
-    }
-
     drag(e) {
         //if not selected or mouse is not down then we don't process anything.
-        if (!this.selected || e.buttons !== 1) {
+        if (!this._selected || e.buttons !== 1) {
             return
         }
 
@@ -384,7 +390,7 @@ export default class Shape extends Component {
         this.element().classList.remove('resize-bottom')
 
         //if not selected then don't bother
-        if (this.selected === false || this.element().contains(event.target) === false) {
+        if (this._selected === false || this.element().contains(event.target) === false) {
             return;
         }
 

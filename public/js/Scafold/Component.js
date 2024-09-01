@@ -13,7 +13,6 @@ import Vector from "../Vector.js"
  *  If you need listeners on the document instead call them onDocScroll, onDocMouseMove etc.
  */
 export default class Component {
-    static isComponent = true
     _eventListeners = []
 
     constructor() {
