@@ -1,5 +1,4 @@
 import Loader from "./Loader.js"
-import Vector from "../Vector.js"
 
 /**
  * Sensitive methods:
