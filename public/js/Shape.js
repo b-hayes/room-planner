@@ -32,11 +32,6 @@ export default class Shape extends Component {
         }
     }
 
-
-    // debug
-    dots = [];
-    lines = [];
-
     // event
     clickX = 0;
     clickY = 0;

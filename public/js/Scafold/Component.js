@@ -229,12 +229,12 @@ export default class Component {
         }
 
         // Keep a list of dots
-        if (!this.dots) {
-            this.dots = []
+        if (!this._debugDots) {
+            this._debugDots = []``
         }
 
         // update the dot if one with the same name already exists
-        for (let dot of this.dots) {
+        for (let dot of this._debugDots) {
             if (dot.name === name) {
                 dot.dot.style.left = x + 'px'
                 dot.dot.style.top = y + 'px'
@@ -247,7 +247,7 @@ export default class Component {
         }
 
         // Do not create a dot if one already exists with the same x and y coordinates
-        for (let dot of this.dots) {
+        for (let dot of this._debugDots) {
             if (dot.dot.style.left === x + 'px' && dot.dot.style.top === y + 'px') {
                 return
             }
@@ -275,7 +275,7 @@ export default class Component {
         dot.appendChild(label)
 
         // Add the dot to the list
-        this.dots.push({name, dot, label})
+        this._debugDots.push({name, dot, label})
     }
 
     /**
@@ -296,12 +296,12 @@ export default class Component {
         //TODO: update this to track names and update lines, copy the dot code
 
         // Keep a list of lines
-        if (!this.lines) {
-            this.lines = []
+        if (!this._debugLines) {
+            this._debugLines = []
         }
 
         //grab exiting line or create one
-        let line = this.lines.find(l => l.name === name)
+        let line = this._debugLines.find(l => l.name === name)
         if (line) {
             line = line.line
         } else {
@@ -320,7 +320,7 @@ export default class Component {
         document.body.appendChild(line)
 
         // Add the line to the list
-        this.lines.push({name, line})
+        this._debugLines.push({name, line})
     }
 
 
