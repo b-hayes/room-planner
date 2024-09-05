@@ -43,7 +43,7 @@ export default class Grid extends Component {
         if (!this._shapes[shapeId]) {
             throw new Error('shape not found in grid')
         }
-        this.element().removeChild(this._shapes[shapeId].element())
+        this._shapes[shapeId].destroy()
         delete this._shapes[shapeId]
     }
 
