@@ -202,6 +202,9 @@ export default class Shape extends Component {
     }
 
     drag(e, initialMouseDownEvent) {
+
+        // TODO: refactor this to use the initialMouseDownEvent and only have this called via grid.
+
         //if not selected or mouse is not down then we don't process anything.
         if (!this._selected || e.buttons !== 1) {
             return
