@@ -51,7 +51,7 @@ export default class Component {
         this._element = Loader.loadHtml(this.html())
         this._element.componentInstance = this
 
-        // Setup event listeners for every onEventName function that exists
+        // Setup event listeners for every onEventName function that exists (should make this a Loader function).
         const prototype = Object.getPrototypeOf(this)
         const properties = Object.getOwnPropertyNames(prototype)
         for (let i in properties) {
@@ -62,12 +62,13 @@ export default class Component {
             // Nothing would functionally change if these lines were deleted.
             let commonEventsOnly = false
             let indexUsages = [
+                // add class methods names here if you want their usage indexed.
                 'onMouseDown', 'onDrag',
             ];
             if (!indexUsages.includes(prop) && commonEventsOnly) {
                 continue
             }
-            // end of code to ignore.
+            // End of code to ignore.
 
             // using any function that starts with on also opens the door for onCustomEventName as well 😉.
             if (!prop.startsWith('on')) {
@@ -85,7 +86,7 @@ export default class Component {
                 continue;
             }
 
-            //remove the word on to match addEventListener syntax.
+            //remove the word 'on' from the start to match addEventListener syntax.
             listenFor.substring(2).toLowerCase()
             if (!listenFor) {
                 continue // ignores on with no event name

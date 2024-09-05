@@ -130,11 +130,6 @@ export default class Grid extends Component {
         this.toolTip.style.top = shift.y + 'px'
     }
 
-    /**
-     * Handle scroll events on the grid.
-     * @param {Event} event
-     * @private
-     */
     onScroll(event) {
         if (!this.element().contains(event.target)) {
             return //if the target is not the grid, ignore the event
