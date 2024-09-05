@@ -58,6 +58,8 @@ export default class Component {
             let prop = properties[i]
             if (typeof this[prop] !== 'function') continue
 
+            //console.log('Function found:',this.constructor.name + '.' + prop)
+
             // Ignore these next few lines. They do nothing except trick the IDE into indexing dynamic method usages.
             // Nothing would functionally change if these lines were deleted.
             let commonEventsOnly = false
@@ -87,10 +89,11 @@ export default class Component {
             }
 
             //remove the word 'on' from the start to match addEventListener syntax.
-            listenFor.substring(2).toLowerCase()
+            listenFor = listenFor.substring(2).toLowerCase()
             if (!listenFor) {
                 continue // ignores on with no event name
             }
+            //console.log('Handler detected',this.constructor.name + '.' + prop, 'will be executed for', listenFor)
             this._element.addEventListener(listenFor, (e) => this._event(e, prop), false)
         }
     }
