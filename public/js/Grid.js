@@ -62,6 +62,7 @@ export default class Grid extends Component {
         return this._selectedShape
     }
 
+
     onMouseDown(event) {
         // record click position and scroll position for other event to reference.
         this.positionWhenClicked = {
@@ -88,6 +89,12 @@ export default class Grid extends Component {
                 this.positionWhenClicked.scrollY
             )
             this.pan(shift, from)
+            return;
+        }
+
+        //Pass the event to selected shape, so it can resize and move.
+        if (this._selectedShape) {
+            this.selectedShape.drag(e, initialMouseDownEvent)
         }
     }
 

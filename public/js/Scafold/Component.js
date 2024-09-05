@@ -51,51 +51,46 @@ export default class Component {
         this._element = Loader.loadHtml(this.html())
         this._element.componentInstance = this
 
-        //NOTE: so after doing all the work to automate this, I then realized I cant use it for Shape class
-        //  because Shapes also need to react to events that are NOT on their own element.
-        // Eg. resizing wouldn't work unless the mousemove events were global and were read outside its element.
-
-        // So I have added onDoc auto handlers as well, and it works however...
-        //  Now I am wondering if this is an inefficient way of doing it.
-        //  Perhaps the grid should listen to custom events and handle the deselecting and resizing etc.
-        //  This would be a little more tricky, but it would mean only one event listener instead one for every shape
-        //  that gets created.
-
-        //TODO: make a decision on the approach re: above before continuing.
-
         // Setup event listeners for every onEventName function that exists
         const prototype = Object.getPrototypeOf(this)
         const properties = Object.getOwnPropertyNames(prototype)
         for (let i in properties) {
             let prop = properties[i]
             if (typeof this[prop] !== 'function') continue
+
+            // Ignore these next few lines. They do nothing except trick the IDE into indexing dynamic method usages.
+            // Nothing would functionally change if these lines were deleted.
+            let commonEventsOnly = false
+            let indexUsages = [
+                'onMouseDown', 'onDrag',
+            ];
+            if (!indexUsages.includes(prop) && commonEventsOnly) {
+                continue
+            }
+            // end of code to ignore.
+
+            // using any function that starts with on also opens the door for onCustomEventName as well 😉.
             if (!prop.startsWith('on')) {
                 continue
             }
-            let listenFor = prop.substring(2).toLowerCase()
-            let onElement = this._element
-            if (prop.startsWith('onDoc')) {
-                listenFor = prop.substring(5).toLowerCase()
-                onElement = document
-            }
-            // using any function that starts with on also opens the door for onCustomEventName as well.
-            //  also possible that we bind a listener to a non-existent event, but it's probably not an issue.
-            if (!listenFor) {
-                continue // prevent a listener for a function called 'on'
-            }
+            let listenFor = prop; //make a copy of the name.
 
             // Special case for onScroll. There is no 'scroll' event, but it's intuitive to think so.
-            if (listenFor === 'scroll') listenFor = 'wheel'
+            if (listenFor === 'onScroll') listenFor = 'onWheel' //map onScroll method to onWheel events.
 
-            // Special case for drag. Drag event only triggers if draggable property is set.
-            //  The behaviour of draggable property is often not what is wanted, so I added a custom drag implementation.
-            if (listenFor === 'drag' && !this._element.draggable) {
-                onElement.addEventListener('mousedown', (e) => this._mouseDragStart(e, prop), false)
+            // Special case for onDrag. onDrag events usually only trigger if draggable property is set in html.
+            //  However, the draggable property behaviour is undesirable, so I added a custom drag implementation if method exists without the property.
+            if (listenFor === 'onDrag' && !this._element.draggable) {
+                this._element.addEventListener('mousedown', (e) => this._mouseDragStart(e, prop), false)
+                continue;
             }
 
-            // Add event listener
-            console.log('Handler detected',this.constructor.name + '.' + prop, 'will be executed for', listenFor)
-            onElement.addEventListener(listenFor, (e) => this._event(e, prop), false)
+            //remove the word on to match addEventListener syntax.
+            listenFor.substring(2).toLowerCase()
+            if (!listenFor) {
+                continue // ignores on with no event name
+            }
+            this._element.addEventListener(listenFor, (e) => this._event(e, prop), false)
         }
     }
 

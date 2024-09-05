@@ -15,23 +15,6 @@ export default class Shape extends Component {
     resizing = false;
     rotating = false;
 
-    get selected() {
-        return this._selected
-    }
-
-    /**
-     * @param {boolean} value
-     */
-    set selected(value) {
-        if (typeof value !== "boolean") throw new Error("selected must be a boolean, received " + typeof value)
-        this._selected = value
-        if (this._selected) {
-            this.element().classList.add('selected')
-        } else {
-            this.element().classList.remove('selected')
-        }
-    }
-
     // event
     clickX = 0;
     clickY = 0;
@@ -142,11 +125,28 @@ export default class Shape extends Component {
         this.scale = scale
     }
 
-    onDocMouseDown(e) {
-        console.log('onDocMouseDown')
+    get selected() {
+        return this._selected
     }
 
-    //Calculate the real location of the centre of the shape in the window.
+    /**
+     * @param {boolean} value
+     */
+    set selected(value) {
+        if (typeof value !== "boolean") throw new Error("selected must be a boolean, received " + typeof value)
+        this._selected = value
+        if (this._selected) {
+            this.element().classList.add('selected')
+        } else {
+            this.element().classList.remove('selected')
+        }
+    }
+
+    /**
+     * Calculate the real location of the centre of the shape in the window.
+     *
+     * @returns {{x: number, y: number}}
+     */
     getCentre() {
         let rect = this.element().getBoundingClientRect()
         return {
@@ -155,7 +155,14 @@ export default class Shape extends Component {
         }
     }
 
-    //Get the angle for a point as if it was rotating around 0,0w with 0deg being up.
+    /**
+     * Calculate the angle for a point as if it was the end of a clock hand rotating around point 0,0
+     * 12 O'clock / up  position representing 0 degrees.
+     *
+     * @param {number} x
+     * @param {number} y
+     * @returns {number}
+     */
     getPointAngle(x, y) {
         // Atan operates in the range of -180 to 180deg with up being 0deg and returns the result in radians.
         let radians = Math.atan2(y, x);
@@ -165,7 +172,13 @@ export default class Shape extends Component {
         return (degrees + 90) % 360;
     }
 
-    //Translate the event coordinates to match the rotation of the shape.
+    /**
+     * Translate the event coordinates to match the rotation of the shape.
+     *
+     * @param {event} event
+     * @param {number} rotation
+     * @returns {{x: number, y: number, angle: number}}
+     */
     translateMouseEvent(event, rotation) {
         const rect = this.element().getBoundingClientRect();
         let centre = {
@@ -188,7 +201,7 @@ export default class Shape extends Component {
         return {x: rotatedX + centre.x, y: rotatedY + centre.y, angle: clickAngle}
     }
 
-    drag(e) {
+    drag(e, initialMouseDownEvent) {
         //if not selected or mouse is not down then we don't process anything.
         if (!this._selected || e.buttons !== 1) {
             return
