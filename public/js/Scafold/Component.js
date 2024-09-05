@@ -45,6 +45,9 @@ export default class Component {
         return this._element
     }
 
+    /**
+     * @private
+     */
     _load() {
         let styleId = this.constructor.name + '-' + Loader.hashString(this.style())
         Loader.loadStyles(this.style(), styleId)
@@ -94,22 +97,31 @@ export default class Component {
                 continue // ignores on with no event name
             }
             //console.log('Handler detected',this.constructor.name + '.' + prop, 'will be executed for', listenFor)
-            this._element.addEventListener(listenFor, (e) => this._event(e, prop), false)
+            this._addListener(listenFor, (e) => this._event(e, prop), false)
         }
     }
 
     /**
      * Helper to collect all the listener for this component, so they can be removed from memory if it is deleted.
      *
-     * @param {Element} element
      * @param {String} eventName
      * @param {Function} handlerFn
      * @param {Boolean|AddEventListenerOptions} options
      * @private
      */
-    _addListener(element, eventName, handlerFn, options = false) {
-        element.addEventListener(eventName, handlerFn, options)
-        this._eventListeners.push({element, eventName, handlerFn, options})
+    _addListener(eventName, handlerFn, options = false) {
+        this._element.addEventListener(eventName, handlerFn, options)
+        this._eventListeners.push({eventName, handlerFn, options})
+    }
+
+    /**
+     * Removes event listeners and delete its dom element.
+     */
+    destroy() {
+        for (let listener of this._eventListeners) {
+            listener.element.removeEventListener(listener.eventName, listener.handlerFn, listener.options)
+        }
+        this._element.remove()
     }
 
     _event(event, method) {
@@ -143,17 +155,6 @@ export default class Component {
     _mouseDragEnd(e) {
         document.removeEventListener('mousemove', this._mouseDragListener, false)
         document.removeEventListener('mouseup', this._mouseDragEndListener, false)
-    }
-
-    /**
-     * Removes event listeners and delete its dom element.
-     */
-    destroy() {
-        for (let listener of this._eventListeners) {
-            listener.element.removeEventListener(listener.eventName, listener.handlerFn, listener.options)
-        }
-        this._element.remove()
-        // all reference to this instance would need to be unset on the outside for this to be removed from memory.
     }
 
     // TODO: move the debugDraw methods to shape (or a new box class for a lower level) when grid can extend shape without issues.
