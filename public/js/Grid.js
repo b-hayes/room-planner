@@ -1,5 +1,5 @@
 import Component from "./Scafold/Component.js"
-import Vector from "./Vector.js"
+import Point from "./Point.js"
 import Shape from "./Shape.js"
 import Float from "./Float.js"
 
@@ -80,11 +80,11 @@ export default class Grid extends Component {
     onDrag(e, initialMouseDownEvent) {
         // Pan if the alt key is held, or middle mouse button is held
         if (e.altKey || e.buttons === 4) {
-            let shift = new Vector(
+            let shift = new Point(
                 this.positionWhenClicked.clickX - e.pageX,
                 this.positionWhenClicked.clickY - e.pageY
             )
-            let from = new Vector(
+            let from = new Point(
                 this.positionWhenClicked.scrollX,
                 this.positionWhenClicked.scrollY
             )
@@ -94,18 +94,19 @@ export default class Grid extends Component {
 
         //Pass the event to selected shape, so it can resize and move.
         if (this._selectedShape) {
+            console.log(this.selectedShape)
             this.selectedShape.drag(e, initialMouseDownEvent)
         }
     }
 
     /**
      * Pan the grid by the shift amount.
-     * @param {Vector} shift
-     * @param {Vector|undefined} from
+     * @param {Point} shift
+     * @param {Point|undefined} from
      */
     pan(shift, from = undefined) {
-        if (!shift instanceof Vector) throw new Error('shift must be an instance of Vector')
-        if (from !== null && !from instanceof Vector) throw new Error('[from must be an instance of Vector')
+        if (!shift instanceof Point) throw new Error('shift must be an instance of Vector')
+        if (from !== null && !from instanceof Point) throw new Error('[from must be an instance of Vector')
 
         if (from) {
             shift.x += from.x
@@ -137,10 +138,10 @@ export default class Grid extends Component {
 
         //if alt is held pan instead of zoom. This is great for trackpads.
         if (event.altKey) {
-            let shift = new Vector(event.deltaX, event.deltaY)
+            let shift = new Point(event.deltaX, event.deltaY)
             //if shift key swap the x and y values
             if (event.shiftKey) {
-                shift = new Vector(event.deltaY, event.deltaX)
+                shift = new Point(event.deltaY, event.deltaX)
             }
             this.pan(shift)
             return
@@ -232,15 +233,15 @@ export default class Grid extends Component {
          */
 
         // Calculate the centre of the View.
-        let viewCentre = new Vector(this.element().clientWidth / 2, this.element().clientHeight / 2);
+        let viewCentre = new Point(this.element().clientWidth / 2, this.element().clientHeight / 2);
         // Add the ScrollPoint to turn it into a GridPoint.
-        let gridPoint = new Vector(
+        let gridPoint = new Point(
             viewCentre.x + this.element().scrollLeft,
             viewCentre.y + this.element().scrollTop
         )
 
         // Convert the GridPoint into a VirtualPoint.
-        let virtualPoint = new Vector(
+        let virtualPoint = new Point(
             gridPoint.x / this.scale,
             gridPoint.y / this.scale
         )
@@ -254,13 +255,13 @@ export default class Grid extends Component {
         this.spacer.style.width = Math.max(this.element().clientWidth, (this.element().clientWidth * this.scale)) + 'px'
 
         // Convert the VirtualPoint we want to keep looking at, back into a GridPoint with the new scale.
-        let newGridPoint = new Vector(
+        let newGridPoint = new Point(
             virtualPoint.x * this.scale,
             virtualPoint.y * this.scale
         )
 
         // the amount to scroll to keep looking at the virtual point is the difference between the grid points
-        let scrollShift = new Vector(
+        let scrollShift = new Point(
             newGridPoint.x - gridPoint.x,
             newGridPoint.y - gridPoint.y
         )
