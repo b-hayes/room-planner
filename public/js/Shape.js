@@ -152,23 +152,6 @@ export default class Shape extends Component {
         )
     }
 
-    /**
-     * Calculate the angle for a point as if it was the end of a clock hand rotating around point 0,0
-     * 12 O'clock / up  position representing 0 degrees.
-     *
-     * @param {number} x
-     * @param {number} y
-     * @returns {number}
-     */
-    getPointAngle(x, y) {
-        // Atan operates in the range of -180 to 180deg with up being 0deg and returns the result in radians.
-        let radians = Math.atan2(y, x);
-        let degrees = radians * (180 / Math.PI);
-        degrees = (degrees < 0) ? degrees + 360 : degrees;
-        // Adjust the angle to be relevant to the orientation of CSS (Atan uses X axis as 0deg and CSS uses Y axis as 0deg).
-        return (degrees + 90) % 360;
-    }
-
     drag(e, initialMouseDownEvent) {
         let center = this.getCentre()
         let rotatedMouseLocation = new Point(e.clientX, e.clientY)
@@ -207,7 +190,7 @@ export default class Shape extends Component {
                 }
                 break;
             case this.rotating:
-                let angleShift = this.getPointAngle(e.x - center.x, e.y - center.y) - this.getPointAngle(initialMouseDownEvent.pageX - center.x, initialMouseDownEvent.pageY - center.y)
+                let angleShift = new Point(e.x - center.x, e.y - center.y).angle() - new Point(initialMouseDownEvent.pageX - center.x, initialMouseDownEvent.pageY - center.y).angle()
                 rotation = this.shapePositionWhenClicked.rotation + angleShift
                 break;
             default:
