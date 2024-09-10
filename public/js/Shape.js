@@ -112,10 +112,6 @@ export default class Shape extends Component {
             if (e.buttons !== 1) {
                 return
             }
-
-            //add event listeners for moving and resizing
-            document.addEventListener('mousemove', (e) => this.drag(e), false)
-            document.addEventListener('mouseup', () => this.up(), false)
         })
 
         //add event listener for hovering
@@ -201,31 +197,17 @@ export default class Shape extends Component {
     }
 
     drag(e, initialMouseDownEvent) {
-
-        // TODO: refactor this to use the initialMouseDownEvent and only have this called via grid.
-
-        //if not selected or mouse is not down then we don't process anything.
-        if (!this._selected || e.buttons !== 1) {
-            return
-        }
-
-        //currently using alt to pan in grid and don't want to move shapes around by accident.
-        if (e.altKey) {
-            return
-        }
-
         let center = this.getCentre()
-
         let rotatedMouseLocation = new Point(e.clientX, e.clientY)
             .rotate(this.position.rotation, center);
-        let rotatedClickLocation = new Point(this.clickX, this.clickY)
+        let rotatedClickLocation = new Point(initialMouseDownEvent.pageX, initialMouseDownEvent.pageY)
             .rotate(this.position.rotation);
 
         let rotatedShiftX = rotatedMouseLocation.x - rotatedClickLocation.x
         let rotatedShiftY = rotatedMouseLocation.y - rotatedClickLocation.y
 
-        let shiftX = e.pageX - this.clickX;
-        let shiftY = e.pageY - this.clickY;
+        let shiftX = e.pageX - initialMouseDownEvent.pageX;
+        let shiftY = e.pageY - initialMouseDownEvent.pageY;
         let {x, y, width, height, rotation} = this.shapePositionWhenClicked;
 
         //apply an inverse scale to the shift values so the change in position is without the current vue scale.
@@ -252,7 +234,7 @@ export default class Shape extends Component {
                 }
                 break;
             case this.rotating:
-                let angleShift = this.getPointAngle(e.x - center.x, e.y - center.y) - this.getPointAngle(this.clickX - center.x, this.clickY - center.y)
+                let angleShift = this.getPointAngle(e.x - center.x, e.y - center.y) - this.getPointAngle(initialMouseDownEvent.pageX - center.x, initialMouseDownEvent.pageY - center.y)
                 rotation = this.shapePositionWhenClicked.rotation + angleShift
                 break;
             default:
@@ -262,10 +244,6 @@ export default class Shape extends Component {
         }
 
         this.position = {x, y, width, height, rotation}
-    }
-
-    up() {
-        document.removeEventListener('mouseup', () => this.up(), false)
     }
 
     /**
