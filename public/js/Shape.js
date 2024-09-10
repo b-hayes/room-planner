@@ -153,6 +153,9 @@ export default class Shape extends Component {
     }
 
     drag(e, initialMouseDownEvent) {
+
+        //TODO: somehow I messed up resizing after shape is rotated fix it.
+
         let center = this.getCentre()
         let rotatedMouseLocation = new Point(e.clientX, e.clientY)
             .rotate(this.position.rotation, center);
