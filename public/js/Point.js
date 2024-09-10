@@ -17,7 +17,7 @@ export default class Point {
      * @param {number} maxX
      * @param {number} minY
      * @param {number} maxY
-     * @returns {Point}
+     * @returns {Point} returns itself for method chaining.
      */
     clamp(minX, maxX, minY, maxY) {
         this.x = Float.clamp(this.x, minX, maxX)
@@ -32,11 +32,7 @@ export default class Point {
      * @param {Point} centre if provided rotates around this point instead of 0,0
      * @returns {Point} returns itself for method chaining.
      */
-    rotate(degrees, centre = null) {
-        if (!centre instanceof Point) {
-            centre = new Point(0,0)
-        }
-
+    rotate(degrees, centre = new Point(0,0)) {
         const x = this.x - centre.x
         const y = this.y - centre.y
 
@@ -46,8 +42,6 @@ export default class Point {
 
         const rotatedX = x * cosAngle - y * sinAngle;
         const rotatedY = x * sinAngle + y * cosAngle;
-
-        const clickAngle = Math.atan2(rotatedY, rotatedX) * (180 / Math.PI)
 
         this.x = rotatedX + centre.x
         this.y = rotatedY + centre.y

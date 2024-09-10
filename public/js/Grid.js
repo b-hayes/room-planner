@@ -72,7 +72,7 @@ export default class Grid extends Component {
             clickY: event.pageY
         }
 
-        if (event.target.componentInstance ?? null instanceof Shape) {
+        if ((event.target.componentInstance ?? null) instanceof Shape) {
             this.selectedShape = event.target.componentInstance
         }
     }
@@ -93,8 +93,7 @@ export default class Grid extends Component {
         }
 
         //Pass the event to selected shape, so it can resize and move.
-        if (this._selectedShape) {
-            console.log(this.selectedShape)
+        if (this._selectedShape instanceof Shape) {
             this.selectedShape.drag(e, initialMouseDownEvent)
         }
     }

@@ -1,4 +1,5 @@
 import Component from "./Scafold/Component.js";
+import Point from "./Point.js"
 
 export default class Shape extends Component {
 
@@ -145,14 +146,14 @@ export default class Shape extends Component {
     /**
      * Calculate the real location of the centre of the shape in the window.
      *
-     * @returns {{x: number, y: number}}
+     * @returns Point
      */
     getCentre() {
         let rect = this.element().getBoundingClientRect()
-        return {
-            x: rect.left + (rect.width / 2),
-            y: rect.top + (rect.height / 2)
-        }
+        return new Point(
+            rect.left + (rect.width / 2),
+            rect.top + (rect.height / 2)
+        )
     }
 
     /**
@@ -196,9 +197,7 @@ export default class Shape extends Component {
         const rotatedX = mouseX * cosAngle - mouseY * sinAngle;
         const rotatedY = mouseX * sinAngle + mouseY * cosAngle;
 
-        const clickAngle = Math.atan2(rotatedY, rotatedX) * (180 / Math.PI)
-
-        return {x: rotatedX + centre.x, y: rotatedY + centre.y, angle: clickAngle}
+        return {x: rotatedX + centre.x, y: rotatedY + centre.y}
     }
 
     drag(e, initialMouseDownEvent) {
@@ -217,14 +216,13 @@ export default class Shape extends Component {
 
         let center = this.getCentre()
 
-        let translatedEvent = this.translateMouseEvent(e, this.position.rotation);
-        let rotatedClickLocation = this.translateMouseEvent({
-            clientX: this.clickX,
-            clientY: this.clickY
-        }, this.position.rotation);
+        let rotatedMouseLocation = new Point(e.clientX, e.clientY)
+            .rotate(this.position.rotation, center);
+        let rotatedClickLocation = new Point(this.clickX, this.clickY)
+            .rotate(this.position.rotation);
 
-        let rotatedShiftX = translatedEvent.x - rotatedClickLocation.x
-        let rotatedShiftY = translatedEvent.y - rotatedClickLocation.y
+        let rotatedShiftX = rotatedMouseLocation.x - rotatedClickLocation.x
+        let rotatedShiftY = rotatedMouseLocation.y - rotatedClickLocation.y
 
         let shiftX = e.pageX - this.clickX;
         let shiftY = e.pageY - this.clickY;
