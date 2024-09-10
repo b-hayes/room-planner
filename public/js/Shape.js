@@ -169,33 +169,6 @@ export default class Shape extends Component {
         return (degrees + 90) % 360;
     }
 
-    /**
-     * Translate the event coordinates to match the rotation of the shape.
-     *
-     * @param {event} event
-     * @param {number} rotation
-     * @returns {{x: number, y: number, angle: number}}
-     */
-    translateMouseEvent(event, rotation) {
-        const rect = this.element().getBoundingClientRect();
-        let centre = {
-            x: rect.left + (rect.width / 2),
-            y: rect.top + (rect.height / 2)
-        }
-
-        const mouseX = event.clientX - centre.x
-        const mouseY = event.clientY - centre.y
-
-        const angleRadians = rotation * (Math.PI / 180);
-        const cosAngle = Math.cos(-angleRadians);
-        const sinAngle = Math.sin(-angleRadians);
-
-        const rotatedX = mouseX * cosAngle - mouseY * sinAngle;
-        const rotatedY = mouseX * sinAngle + mouseY * cosAngle;
-
-        return {x: rotatedX + centre.x, y: rotatedY + centre.y}
-    }
-
     drag(e, initialMouseDownEvent) {
         let center = this.getCentre()
         let rotatedMouseLocation = new Point(e.clientX, e.clientY)
