@@ -26,29 +26,25 @@ export default class Point {
     }
 
     /**
-     * Rotate the point.
+     * Rotate the point around 0,0 or a given 'centre' point.
      *
      * @param {number} degrees
      * @param {Point} centre if provided rotates around this point instead of 0,0
      * @returns {Point} returns itself for method chaining.
      */
     rotate(degrees, centre = new Point(0,0)) {
-        if (degrees === 0) {
-            return this
-        }
-        const x = this.x - centre.x
-        const y = this.y - centre.y
+        const mouseX = this.x - centre.x
+        const mouseY = this.y - centre.y
 
         const angleRadians = degrees * (Math.PI / 180);
         const cosAngle = Math.cos(-angleRadians);
         const sinAngle = Math.sin(-angleRadians);
 
-        const rotatedX = x * cosAngle - y * sinAngle;
-        const rotatedY = x * sinAngle + y * cosAngle;
+        const rotatedX = mouseX * cosAngle - mouseY * sinAngle;
+        const rotatedY = mouseX * sinAngle + mouseY * cosAngle;
 
         this.x = rotatedX + centre.x
         this.y = rotatedY + centre.y
-
         return this
     }
 

@@ -154,19 +154,19 @@ export default class Shape extends Component {
 
     drag(e, initialMouseDownEvent) {
 
-        //TODO: somehow I messed up resizing after shape is rotated fix it.
+
 
         let center = this.getCentre()
         let rotatedMouseLocation = new Point(e.clientX, e.clientY)
             .rotate(this.position.rotation, center);
-        let rotatedClickLocation = new Point(initialMouseDownEvent.pageX, initialMouseDownEvent.pageY)
-            .rotate(this.position.rotation);
+        let rotatedClickLocation = new Point(initialMouseDownEvent.clientX, initialMouseDownEvent.clientY)
+            .rotate(this.position.rotation, this.getCentre());
 
         let rotatedShiftX = rotatedMouseLocation.x - rotatedClickLocation.x
         let rotatedShiftY = rotatedMouseLocation.y - rotatedClickLocation.y
+        let shiftX = e.pageX - this.clickX;
+        let shiftY = e.pageY - this.clickY;
 
-        let shiftX = e.pageX - initialMouseDownEvent.pageX;
-        let shiftY = e.pageY - initialMouseDownEvent.pageY;
         let {x, y, width, height, rotation} = this.shapePositionWhenClicked;
 
         //apply an inverse scale to the shift values so the change in position is without the current vue scale.
