@@ -93,7 +93,10 @@ export default class Grid extends Component {
         }
 
         //Pass the event to selected shape, so it can resize and move.
-        if (e.buttons === 1 && this._selectedShape instanceof Shape) {
+        if (
+            e.buttons === 1 && this.selectedShape instanceof Shape &&
+            this.selectedShape.element().contains(initialMouseDownEvent.target)
+        ) {
             this.selectedShape.drag(e, initialMouseDownEvent)
         }
     }

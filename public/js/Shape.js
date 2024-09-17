@@ -153,9 +153,6 @@ export default class Shape extends Component {
     }
 
     drag(e, initialMouseDownEvent) {
-
-
-
         let center = this.getCentre()
         let rotatedMouseLocation = new Point(e.clientX, e.clientY)
             .rotate(this.position.rotation, center);
