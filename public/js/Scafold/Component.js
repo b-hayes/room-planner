@@ -85,7 +85,7 @@ export default class Component {
                 // Special case for onScroll. There is no 'scroll' event, but it's intuitive to think so.
                 if (listenFor === 'onScroll') listenFor = 'onWheel' //map onScroll method to onWheel events.
 
-                console.log('Handler detected',this.constructor.name + ' with id ' + this.id ?? 'undefined' + '.' + prop, 'will be executed for', listenFor)
+                //console.log('Handler detected',this.constructor.name + '.' + prop, 'will be executed for', listenFor, 'events.')
 
                 // Special case for onDrag. onDrag events usually only trigger if draggable property is set in html.
                 //  However, the draggable property behaviour is undesirable, so I added a custom drag implementation if method exists without the property.
