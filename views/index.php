@@ -148,7 +148,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     window.newShape = function () {
         const shape = new Shape(randomId())
         grid.addShape(shape)
-        shape.select()
+        grid.selectedShape = shape
         shapes.push(shape)// keep track of the shapes here for client storage.
         console.log(window.shapes, shapes)
     }
@@ -167,7 +167,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     window.newRoom = function () {
         const room = new Room(randomId())
         grid.addShape(room)
-        room.select()
+        grid.selectedShape = room
         shapes.push(room)
     }
 

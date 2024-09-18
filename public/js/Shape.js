@@ -79,34 +79,11 @@ export default class Shape extends Component {
         this.rotationText = this.element().querySelector('.rotationText')
 
         document.addEventListener('mousedown', (e) => {
-            //unselect if anything other than this is clicked on
-            // if (
-            //     e.target !== this.element() &&
-            //     //if the target is a child of the shape then don't unselect
-            //     this.element().contains(e.target) === false
-            // ) {
-            //     this.selected = false
-            //     return
-            // }
 
             //record where the click happened so that drag events can use it as a point of reference
             this.clickX = e.pageX
             this.clickY = e.pageY
             this.shapePositionWhenClicked = this.position
-
-            //mark the shape as selected (important)
-            //this.selected = true
-
-            //trigger a custom event so the rest of application can perform other actions.
-            let event = new CustomEvent('shape-click', {
-                detail: {
-                    button: e.button,
-                    x: e.pageX,
-                    y: e.pageY,
-                    shape: this
-                }
-            })
-            this.element().dispatchEvent(event)
 
             //if not primary mouse button then don't bother with move and resize events.
             if (e.buttons !== 1) {
@@ -120,6 +97,20 @@ export default class Shape extends Component {
         // set the initial position and scale (triggers a redraw twice for now).
         this.position = {x, y, width, height, rotation}
         this.scale = scale
+    }
+
+    onClick(e) {
+        console.log('shape was clicked')
+        //trigger a custom event so the rest of application can perform other actions.
+        let event = new CustomEvent('shape-click', {
+            detail: {
+                button: e.button,
+                x: e.pageX,
+                y: e.pageY,
+                shape: this
+            }
+        })
+        this.element().dispatchEvent(event)
     }
 
     get selected() {
