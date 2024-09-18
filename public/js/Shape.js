@@ -99,20 +99,6 @@ export default class Shape extends Component {
         this.scale = scale
     }
 
-    onClick(e) {
-        console.log('shape was clicked')
-        //trigger a custom event so the rest of application can perform other actions.
-        let event = new CustomEvent('shape-click', {
-            detail: {
-                button: e.button,
-                x: e.pageX,
-                y: e.pageY,
-                shape: this
-            }
-        })
-        this.element().dispatchEvent(event)
-    }
-
     get selected() {
         return this._selected
     }

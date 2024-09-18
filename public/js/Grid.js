@@ -75,6 +75,10 @@ export default class Grid extends Component {
         if ((event.target.componentInstance ?? null) instanceof Shape) {
             this.selectedShape = event.target.componentInstance
         }
+
+        if (this.selectedShape && event.button === 2) {
+            console.log('shape was right clicked.')
+        }
     }
 
     onDrag(e, initialMouseDownEvent) {

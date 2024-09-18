@@ -60,11 +60,11 @@ export default class Component {
         while (prototype) {
             const properties = Object.getOwnPropertyNames(prototype);
             properties.forEach(prop => {
-                if (processedMethods.has(prop) || typeof this[prop] !== 'function') {
+                if (processedMethods.has(prop) || typeof this[prop] !== 'function' || !prop.startsWith('on')) {
                     return //skip
                 }
 
-                // Ignore these next few lines. They do nothing except trick the IDE into indexing dynamic method usages.
+                // >>> Ignore these next few lines. They do nothing except trick the IDE into indexing dynamic method usages.
                 // Nothing would functionally change if these lines were deleted.
                 let commonEventsOnly = false
                 let indexUsages = [
@@ -74,12 +74,8 @@ export default class Component {
                 if (!indexUsages.includes(prop) && commonEventsOnly) {
                     return
                 }
-                // End of code to ignore.
+                // <<< End of code to ignore.
 
-                // using any function that starts with on also opens the door for onCustomEventName as well 😉.
-                if (!prop.startsWith('on')) {
-                    return
-                }
                 let listenFor = prop; //make a copy of the name.
 
                 // Special case for onScroll. There is no 'scroll' event, but it's intuitive to think so.
