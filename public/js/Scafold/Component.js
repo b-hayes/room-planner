@@ -53,8 +53,8 @@ export default class Component {
         this._element = Loader.loadHtml(this.html())
         this._element.componentInstance = this
 
-        // Traverse the prototype chain and collect methods including ones inherited by parent classes.
-        let className = this.constructor.name
+        // TODO: perhaps move all this stuff into a fn on the Loader class.
+        // Traverse the prototype chain to include inherited methods from ancestor classes.
         let prototype = Object.getPrototypeOf(this);
         const processedMethods = new Set(); // To avoid duplicates
         while (prototype) {
