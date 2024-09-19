@@ -1,4 +1,4 @@
-import Component from "./Scafold/Component.js"
+import Component from "./ModuLatte/Component.js"
 
 export default class Toast extends Component {
 

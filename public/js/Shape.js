@@ -1,4 +1,4 @@
-import Component from "./Scafold/Component.js";
+import Component from "./ModuLatte/Component.js";
 import Point from "./Point.js"
 
 export default class Shape extends Component {

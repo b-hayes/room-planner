@@ -133,7 +133,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     import Shape from "/js/Shape.js"
     import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"
-    import Loader from "../public/js/Scafold/Loader.js"
+    import Loader from "../public/js/ModuLatte/Loader.js"
 
     window.shapes = []
 
