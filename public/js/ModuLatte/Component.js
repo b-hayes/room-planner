@@ -52,55 +52,7 @@ export default class Component {
         Loader.loadStyles(this.style(), styleId)
         this._element = Loader.loadHtml(this.html())
         this._element.componentInstance = this
-
-        // TODO: perhaps move all this stuff into a fn on the Loader class.
-        // Traverse the prototype chain to include inherited methods from ancestor classes.
-        let prototype = Object.getPrototypeOf(this);
-        const processedMethods = new Set(); // To avoid duplicates
-        while (prototype) {
-            const properties = Object.getOwnPropertyNames(prototype);
-            properties.forEach(prop => {
-                if (processedMethods.has(prop) || typeof this[prop] !== 'function' || !prop.startsWith('on')) {
-                    return //skip
-                }
-
-                // >>> Ignore these next few lines. They do nothing except trick the IDE into indexing dynamic method usages.
-                // Nothing would functionally change if these lines were deleted.
-                let commonEventsOnly = false
-                let indexUsages = [
-                    // add class methods names here if you want their usage indexed.
-                    'onMouseDown', 'onDrag', 'onClick'
-                ];
-                if (!indexUsages.includes(prop) && commonEventsOnly) {
-                    return
-                }
-                // <<< End of code to ignore.
-
-                let listenFor = prop; //make a copy of the name.
-
-                // Special case for onScroll. There is no 'scroll' event, but it's intuitive to think so.
-                if (listenFor === 'onScroll') listenFor = 'onWheel' //map onScroll method to onWheel events.
-
-                //console.log('Handler detected',this.constructor.name + '.' + prop, 'will be executed for', listenFor, 'events.')
-
-                // Special case for onDrag. onDrag events usually only trigger if draggable property is set in html.
-                //  However, the draggable property behaviour is undesirable, so I added a custom drag implementation if method exists without the property.
-                if (listenFor === 'onDrag' && !this._element.draggable) {
-                    this._element.addEventListener('mousedown', (e) => this._mouseDragStart(e, prop), false)
-                    processedMethods.add(prop); // Store method to avoid duplicate listeners.
-                    return
-                }
-
-                //remove the word 'on' from the start to match addEventListener syntax.
-                listenFor = listenFor.substring(2).toLowerCase()
-                if (!listenFor) {
-                    return // ignores on with no event name
-                }
-                this._addListener(listenFor, (e) => this._event(e, prop), false)
-                processedMethods.add(prop); // Store method to avoid duplicate listeners.
-            });
-            prototype = Object.getPrototypeOf(prototype); // Move up the prototype chain
-        }
+        Loader.setupEventListeners(this)
     }
 
     /**
