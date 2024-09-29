@@ -1,5 +1,6 @@
-import Component from "./ModuLatte/Component.js";
+import Component from "../ModuLatte/Component.js";
 import Point from "./Point.js"
+import Position from "./Position.js"
 
 export default class Shape extends Component {
 
@@ -37,13 +38,13 @@ export default class Shape extends Component {
 
     constructor(
         id,
-        position = {
-            width: 300,
-            height: 300,
-            x: 150,
-            y: 150,
-            rotation: 0
-        },
+        position = new Position (
+            width = 300,
+            height = 300,
+            x = 150,
+            y = 150,
+            rotation = 0
+        ),
         scale = 1
     ) {
         super();
@@ -51,13 +52,6 @@ export default class Shape extends Component {
             throw new TypeError('id must be a unique string')
         }
         this.id = id
-
-        // for each Position value if defined should be int/float
-        for (let key in position) {
-            if (position[key] !== undefined && typeof position[key] !== 'number') {
-                throw new TypeError('position.' + key + ' must be a number')
-            }
-        }
 
         // get the position values
         let {width, height, x, y, rotation} = position

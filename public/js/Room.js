@@ -1,4 +1,4 @@
-import Shape from "./Shape.js"
+import Shape from "./Grid/Shape.js"
 
 export default class Room extends Shape {
 

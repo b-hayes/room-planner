@@ -24,7 +24,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
 </div>
 <main>
-    <Grid params='{ "scale": 1 }'></Grid>
+    <Grid.Grid params='{ "scale": 1 }'></Grid.Grid>
 </main>
 
 <div class="status-bar">
@@ -130,7 +130,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     //import Grid from "/js/Grid.js" //this import isn't needed because of the dynamic component loading.
     //  just leaving here as an example of how it would look if my special loader wasn't in place.
     //  the other imports are still needed because they are directly referenced before the loader is called.
-    import Shape from "/js/Shape.js"
+    import Shape from "/js/Grid/Shape.js"
     import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"
     import Loader from "../public/js/ModuLatte/Loader.js"

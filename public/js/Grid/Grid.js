@@ -1,4 +1,4 @@
-import Component from "./ModuLatte/Component.js"
+import Component from "../ModuLatte/Component.js"
 import Point from "./Point.js"
 import Shape from "./Shape.js"
 import Float from "./Float.js"

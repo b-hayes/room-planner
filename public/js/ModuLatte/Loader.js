@@ -32,12 +32,13 @@ export default class Loader {
 
     // This is totally unnecessary since it's only used for Grid.
     // I could have just called new Grid() but I wanted to see how hard it is to dynamically load all the components.
-    static async replaceTagsWithComponents(parent) {
+    static async replaceTagsWithComponents(parent, sourceRoot = '/js/') {
         let tags = parent.getElementsByTagName('*')
         for (let tag of tags) {
             let tagName = tag.tagName.toLowerCase()
             //convert classname from kebab-case to PascalCase
             let className = Loader.toPascalCase(tagName)
+            let classPath = className.replace('.', '/') + '.js'
 
             //skip slot
             if (['slot'].includes(tagName)) {
@@ -55,7 +56,7 @@ export default class Loader {
             }
 
             // Dynamically import the module
-            let module = await import(`/js/${className}.js`)
+            let module = await import(sourceRoot + classPath)
             // Access the class using the variable
             const LoadedClass = module.default; // Assuming the class is the default export
 
