@@ -1,6 +1,19 @@
 export default class Text {
     static parse(value) {
-        return value.toString()// pretty much anything can be a string already without an error.
+        if (typeof value === 'string') return value
+
+        if (value === null || value === undefined || typeof value === 'symbol' || typeof value === 'function') {
+            throw new Error('Value is not a valid string.');
+        }
+
+        if (typeof value === 'object') {
+            // object must have a custom toString method and return a string to be considered valid.
+            if (value.toString === Object.prototype.toString || typeof value.toString() !== 'string') {
+                throw new Error('Value is an object with an invalid toString method.');
+            }
+        }
+
+        return value.toString();
     }
 
     static toCamelCase(text) {
