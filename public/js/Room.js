@@ -1,18 +1,19 @@
 import Shape from "./Grid/Shape.js"
 import Loader from "./ModuLatte/Loader.js"
 import Text from "./ModuLatte/Text.js"
+import Position from "./Grid/Position.js"
 
 export default class Room extends Shape {
 
     constructor(
         id = Text.randomId(),
-        position = {
-            width: 300,
-            height: 300,
-            x: undefined, //if undefined will center
-            y: undefined, //if undefined will center
-            rotation: 0
-        }
+        position = new Position (
+            150,
+            150,
+            300,
+            300,
+            0
+        )
     ) {
         super(id, position)
         this.element().classList.add('room')
