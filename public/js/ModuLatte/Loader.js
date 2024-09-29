@@ -1,5 +1,5 @@
 import Component from "./Component.js"
-import String from "./String.js"
+import Text from "./Text.js"
 
 export default class Loader {
     static loadStyles(style, styleId) {
@@ -46,7 +46,7 @@ export default class Loader {
         for (let tag of tags) {
             let tagName = tag.tagName.toLowerCase()
             //convert classname from kebab-case to PascalCase
-            let className = String.toPascalCase(tagName)
+            let className = Text.toPascalCase(tagName)
             let classPath = className.replace('.', '/') + '.js'
 
             //skip slot
