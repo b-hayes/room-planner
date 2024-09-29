@@ -1,4 +1,4 @@
-import Float from "./Float.js"
+import Float from "../ModuLatte/Float.js"
 
 export default class Position {
     constructor(x = 0, y = 0, width = 0, height = 0, rotation = 0)

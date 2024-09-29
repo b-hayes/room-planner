@@ -1,4 +1,4 @@
-import Float from "./Float.js"
+import Float from "../ModuLatte/Float.js"
 
 export default class Point {
     constructor(x, y) {

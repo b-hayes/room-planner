@@ -1,4 +1,5 @@
 import Component from "./Component.js"
+import String from "./String.js"
 
 export default class Loader {
     static loadStyles(style, styleId) {
@@ -30,14 +31,22 @@ export default class Loader {
         return hash
     }
 
-    // This is totally unnecessary since it's only used for Grid.
-    // I could have just called new Grid() but I wanted to see how hard it is to dynamically load all the components.
+
+    /**
+     * Replace any custom tag names with a matching JS Component from the source root.
+     *  e.g. <Cat params='{ "constructor": "arguments" }'> will autoload /source/Cat.js module,
+     *  and replace the html tag with new Cat(params).element().
+     *
+     * @param parent
+     * @param sourceRoot
+     * @returns {Promise<void>}
+     */
     static async replaceTagsWithComponents(parent, sourceRoot = '/js/') {
         let tags = parent.getElementsByTagName('*')
         for (let tag of tags) {
             let tagName = tag.tagName.toLowerCase()
             //convert classname from kebab-case to PascalCase
-            let className = Loader.toPascalCase(tagName)
+            let className = String.toPascalCase(tagName)
             let classPath = className.replace('.', '/') + '.js'
 
             //skip slot
@@ -86,18 +95,6 @@ export default class Loader {
 
             tag.parentNode.replaceChild(newElement, tag)
         }
-    }
-
-    static toCamelCase(text) {
-        return text.replace(/-\w/g, Loader.clearAndUpper);
-    }
-
-    static toPascalCase(text) {
-        return text.replace(/(^\w|-\w)/g, Loader.clearAndUpper);
-    }
-
-    static clearAndUpper(text) {
-        return text.replace(/-/, "").toUpperCase();
     }
 
     static randomId() {

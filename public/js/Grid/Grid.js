@@ -1,7 +1,7 @@
 import Component from "../ModuLatte/Component.js"
 import Point from "./Point.js"
 import Shape from "./Shape.js"
-import Float from "./Float.js"
+import Float from "../ModuLatte/Float.js"
 
 export default class Grid extends Component {
 
@@ -77,6 +77,7 @@ export default class Grid extends Component {
         }
 
         if (this.selectedShape && event.button === 2) {
+            // TODO: need to restore the right click menu. Index has it atm.
             console.log('shape was right clicked.')
         }
     }
