@@ -1,5 +1,5 @@
 export default class String {
-    static parse(value, errorMessage) {
+    static parse(value, errorMessage = 'Value must be a string') {
         if (typeof value !== 'string') {
             if (errorMessage === undefined) {
                 errorMessage = 'Expected value to be a string ' + typeof value

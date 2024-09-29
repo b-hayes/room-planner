@@ -1,11 +1,11 @@
 export default class Float {
 
-    static parse(n, message = 'n must be a number') {
-        n = parseFloat(n)
-        if (isNaN(n)) {
-            throw new Error(message)
+    static parse(value, errorMessage = 'Value must be a number') {
+        value = parseFloat(value)
+        if (isNaN(value)) {
+            throw new Error(errorMessage)
         }
-        return n
+        return value
     }
 
     static round(n, nearest) {
