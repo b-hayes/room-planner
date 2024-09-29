@@ -97,10 +97,6 @@ export default class Loader {
         }
     }
 
-    static randomId() {
-        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-    }
-
     /**
      * Automatically assigns event listeners to any methods called on<eventName>() so the components do not have to.
      *  e.g. if component has an onMouseDown method an 'mousedown' event listener will be assigned to its element.

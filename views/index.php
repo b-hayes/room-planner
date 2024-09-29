@@ -134,7 +134,9 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"
     import Loader from "../public/js/ModuLatte/Loader.js"
+    import Text from "../public/js/ModuLatte/Text.js"
 
+    window.t = Text
     window.shapes = []
 
     window.error = function (message) {

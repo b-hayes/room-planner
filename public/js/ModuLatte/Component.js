@@ -1,4 +1,5 @@
 import Loader from "./Loader.js"
+import Text from "./Text.js"
 
 /**
  * Sensitive methods:
@@ -187,7 +188,7 @@ export default class Component {
         if (typeof name !== 'string') throw new Error('name must be a string')
 
         if (!name) {
-            name = Loader.randomId()
+            name = Text.randomId(8)
         }
 
         // Keep a list of dots

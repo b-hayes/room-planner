@@ -2,6 +2,7 @@ import Component from "../ModuLatte/Component.js";
 import Point from "./Point.js"
 import Position from "./Position.js"
 import Loader from "../ModuLatte/Loader.js"
+import Text from "../ModuLatte/Text.js"
 
 export default class Shape extends Component {
 
@@ -38,7 +39,7 @@ export default class Shape extends Component {
     }
 
     constructor(
-        id = Loader.randomId(),
+        id = Text.randomId(),
         position = new Position (
             150,
             150,
@@ -73,6 +74,7 @@ export default class Shape extends Component {
         this.heightText = this.element().querySelector('.heightText')
         this.rotationText = this.element().querySelector('.rotationText')
 
+        //todo: should not need to use a document listener anymore wih the new setup.
         document.addEventListener('mousedown', (e) => {
 
             //record where the click happened so that drag events can use it as a point of reference
@@ -86,6 +88,7 @@ export default class Shape extends Component {
             }
         })
 
+        //todo: should not need to use a document listener anymore wih the new setup.
         //add event listener for hovering
         document.addEventListener('mousemove', (e) => this.hover(e), false)
 
