@@ -1,6 +1,7 @@
 import Component from "../ModuLatte/Component.js";
 import Point from "./Point.js"
 import Position from "./Position.js"
+import Loader from "../ModuLatte/Loader.js"
 
 export default class Shape extends Component {
 
@@ -37,7 +38,7 @@ export default class Shape extends Component {
     }
 
     constructor(
-        id,
+        id = Loader.randomId(),
         position = new Position (
             width = 300,
             height = 300,
@@ -222,7 +223,7 @@ export default class Shape extends Component {
     }
 
     //Virtual position. Not the real position of the element.
-    set position({x, y, width, height, rotation}) {
+    set  position({x, y, width, height, rotation}) {
         // make sure we have Numbers and not strings
         width = parseFloat(width) ?? 300
         height = parseFloat(height) ?? 300

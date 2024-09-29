@@ -137,16 +137,12 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
     window.shapes = []
 
-    window.randomId = function () {
-        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-    }
-
     window.error = function (message) {
         throw new Error(message)
     }
 
     window.newShape = function () {
-        const shape = new Shape(randomId())
+        const shape = new Shape()
         grid.addShape(shape)
         grid.selectedShape = shape
         shapes.push(shape)// keep track of the shapes here for client storage.
@@ -165,7 +161,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     }
 
     window.newRoom = function () {
-        const room = new Room(randomId())
+        const room = new Room()
         grid.addShape(room)
         grid.selectedShape = room
         shapes.push(room)
@@ -224,15 +220,6 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         })
         window.shapes = loadedShapes
     }
-
-    //todo: remove this when done playing around
-    // var eventList = [];
-    // for (var x in document) {
-    //     if (/^on/.test(x)) {
-    //         eventList.push(x);
-    //     }
-    // }
-    // console.log('all the possible events you could call on document:', eventList);
 
     await Loader.replaceTagsWithComponents(document)
     window.grid = document.querySelector(".grid")

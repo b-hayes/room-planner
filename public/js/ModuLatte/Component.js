@@ -227,12 +227,12 @@ export default class Component {
         if (typeof name !== 'string') throw new Error('name must be a string')
 
         if (!name) {
-            name = randomId()
+            name = Loader.randomId()
         }
 
         // Keep a list of dots
         if (!this._debugDots) {
-            this._debugDots = []``
+            this._debugDots = []
         }
 
         // update the dot if one with the same name already exists
@@ -282,6 +282,7 @@ export default class Component {
 
     /**
      * Draw a red line between two points inside the component element.
+     *  Give the line a name to update it on consecutive calls instead of creating a new one.
      * @param {number} x1
      * @param {number} y1
      * @param {number} x2
@@ -294,8 +295,6 @@ export default class Component {
         if (typeof x2 !== 'number') throw new Error('x2 must be a number')
         if (typeof y2 !== 'number') throw new Error('y2 must be a number')
         if (typeof name !== 'string') throw new Error('name must be a string')
-
-        //TODO: update this to track names and update lines, copy the dot code
 
         // Keep a list of lines
         if (!this._debugLines) {

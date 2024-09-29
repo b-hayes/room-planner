@@ -1,9 +1,10 @@
 import Shape from "./Grid/Shape.js"
+import Loader from "./ModuLatte/Loader.js"
 
 export default class Room extends Shape {
 
     constructor(
-        id,
+        id = Loader.randomId(),
         position = {
             width: 300,
             height: 300,

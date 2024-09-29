@@ -99,4 +99,8 @@ export default class Loader {
     static clearAndUpper(text) {
         return text.replace(/-/, "").toUpperCase();
     }
+
+    static randomId() {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    }
 }
