@@ -1,12 +1,6 @@
 export default class String {
-    static parse(value, errorMessage = 'Value must be a string') {
-        if (typeof value !== 'string') {
-            if (errorMessage === undefined) {
-                errorMessage = 'Expected value to be a string ' + typeof value
-            }
-            throw new Error(errorMessage)
-        }
-        return value
+    static parse(value) {
+        return value.toString()// pretty much anything can be a string already without an error.
     }
 
     static toCamelCase(text) {
