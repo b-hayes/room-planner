@@ -45,6 +45,7 @@ export default class Component {
     }
 
     /**
+     * Called the first time the element is referenced.
      * @private
      */
     _load() {
@@ -56,7 +57,7 @@ export default class Component {
     }
 
     /**
-     * Helper to collect all the listener for this component, so they can be removed from memory if it is deleted.
+     * Helper to add event listeners, so that they are tracked and removed if the component is destroyed.
      *
      * @param {String} eventName
      * @param {Function} handlerFn
@@ -78,6 +79,13 @@ export default class Component {
         this._element.remove()
     }
 
+    /**
+     *
+     * @param event
+     * @param method
+     * @returns {*}
+     * @private
+     */
     _event(event, method) {
         let _method = '_' + method
         if (typeof this[_method] === 'function') {// might have wrapper methods defined in here at some point.

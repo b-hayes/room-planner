@@ -40,11 +40,11 @@ export default class Shape extends Component {
     constructor(
         id = Loader.randomId(),
         position = new Position (
-            width = 300,
-            height = 300,
-            x = 150,
-            y = 150,
-            rotation = 0
+            150,
+            150,
+            300,
+            300,
+            0
         ),
         scale = 1
     ) {
