@@ -2,6 +2,7 @@ import Component from "../ModuLatte/Component.js"
 import Point from "./Point.js"
 import Shape from "./Shape.js"
 import Float from "../ModuLatte/Float.js"
+import Text from "../ModuLatte/Text.js"
 
 export default class Grid extends Component {
 
@@ -294,6 +295,117 @@ export default class Grid extends Component {
             }
         })
         this.dispatchEventWithDebounce(event)
+    }
+
+
+    /**
+     * Draw a small red dot at the given x and y coordinates within the component element.
+     * Give the dot a name to update on consecutive calls instead of creating a new one.
+     * @param {number} x
+     * @param {number} y
+     * @param {string} name
+     */
+    debugDrawDot(x, y, name = '') {
+        if (typeof x !== 'number') throw new Error('x must be a number')
+        if (typeof y !== 'number') throw new Error('y must be a number')
+        if (typeof name !== 'string') throw new Error('name must be a string')
+
+        if (!name) {
+            name = Text.randomId(8)
+        }
+
+        // Keep a list of dots
+        if (!this._debugDots) {
+            this._debugDots = []
+        }
+
+        // update the dot if one with the same name already exists
+        for (let dot of this._debugDots) {
+            if (dot.name === name) {
+                dot.dot.style.left = x + 'px'
+                dot.dot.style.top = y + 'px'
+                // update the label if it has one
+                if (dot.label) {
+                    dot.label.innerHTML = name + '<br/> ' + x + '<br/> ' + y
+                }
+                return
+            }
+        }
+
+        // Do not create a dot if one already exists with the same x and y coordinates
+        for (let dot of this._debugDots) {
+            if (dot.dot.style.left === x + 'px' && dot.dot.style.top === y + 'px') {
+                return
+            }
+        }
+
+        // Create a small red dot at the given x and y coordinates
+        const dot = document.createElement('div')
+        dot.style.position = 'absolute'
+        dot.style.width = '5px'
+        dot.style.height = '5px'
+        dot.style.backgroundColor = 'red'
+        dot.style.left = x + 'px'
+        dot.style.top = y + 'px'
+        dot.style.zIndex = '999999999999999'
+        this.element().appendChild(dot)
+
+        // add label to the dot, so we can see what it is
+        const label = document.createElement('div')
+        label.style.position = 'absolute'
+        label.style.left = 10 + 'px'
+        label.style.top = -5 + 'px'
+        label.style.zIndex = '999999999999999'
+        label.innerHTML = name + '<br/> ' + x + '<br/> ' + y
+        label.style.width = '300px'
+        dot.appendChild(label)
+
+        // Add the dot to the list
+        this._debugDots.push({name, dot, label})
+    }
+
+    /**
+     * Draw a red line between two points inside the component element.
+     *  Give the line a name to update it on consecutive calls instead of creating a new one.
+     * @param {number} x1
+     * @param {number} y1
+     * @param {number} x2
+     * @param {number} y2
+     * @param {string} name
+     */
+    debugDrawLine(x1, y1, x2, y2, name = '') {
+        if (typeof x1 !== 'number') throw new Error('x1 must be a number')
+        if (typeof y1 !== 'number') throw new Error('y1 must be a number')
+        if (typeof x2 !== 'number') throw new Error('x2 must be a number')
+        if (typeof y2 !== 'number') throw new Error('y2 must be a number')
+        if (typeof name !== 'string') throw new Error('name must be a string')
+
+        // Keep a list of lines
+        if (!this._debugLines) {
+            this._debugLines = []
+        }
+
+        //grab exiting line or create one
+        let line = this._debugLines.find(l => l.name === name)
+        if (line) {
+            line = line.line
+        } else {
+            line = document.createElement('div')
+        }
+
+        line.style.position = 'absolute'
+        line.style.width = '1px'
+        line.style.height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) + 'px'
+        line.style.backgroundColor = 'red'
+        line.style.left = x1 + 'px'
+        line.style.top = y1 + 'px'
+        line.style.transformOrigin = '0 0'
+        let angle = (Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI - 90 + 360) % 360
+        line.style.transform = `rotate(${angle}deg)`
+        document.body.appendChild(line)
+
+        // Add the line to the list
+        this._debugLines.push({name, line})
     }
 }
 
