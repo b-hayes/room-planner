@@ -75,22 +75,24 @@ export default class Shape extends Component {
         this.rotationText = this.element().querySelector('.rotationText')
 
         //todo: should not need to use a document listener anymore wih the new setup.
-        document.addEventListener('mousedown', (e) => {
-
-            //record where the click happened so that drag events can use it as a point of reference
-            this.clickX = e.pageX
-            this.clickY = e.pageY
-            this.shapePositionWhenClicked = this.position
-
-            //if not primary mouse button then don't bother with move and resize events.
-            if (e.buttons !== 1) {
-                return
-            }
-        })
+        // document.addEventListener('mousedown', (e) => {
+        //
+        //     //record where the click happened so that drag events can use it as a point of reference
+        //     this.clickX = e.pageX
+        //     this.clickY = e.pageY
+        //     this.shapePositionWhenClicked = this.position
+        //
+        //     console.log('document mousedown', this.shapePositionWhenClicked)
+        //
+        //     //if not primary mouse button then don't bother with move and resize events.
+        //     if (e.buttons !== 1) {
+        //         return
+        //     }
+        // })
 
         //todo: should not need to use a document listener anymore wih the new setup.
         //add event listener for hovering
-        document.addEventListener('mousemove', (e) => this.hover(e), false)
+        // document.addEventListener('mousemove', (e) => this.hover(e), false)
 
         // set the initial position and scale (triggers a redraw twice for now).
         this.position = {x, y, width, height, rotation}
@@ -139,6 +141,9 @@ export default class Shape extends Component {
         let shiftX = e.pageX - this.clickX;
         let shiftY = e.pageY - this.clickY;
 
+        //TODO this is where the problem is, shapePositionWhenClicked is not being set.
+        //  wondering if we could just change the way we calculate the new position based of the initial mouse event
+        //  instead of what the position was.
         let {x, y, width, height, rotation} = this.shapePositionWhenClicked;
 
         //apply an inverse scale to the shift values so the change in position is without the current vue scale.
@@ -173,6 +178,8 @@ export default class Shape extends Component {
                 x = this.shapePositionWhenClicked.x + shiftX
                 y = this.shapePositionWhenClicked.y + shiftY
         }
+
+        console.log('new position', {x, y, width, height, rotation})
 
         this.position = {x, y, width, height, rotation}
     }

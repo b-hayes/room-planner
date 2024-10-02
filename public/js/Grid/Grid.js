@@ -65,14 +65,6 @@ export default class Grid extends Component {
 
 
     onMouseDown(event) {
-        // record click position and scroll position for other event to reference.
-        this.positionWhenClicked = {
-            scrollX: this.element().scrollLeft,
-            scrollY: this.element().scrollTop,
-            clickX: event.pageX,
-            clickY: event.pageY
-        }
-
         if ((event.target.componentInstance ?? null) instanceof Shape) {
             this.selectedShape = event.target.componentInstance
         }
@@ -104,6 +96,12 @@ export default class Grid extends Component {
             this.selectedShape.element().contains(initialMouseDownEvent.target)
         ) {
             this.selectedShape.drag(e, initialMouseDownEvent)
+        }
+    }
+
+    onMouseMove(e) {
+        if (this.selectedShape instanceof Shape) {
+            this.selectedShape.hover(e)
         }
     }
 
