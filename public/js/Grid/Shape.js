@@ -74,26 +74,6 @@ export default class Shape extends Component {
         this.heightText = this.element().querySelector('.heightText')
         this.rotationText = this.element().querySelector('.rotationText')
 
-        //todo: should not need to use a document listener anymore wih the new setup.
-        // document.addEventListener('mousedown', (e) => {
-        //
-        //     //record where the click happened so that drag events can use it as a point of reference
-        //     this.clickX = e.pageX
-        //     this.clickY = e.pageY
-        //     this.shapePositionWhenClicked = this.position
-        //
-        //     console.log('document mousedown', this.shapePositionWhenClicked)
-        //
-        //     //if not primary mouse button then don't bother with move and resize events.
-        //     if (e.buttons !== 1) {
-        //         return
-        //     }
-        // })
-
-        //todo: should not need to use a document listener anymore wih the new setup.
-        //add event listener for hovering
-        // document.addEventListener('mousemove', (e) => this.hover(e), false)
-
         // set the initial position and scale (triggers a redraw twice for now).
         this.position = {x, y, width, height, rotation}
         this.scale = scale
@@ -133,17 +113,17 @@ export default class Shape extends Component {
         this.shapePositionWhenClicked = this.position
     }
 
-    drag(e, initialMouseDownEvent) {
+    drag(mouseMoveEvent, initialMouseDownEvent) {
         let center = this.getCentre()
-        let rotatedMouseLocation = new Point(e.clientX, e.clientY)
+        let rotatedMouseLocation = new Point(mouseMoveEvent.clientX, mouseMoveEvent.clientY)
             .rotate(this.position.rotation, center);
         let rotatedClickLocation = new Point(initialMouseDownEvent.clientX, initialMouseDownEvent.clientY)
             .rotate(this.position.rotation, this.getCentre());
 
         let rotatedShiftX = rotatedMouseLocation.x - rotatedClickLocation.x
         let rotatedShiftY = rotatedMouseLocation.y - rotatedClickLocation.y
-        let shiftX = e.pageX - initialMouseDownEvent.pageX;
-        let shiftY = e.pageY - initialMouseDownEvent.pageY;
+        let shiftX = mouseMoveEvent.pageX - initialMouseDownEvent.pageX;
+        let shiftY = mouseMoveEvent.pageY - initialMouseDownEvent.pageY;
 
         let {x, y, width, height, rotation} = this.shapePositionWhenClicked;
 
@@ -171,7 +151,7 @@ export default class Shape extends Component {
                 }
                 break;
             case this.rotating:
-                let angleShift = new Point(e.x - center.x, e.y - center.y).angle() - new Point(initialMouseDownEvent.pageX - center.x, initialMouseDownEvent.pageY - center.y).angle()
+                let angleShift = new Point(mouseMoveEvent.x - center.x, mouseMoveEvent.y - center.y).angle() - new Point(initialMouseDownEvent.pageX - center.x, initialMouseDownEvent.pageY - center.y).angle()
                 rotation = this.shapePositionWhenClicked.rotation + angleShift
                 break;
             default:
@@ -180,7 +160,6 @@ export default class Shape extends Component {
                 y = this.shapePositionWhenClicked.y + shiftY
         }
 
-        console.log('new position', {x, y, width, height, rotation})
 
         this.position = {x, y, width, height, rotation}
     }

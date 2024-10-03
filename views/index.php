@@ -147,8 +147,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         const shape = new Shape()
         grid.addShape(shape)
         grid.selectedShape = shape
-        shapes.push(shape)// keep track of the shapes here for client storage.
-        console.log(window.shapes, shapes)
+        shapes.push(shape)
     }
 
     window.deleteShape = function (id) {

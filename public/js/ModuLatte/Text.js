@@ -30,7 +30,6 @@ export default class Text {
 
     static randomId(length = 36, base = Date.now()) {
         let result = base.toString(36).substring(2)
-        //console.log('time part', result)
         while (result.length < length) {
             result += Math.random().toString(36).substring(2)
         }

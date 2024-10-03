@@ -137,8 +137,6 @@ export default class Loader {
                 // Special case for onScroll. There is no 'scroll' event, but it's intuitive to think so.
                 if (listenFor === 'onScroll') listenFor = 'onWheel' //map onScroll method to onWheel events.
 
-                //console.log('Handler detected',component.constructor.name + '.' + prop, 'will be executed for', listenFor, 'events.')
-
                 // Special case for onDrag. onDrag events usually only trigger if draggable property is set in html.
                 //  However, the draggable property behaviour is undesirable, so I added a custom drag implementation if method exists without the property.
                 if (listenFor === 'onDrag' && !component._element.draggable) {
