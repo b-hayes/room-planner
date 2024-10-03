@@ -65,13 +65,17 @@ export default class Grid extends Component {
 
 
     onMouseDown(event) {
-        if ((event.target.componentInstance ?? null) instanceof Shape) {
-            this.selectedShape = event.target.componentInstance
+        // record click and scroll position for the pan function to use as a reference point.
+        this.positionWhenClicked = {
+            scrollX: this.element().scrollLeft,
+            scrollY: this.element().scrollTop,
+            clickX: event.pageX,
+            clickY: event.pageY
         }
 
-        if (this.selectedShape && event.button === 2) {
-            // TODO: need to restore the right click menu. Index has it atm.
-            console.log('shape was right clicked.')
+        if ((event.target.componentInstance ?? null) instanceof Shape) {
+            this.selectedShape = event.target.componentInstance
+            this.selectedShape.mouseDown(event)
         }
     }
 
