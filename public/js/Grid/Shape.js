@@ -129,6 +129,10 @@ export default class Shape extends Component {
         )
     }
 
+    mouseDown(e) {
+        this.shapePositionWhenClicked = this.position
+    }
+
     drag(e, initialMouseDownEvent) {
         let center = this.getCentre()
         let rotatedMouseLocation = new Point(e.clientX, e.clientY)
@@ -138,12 +142,9 @@ export default class Shape extends Component {
 
         let rotatedShiftX = rotatedMouseLocation.x - rotatedClickLocation.x
         let rotatedShiftY = rotatedMouseLocation.y - rotatedClickLocation.y
-        let shiftX = e.pageX - this.clickX;
-        let shiftY = e.pageY - this.clickY;
+        let shiftX = e.pageX - initialMouseDownEvent.pageX;
+        let shiftY = e.pageY - initialMouseDownEvent.pageY;
 
-        //TODO this is where the problem is, shapePositionWhenClicked is not being set.
-        //  wondering if we could just change the way we calculate the new position based of the initial mouse event
-        //  instead of what the position was.
         let {x, y, width, height, rotation} = this.shapePositionWhenClicked;
 
         //apply an inverse scale to the shift values so the change in position is without the current vue scale.
