@@ -20,8 +20,6 @@ export default class Shape extends Component {
     rotating = false;
 
     // event
-    clickX = 0;
-    clickY = 0;
     shapePositionWhenClicked = {};
 
     // labels (would be nice to use data binds instead of direct manipulations in future).

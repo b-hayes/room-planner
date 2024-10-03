@@ -15,10 +15,6 @@ import Text from "./Text.js"
 export default class Component {
     _eventListeners = []
 
-    constructor() {
-        // Nothing is loaded until the element is requested
-    }
-
     /**
      * Override this method to return the html for you component
      * @returns {string}
