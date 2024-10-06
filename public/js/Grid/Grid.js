@@ -3,6 +3,7 @@ import Point from "./Point.js"
 import Shape from "./Shape.js"
 import Float from "../ModuLatte/Float.js"
 import Text from "../ModuLatte/Text.js"
+import Menu from "../ModuLatte/Menu.js"
 
 export default class Grid extends Component {
 
@@ -60,6 +61,7 @@ export default class Grid extends Component {
         }
         this._selectedShape = shape
     }
+
     get selectedShape() {
         return this._selectedShape
     }
@@ -109,7 +111,19 @@ export default class Grid extends Component {
 
     onMouseMove(e) {
         if (this.selectedShape instanceof Shape) {
+            // don't check target as need to register mouse moving outside the shape for its resizing to work.
             this.selectedShape.hover(e)
+        }
+    }
+
+    onContextMenu(event) {
+        if (event.ctrlKey || event.metaKey) {
+            return // let the browser do its normal menu
+        }
+        event.preventDefault() // prevent browser menu
+        let shape = event.target.closest('.shape')?.componentInstance ?? null
+        if (shape instanceof Shape) {
+            shape.contextMenu(event)
         }
     }
 
@@ -120,7 +134,7 @@ export default class Grid extends Component {
      */
     pan(shift, from = undefined) {
         if (!shift instanceof Point) throw new Error('shift must be an instance of Vector')
-        if (from !== null && !from instanceof Point) throw new Error('[from must be an instance of Vector')
+        if (from !== null && !from instanceof Point) throw new Error('from must be an instance of Vector')
 
         if (from) {
             shift.x += from.x
@@ -187,7 +201,8 @@ export default class Grid extends Component {
             (this.scale === maxScale && this.scale + shift > maxScale) ||
             (this.scale === minScale && this.scale + shift < minScale)
         ) {
-            //TODO: make the tooltip component listen for this event and update itself instead of requiring us to do it manually.
+            //TODO: make the tooltip component listen for this event and update itself?
+
             // this.dispatchEventWithDebounce(new CustomEvent('grid-scale-limit-reached', {
             //     detail: {
             //         scale: this.scale,
@@ -246,7 +261,7 @@ export default class Grid extends Component {
          *
          */
 
-        // Calculate the centre of the View.
+            // Calculate the centre of the View.
         let viewCentre = new Point(this.element().clientWidth / 2, this.element().clientHeight / 2);
         // Add the ScrollPoint to turn it into a GridPoint.
         let gridPoint = new Point(
@@ -436,7 +451,7 @@ const style = `
         overflow: hidden;
         /* overflow hidden still allows scrolling if child nodes use position absolute */
     }
-    
+
     /* make all .grid children use position absolute */
     .grid > * {
         position: absolute;

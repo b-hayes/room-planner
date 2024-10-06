@@ -228,50 +228,50 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     load()
 
     //Prevent the default right click menu
-    document.addEventListener('contextmenu', function (event) {
-        //unless the control/command key is held down
-        if (event.ctrlKey || event.metaKey) {
-            return
-        }
-        event.preventDefault()
-    }, true)
+    // document.addEventListener('contextmenu', function (event) {
+    //     //unless the control/command key is held down
+    //     if (event.ctrlKey || event.metaKey) {
+    //         return
+    //     }
+    //     event.preventDefault()
+    // }, true)
 
     // Context menu
-    grid.element().addEventListener('shape-click', function (event) {
-        if (event.detail.button !== 2) {
-            return
-        }
-
-        let menuHtml = `
-            <div class="shape-context-menu">
-                <div class="context-menu-item" onclick="
-                deleteShape('${event.detail.shape.id}')
-                this.parentElement.parentElement.remove()
-                ">🚮 Delete</div>
-            </div>
-        `
-        let menu = document.createElement('div')
-        menu.innerHTML = menuHtml
-        menu.style.position = 'absolute'
-        menu.style.left = event.detail.x + 'px'
-        menu.style.top = event.detail.y + 'px'
-        menu.style.zIndex = 999999
-        menu.style.backgroundColor = 'var(--background)'
-        menu.style.border = '1px solid var(--foreground)'
-        menu.style.padding = '5px'
-        menu.style.borderRadius = '5px'
-        menu.style.boxShadow = '5px 5px 10px 3px rgba(0, 0, 0, 0.5)'
-        menu.style.cursor = 'pointer'
-        menu.addEventListener('click', function (event) {
-            event.stopPropagation()
-        })
-        //remove the menu when the user clicks anywhere else
-        document.addEventListener('click', function () {
-            menu.remove()
-        })
-        //add the menu to the document
-        document.body.appendChild(menu)
-    }, true)
+    // grid.element().addEventListener('shape-click', function (event) {
+    //     if (event.detail.button !== 2) {
+    //         return
+    //     }
+    //
+    //     let menuHtml = `
+    //         <div class="shape-context-menu">
+    //             <div class="context-menu-item" onclick="
+    //             deleteShape('${event.detail.shape.id}')
+    //             this.parentElement.parentElement.remove()
+    //             ">🚮 Delete</div>
+    //         </div>
+    //     `
+    //     let menu = document.createElement('div')
+    //     menu.innerHTML = menuHtml
+    //     menu.style.position = 'absolute'
+    //     menu.style.left = event.detail.x + 'px'
+    //     menu.style.top = event.detail.y + 'px'
+    //     menu.style.zIndex = 999999
+    //     menu.style.backgroundColor = 'var(--background)'
+    //     menu.style.border = '1px solid var(--foreground)'
+    //     menu.style.padding = '5px'
+    //     menu.style.borderRadius = '5px'
+    //     menu.style.boxShadow = '5px 5px 10px 3px rgba(0, 0, 0, 0.5)'
+    //     menu.style.cursor = 'pointer'
+    //     menu.addEventListener('click', function (event) {
+    //         event.stopPropagation()
+    //     })
+    //     //remove the menu when the user clicks anywhere else
+    //     document.addEventListener('click', function () {
+    //         menu.remove()
+    //     })
+    //     //add the menu to the document
+    //     document.body.appendChild(menu)
+    // }, true)
 
     //Show the memory usage in the performance div update every 1 second
     setInterval(function () {

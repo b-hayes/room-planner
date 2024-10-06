@@ -125,32 +125,38 @@ export default class Loader {
                 let commonEventsOnly = false
                 let indexUsages = [
                     // add class methods names here if you want their usage indexed.
-                    'onMouseDown', 'onDrag', 'onClick', 'onMouseDown', 'onMouseMove'
+                    'onMouseDown', 'onDrag', 'onClick', 'onMouseDown', 'onMouseMove', 'onContextMenu'
                 ];
                 if (!indexUsages.includes(prop) && commonEventsOnly) {
                     return
                 }
                 // <<< End of code to ignore.
 
-                let listenFor = prop; //make a copy of the name.
+                let listenFor, globalDocumentLister
+                //remove the word 'on'|'onDoc' from the start to match addEventListener syntax.
+                if (prop.startsWith('onDoc')) {
+                    globalDocumentLister = true //event will be attached to the Document instead of the element.
+                    listenFor = prop.substring(5).toLowerCase()
+                } else {
+                    globalDocumentLister = false
+                    listenFor = prop.substring(2).toLowerCase()
+                }
 
                 // Special case for onScroll. There is no 'scroll' event, but it's intuitive to think so.
-                if (listenFor === 'onScroll') listenFor = 'onWheel' //map onScroll method to onWheel events.
+                if (listenFor === 'scroll') listenFor = 'wheel' //map onScroll method to onWheel events.
 
                 // Special case for onDrag. onDrag events usually only trigger if draggable property is set in html.
                 //  However, the draggable property behaviour is undesirable, so I added a custom drag implementation if method exists without the property.
-                if (listenFor === 'onDrag' && !component._element.draggable) {
-                    component._element.addEventListener('mousedown', (e) => component._mouseDragStart(e, prop), false)
+                if (listenFor === 'drag' && !component._element.draggable) {
+                    component._addListener('mousedown', (e) => component._mouseDragStart(e, prop), false, globalDocumentLister)
                     processedMethods.add(prop); // Store method to avoid duplicate listeners.
                     return
                 }
 
-                //remove the word 'on' from the start to match addEventListener syntax.
-                listenFor = listenFor.substring(2).toLowerCase()
                 if (!listenFor) {
                     return // ignores on with no event name
                 }
-                component._addListener(listenFor, (e) => component._event(e, prop), false)
+                component._addListener(listenFor, (e) => component._event(e, prop), false, globalDocumentLister)
                 processedMethods.add(prop); // Store method to avoid duplicate listeners.
             });
             prototype = Object.getPrototypeOf(prototype); // Move up the prototype chain

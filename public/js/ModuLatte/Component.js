@@ -61,10 +61,12 @@ export default class Component {
      * @param {String} eventName
      * @param {Function} handlerFn
      * @param {Boolean|AddEventListenerOptions} options
+     * @param {boolean} global  if true will add the listener to the document instead of the component element.
      * @private
      */
-    _addListener(eventName, handlerFn, options = false) {
-        this._element.addEventListener(eventName, handlerFn, options)
+    _addListener(eventName, handlerFn, options = false, global = true) {
+        let element = global ? document : this._element
+        element.addEventListener(eventName, handlerFn, options)
         this._eventListeners.push({eventName, handlerFn, options})
     }
 
@@ -75,6 +77,16 @@ export default class Component {
         for (let listener of this._eventListeners) {
             listener.element.removeEventListener(listener.eventName, listener.handlerFn, listener.options)
         }
+
+        // call the destroy method on any child components if they exist.
+        if (this._element.childNodes) {
+            for (let child of this._element.childNodes) {
+                if (child.componentInstance && typeof child.componentInstance.destroy === 'function') {
+                    child.componentInstance.destroy()
+                }
+            }
+        }
+
         this._element.remove()
     }
 
