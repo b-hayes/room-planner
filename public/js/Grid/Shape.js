@@ -516,6 +516,7 @@ const style = `
     }
 
     .rotateIcon {
+        -webkit-user-drag: none;
         color: var(--link-hover, darkseagreen);
         opacity: 0.3;
         max-width: 100%;

@@ -49,20 +49,20 @@ export default class Grid extends Component {
     }
 
     /**
-     * @param {Shape} shape
+     * @param {Shape|null} shape
      */
     set selectedShape(shape) {
-        if (!shape instanceof Shape) throw new Error('shape must be an instance of Shape but received ' + typeof shape)
-        if (this._selectedShape && this._selectedShape !== shape) {
+        if (this._selectedShape instanceof Shape && this._selectedShape !== shape) {
             this._selectedShape.selected = false
         }
-        shape.selected = true
+        if (shape instanceof Shape) {
+            shape.selected = true
+        }
         this._selectedShape = shape
     }
     get selectedShape() {
         return this._selectedShape
     }
-
 
     onMouseDown(event) {
         // record click and scroll position for the pan function to use as a reference point.
@@ -73,12 +73,14 @@ export default class Grid extends Component {
             clickY: event.pageY
         }
 
-        if ((event.target.componentInstance ?? null) instanceof Shape) {
-            this.selectedShape = event.target.componentInstance
-            this.selectedShape.mouseDown(event)
+        // detect if the mouse down event was on a Shape
+        let shape = event.target.closest('.shape')?.componentInstance ?? null
+        if (shape instanceof Shape) {
+            this.selectedShape = shape
+            shape.mouseDown(event)
+        } else {
+            this.selectedShape = null
         }
-
-        console.log('on shape?', this.selectedShape.element().contains(event.target))
     }
 
     onDrag(e, initialMouseDownEvent) {
