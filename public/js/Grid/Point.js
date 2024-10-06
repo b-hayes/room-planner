@@ -5,7 +5,7 @@ export default class Point {
         this.x = parseFloat(x);
         this.y = parseFloat(y);
         if (isNaN(this.x) || isNaN(this.y)) {
-            console.error('x and y must be numbers. Received x: ' + x + ' y: ' + y)
+            console.error('x and y must be numbers. Received:',x ,y)
             throw new Error('x and y must be numbers')
         }
     }

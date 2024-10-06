@@ -153,7 +153,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     window.deleteShape = function (id) {
         const shape = window.shapes.find(shape => shape.id === id)
         if (!shape) {
-            console.error(`Cant find shape to delete: '${id}'`)
+            console.error(`Cant find shape to delete. Id:`, id)
         } else {
             grid.deleteShape(shape.id)
             //update the shapes list.

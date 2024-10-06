@@ -80,7 +80,7 @@ export default class Loader {
             }
 
             if (!LoadedClass.prototype instanceof Component) {
-                console.error('Class ' + className + ' does not extend Component')
+                console.error('Class ' + className + ' does not extend Component', LoadedClass)
                 continue;
             }
 

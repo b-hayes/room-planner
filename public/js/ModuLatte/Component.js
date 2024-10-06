@@ -66,7 +66,6 @@ export default class Component {
     _addListener(eventName, handlerFn, options = false) {
         this._element.addEventListener(eventName, handlerFn, options)
         this._eventListeners.push({eventName, handlerFn, options})
-        console.log(this._eventListeners.length + ' events on ' + this.constructor.name)
     }
 
     /**
