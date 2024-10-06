@@ -1,4 +1,7 @@
-import Component from "./Scafold/Component.js";
+import Component from "../ModuLatte/Component.js";
+import Point from "./Point.js"
+import Position from "./Position.js"
+import Text from "../ModuLatte/Text.js"
 
 export default class Shape extends Component {
 
@@ -11,17 +14,11 @@ export default class Shape extends Component {
     _gridPosition = {x: 0, y: 0, width: 0, height: 0, rotation: 0};
 
     // states
-    selected = false;
+    _selected = false;
     resizing = false;
     rotating = false;
 
-    // debug
-    dots = [];
-    lines = [];
-
     // event
-    clickX = 0;
-    clickY = 0;
     shapePositionWhenClicked = {};
 
     // labels (would be nice to use data binds instead of direct manipulations in future).
@@ -39,14 +36,14 @@ export default class Shape extends Component {
     }
 
     constructor(
-        id,
-        position = {
-            width: 300,
-            height: 300,
-            x: 150,
-            y: 150,
-            rotation: 0
-        },
+        id = Text.randomId(),
+        position = new Position (
+            150,
+            150,
+            300,
+            300,
+            0
+        ),
         scale = 1
     ) {
         super();
@@ -54,13 +51,6 @@ export default class Shape extends Component {
             throw new TypeError('id must be a unique string')
         }
         this.id = id
-
-        // for each Position value if defined should be int/float
-        for (let key in position) {
-            if (position[key] !== undefined && typeof position[key] !== 'number') {
-                throw new TypeError('position.' + key + ' must be a number')
-            }
-        }
 
         // get the position values
         let {width, height, x, y, rotation} = position
@@ -81,132 +71,57 @@ export default class Shape extends Component {
         this.heightText = this.element().querySelector('.heightText')
         this.rotationText = this.element().querySelector('.rotationText')
 
-        document.addEventListener('mousedown', (e) => {
-            //unselect if anything other than this is clicked on
-            if (
-                e.target !== this.element() &&
-                //if the target is a child of the shape then don't unselect
-                this.element().contains(e.target) === false
-            ) {
-                this.unselect()
-                return
-            }
-
-            //record where the click happened so that drag events can use it as a point of reference
-            this.clickX = e.pageX
-            this.clickY = e.pageY
-            this.shapePositionWhenClicked = this.position
-
-            //mark the shape as selected (important)
-            this.select()
-
-            //trigger a custom event so the rest of application can perform other actions.
-            let event = new CustomEvent('shape-click', {
-                detail: {
-                    button: e.button,
-                    x: e.pageX,
-                    y: e.pageY,
-                    shape: this
-                }
-            })
-            this.element().dispatchEvent(event)
-
-            //if not primary mouse button then don't bother with move and resize events.
-            if (e.buttons !== 1) {
-                return
-            }
-
-            //add event listeners for moving and resizing
-            document.addEventListener('mousemove', (e) => this.drag(e), false)
-            document.addEventListener('mouseup', () => this.up(), false)
-        })
-
-        //add event listener for hovering
-        document.addEventListener('mousemove', (e) => this.hover(e), false)
-
         // set the initial position and scale (triggers a redraw twice for now).
         this.position = {x, y, width, height, rotation}
         this.scale = scale
     }
 
-    //Calculate the real location of the centre of the shape in the window.
+    get selected() {
+        return this._selected
+    }
+
+    /**
+     * @param {boolean} value
+     */
+    set selected(value) {
+        if (typeof value !== "boolean") throw new Error("selected must be a boolean, received " + typeof value)
+        this._selected = value
+        if (this._selected) {
+            this.element().classList.add('selected')
+        } else {
+            this.element().classList.remove('selected')
+        }
+    }
+
+    /**
+     * Calculate the real location of the centre of the shape in the window.
+     *
+     * @returns Point
+     */
     getCentre() {
         let rect = this.element().getBoundingClientRect()
-        return {
-            x: rect.left + (rect.width / 2),
-            y: rect.top + (rect.height / 2)
-        }
+        return new Point(
+            rect.left + (rect.width / 2),
+            rect.top + (rect.height / 2)
+        )
     }
 
-    //Get the angle for a point as if it was rotating around 0,0w with 0deg being up.
-    getPointAngle(x, y) {
-        // Atan operates in the range of -180 to 180deg with up being 0deg and returns the result in radians.
-        let radians = Math.atan2(y, x);
-        let degrees = radians * (180 / Math.PI);
-        degrees = (degrees < 0) ? degrees + 360 : degrees;
-        // Adjust the angle to be relevant to the orientation of CSS (Atan uses X axis as 0deg and CSS uses Y axis as 0deg).
-        return (degrees + 90) % 360;
+    mouseDown(e) {
+        this.shapePositionWhenClicked = this.position
     }
 
-    //Translate the event coordinates to match the rotation of the shape.
-    translateMouseEvent(event, rotation) {
-        const rect = this.element().getBoundingClientRect();
-        let centre = {
-            x: rect.left + (rect.width / 2),
-            y: rect.top + (rect.height / 2)
-        }
-
-        const mouseX = event.clientX - centre.x
-        const mouseY = event.clientY - centre.y
-
-        const angleRadians = rotation * (Math.PI / 180);
-        const cosAngle = Math.cos(-angleRadians);
-        const sinAngle = Math.sin(-angleRadians);
-
-        const rotatedX = mouseX * cosAngle - mouseY * sinAngle;
-        const rotatedY = mouseX * sinAngle + mouseY * cosAngle;
-
-        const clickAngle = Math.atan2(rotatedY, rotatedX) * (180 / Math.PI)
-
-        return {x: rotatedX + centre.x, y: rotatedY + centre.y, angle: clickAngle}
-    }
-
-    select() {
-        this.selected = true
-        //add selected class
-        this.element().classList.add('selected')
-    }
-
-    unselect() {
-        this.selected = false
-        //remove selected class
-        this.element().classList.remove('selected')
-    }
-
-    drag(e) {
-        //if not selected or mouse is not down then we don't process anything.
-        if (!this.selected || e.buttons !== 1) {
-            return
-        }
-
-        //currently using alt to pan in grid and don't want to move shapes around by accident.
-        if (e.altKey) {
-            return
-        }
-
+    drag(mouseMoveEvent, initialMouseDownEvent) {
         let center = this.getCentre()
+        let rotatedMouseLocation = new Point(mouseMoveEvent.clientX, mouseMoveEvent.clientY)
+            .rotate(this.position.rotation, center);
+        let rotatedClickLocation = new Point(initialMouseDownEvent.clientX, initialMouseDownEvent.clientY)
+            .rotate(this.position.rotation, this.getCentre());
 
-        let translatedEvent = this.translateMouseEvent(e, this.position.rotation);
-        let rotatedClickLocation = this.translateMouseEvent({
-            clientX: this.clickX,
-            clientY: this.clickY
-        }, this.position.rotation);
+        let rotatedShiftX = rotatedMouseLocation.x - rotatedClickLocation.x
+        let rotatedShiftY = rotatedMouseLocation.y - rotatedClickLocation.y
+        let shiftX = mouseMoveEvent.pageX - initialMouseDownEvent.pageX;
+        let shiftY = mouseMoveEvent.pageY - initialMouseDownEvent.pageY;
 
-        let rotatedShiftX = translatedEvent.x - rotatedClickLocation.x
-        let rotatedShiftY = translatedEvent.y - rotatedClickLocation.y
-
-        let shiftX = e.pageX - this.clickX;
-        let shiftY = e.pageY - this.clickY;
         let {x, y, width, height, rotation} = this.shapePositionWhenClicked;
 
         //apply an inverse scale to the shift values so the change in position is without the current vue scale.
@@ -233,7 +148,7 @@ export default class Shape extends Component {
                 }
                 break;
             case this.rotating:
-                let angleShift = this.getPointAngle(e.x - center.x, e.y - center.y) - this.getPointAngle(this.clickX - center.x, this.clickY - center.y)
+                let angleShift = new Point(mouseMoveEvent.x - center.x, mouseMoveEvent.y - center.y).angle() - new Point(initialMouseDownEvent.pageX - center.x, initialMouseDownEvent.pageY - center.y).angle()
                 rotation = this.shapePositionWhenClicked.rotation + angleShift
                 break;
             default:
@@ -242,11 +157,8 @@ export default class Shape extends Component {
                 y = this.shapePositionWhenClicked.y + shiftY
         }
 
-        this.position = {x, y, width, height, rotation}
-    }
 
-    up() {
-        document.removeEventListener('mouseup', () => this.up(), false)
+        this.position = {x, y, width, height, rotation}
     }
 
     /**
@@ -298,7 +210,7 @@ export default class Shape extends Component {
     }
 
     //Virtual position. Not the real position of the element.
-    set position({x, y, width, height, rotation}) {
+    set  position({x, y, width, height, rotation}) {
         // make sure we have Numbers and not strings
         width = parseFloat(width) ?? 300
         height = parseFloat(height) ?? 300
@@ -380,7 +292,7 @@ export default class Shape extends Component {
         this.element().classList.remove('resize-bottom')
 
         //if not selected then don't bother
-        if (this.selected === false || this.element().contains(event.target) === false) {
+        if (this._selected === false || this.element().contains(event.target) === false) {
             return;
         }
 
@@ -418,77 +330,6 @@ export default class Shape extends Component {
         //add a css class to the element matching the resize mode
         if (this.resizing) this.element().classList.add('resize-' + this.resizing)
     }
-
-
-    /**
-     * Draw a small red dot at the given x and y coordinates for debugging purposes.
-     * Give the dot a name to track a point/update the dot instead of creating a new one.
-     */
-    debugDrawDot(x, y, name = undefined) {
-        // Keep a list of dots
-        if (!this.dots) {
-            this.dots = [];
-        }
-
-        // update the dot if one with the same name already exists
-        for (let dot of this.dots) {
-            if (dot.name === name) {
-                dot.dot.style.left = x + 'px';
-                dot.dot.style.top = y + 'px';
-                return;
-            }
-        }
-
-        // Do not create a dot if one already exists with the same x and y coordinates
-        for (let dot of this.dots) {
-            if (dot.style.left === x + 'px' && dot.style.top === y + 'px') {
-                return;
-            }
-        }
-
-        // Create a small red dot at the given x and y coordinates
-        const dot = document.createElement('div');
-        dot.style.position = 'absolute';
-        dot.style.width = '5px';
-        dot.style.height = '5px';
-        dot.style.backgroundColor = 'red';
-        dot.style.left = x + 'px';
-        dot.style.top = y + 'px';
-        document.body.appendChild(dot);
-
-        // Add the dot to the list
-        this.dots.push({name, dot});
-    }
-
-    debugDrawLine(x1, y1, x2, y2, name = 'line') {
-
-        // Keep a list of lines
-        if (!this.lines) {
-            this.lines = [];
-        }
-
-        //grab exiting line or create one
-        let line = this.lines.find(l => l.name === name)
-        if (line) {
-            line = line.line
-        } else {
-            line = document.createElement('div');
-        }
-
-        line.style.position = 'absolute';
-        line.style.width = '1px';
-        line.style.height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) + 'px';
-        line.style.backgroundColor = 'red';
-        line.style.left = x1 + 'px';
-        line.style.top = y1 + 'px';
-        line.style.transformOrigin = '0 0';
-        let angle = (Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI - 90 + 360) % 360;
-        line.style.transform = `rotate(${angle}deg)`;
-        document.body.appendChild(line);
-
-        // Add the line to the list
-        this.lines.push({name, line});
-    }
 }
 
 // language=HTML
@@ -522,7 +363,7 @@ const style = `
     }
 
     .shape.selected {
-        z-index: 1000;
+        z-index: 200;
         border: 3px solid var(--link-hover, darkseagreen);
     }
 
@@ -674,6 +515,7 @@ const style = `
     }
 
     .rotateIcon {
+        -webkit-user-drag: none;
         color: var(--link-hover, darkseagreen);
         opacity: 0.3;
         max-width: 100%;
