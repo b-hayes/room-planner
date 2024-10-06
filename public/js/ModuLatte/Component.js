@@ -13,6 +13,7 @@ import Text from "./Text.js"
  *  If you need listeners on the document instead call them onDocScroll, onDocMouseMove etc.
  */
 export default class Component {
+    //private properties only for this class.
     _eventListeners = []
 
     /**
@@ -55,6 +56,7 @@ export default class Component {
 
     /**
      * Helper to add event listeners, so that they are tracked and removed if the component is destroyed.
+     *  JS does not remove event listeners automatically if an element is removed and can lead to memory leaks.
      *
      * @param {String} eventName
      * @param {Function} handlerFn
@@ -64,6 +66,7 @@ export default class Component {
     _addListener(eventName, handlerFn, options = false) {
         this._element.addEventListener(eventName, handlerFn, options)
         this._eventListeners.push({eventName, handlerFn, options})
+        console.log(this._eventListeners.length + ' events on ' + this.constructor.name)
     }
 
     /**
@@ -91,24 +94,15 @@ export default class Component {
         return this[method](event)
     }
 
-    _onMouseDrag(mouseMoveEvent, initialMouseDownEvent, userMethod) {
-        this[userMethod](mouseMoveEvent, initialMouseDownEvent)
-    }
-
-    /**
-     * To be called by mousedown listener when custom drag event is used.
-     * - Creates a mousemove listener to call the drag function whenever the mouse is moved.
-     *    The mousemove listener also passes along the initial mousedown event, so they can calculate the distance dragged.
-     * - Creates a mouseup listener to call the drag end function when the mouse is released.
-     * @param {Event} mouseDownEvent
-     * @param {string} userMethod
-     * @private
-     */
     _mouseDragStart(mouseDownEvent, userMethod) {
         this._mouseDragListener = (mouseMoveEvent) => this._onMouseDrag(mouseMoveEvent, mouseDownEvent, userMethod)
         document.addEventListener('mousemove', this._mouseDragListener, false)
         this._mouseDragEndListener = (mouseUpEvent) => this._mouseDragEnd(mouseUpEvent)
         document.addEventListener('mouseup', this._mouseDragEndListener, false)
+    }
+
+    _onMouseDrag(mouseMoveEvent, initialMouseDownEvent, userMethod) {
+        this[userMethod](mouseMoveEvent, initialMouseDownEvent)
     }
 
     _mouseDragEnd(e) {

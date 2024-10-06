@@ -77,6 +77,8 @@ export default class Grid extends Component {
             this.selectedShape = event.target.componentInstance
             this.selectedShape.mouseDown(event)
         }
+
+        console.log('on shape?', this.selectedShape.element().contains(event.target))
     }
 
     onDrag(e, initialMouseDownEvent) {
