@@ -27,6 +27,13 @@ export default class Grid extends Component {
         return style
     }
 
+    shapes(id = null) {
+        if (id) {
+            return this._shapes[id]
+        }
+        return this._shapes
+    }
+
     /**
      * Add a shape to the grid.
      * @param {Shape} shape
@@ -139,10 +146,9 @@ export default class Grid extends Component {
             this._contextMenu = new Menu({
                 position: { x: event.clientX, y: event.clientY},
                 items: [
-                    //todo: referencing the global deleteShape function is not ideal. But need to do this for now.
-                    {label: '🚮 Delete', action: () => deleteShape(shape.id)}
+                    {label: '🚮 Delete', action: () => this.deleteShape(shape.id)}
                 ]
-            } )
+            })
         }
     }
 

@@ -179,7 +179,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
     window.save = function () {
         let data = {
-            shapes: shapes.map(shape => {
+            shapes: Object.values(grid.shapes()).map(shape => {
                 return {
                     id: shape.id,
                     position: shape.position,
