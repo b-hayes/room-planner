@@ -133,7 +133,8 @@ export default class Grid extends Component {
             new Menu({
                 position: { x: event.clientX, y: event.clientY},
                 items: [
-                    {label: '🚮 Delete', action: () => this.deleteShape(shape.id)}
+                    //todo: referencing the global deleteShape function is not ideal. But need to do this for now.
+                    {label: '🚮 Delete', action: () => deleteShape(shape.id)}
                 ]
             } )
         }

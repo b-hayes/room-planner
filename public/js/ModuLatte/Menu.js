@@ -7,6 +7,15 @@ export default class Menu extends Component{
         this.position = position
         let el = this.element()
 
+        // if no items add some place holder items
+        if (!items) {
+            items = [
+                {label: 'Item 1', action: () => console.log('Item 1')},
+                {label: 'Item 2', action: () => console.log('Item 2')},
+                {label: 'Item 3', action: () => console.log('Item 3')},
+            ]
+        }
+
         // add menu items
         for (let item of items) {
             let menuItem = document.createElement('div')
@@ -38,9 +47,6 @@ export default class Menu extends Component{
         // language=html
         return `
         <div class="menu">
-            <div class="menu-item">Item 1</div>
-            <div class="menu-item">Item 1</div>
-            <div class="menu-item">Item 1</div>
         </div>
         `
     }
