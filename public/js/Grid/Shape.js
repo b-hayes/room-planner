@@ -1,9 +1,7 @@
 import Component from "../ModuLatte/Component.js";
 import Point from "./Point.js"
 import Position from "./Position.js"
-import Loader from "../ModuLatte/Loader.js"
 import Text from "../ModuLatte/Text.js"
-import Menu from "../ModuLatte/Menu.js"
 
 export default class Shape extends Component {
 
@@ -93,11 +91,6 @@ export default class Shape extends Component {
         } else {
             this.element().classList.remove('selected')
         }
-    }
-
-    contextMenu(event) {
-        console.log('shape.contextMenu', event)
-        new Menu({ x: event.clientX, y: event.clientY})
     }
 
     /**

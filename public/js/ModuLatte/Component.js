@@ -67,7 +67,7 @@ export default class Component {
     _addListener(eventName, handlerFn, options = false, global = true) {
         let element = global ? document : this._element
         element.addEventListener(eventName, handlerFn, options)
-        this._eventListeners.push({eventName, handlerFn, options})
+        this._eventListeners.push({eventName, handlerFn, options, element})
     }
 
     /**

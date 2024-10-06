@@ -273,6 +273,13 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     //     document.body.appendChild(menu)
     // }, true)
 
+    // Remove shape when shape-deleted event is detected
+    //  TODO: it would be nicer if we didnt have to update this list when we couldbe grabbing it from the grid instead.
+    document.addEventListener('shape-deleted', function (event) {
+        //update the shapes list.
+        window.shapes = window.shapes.filter(shape => shape.id !== id)
+    })
+
     //Show the memory usage in the performance div update every 1 second
     setInterval(function () {
         let memory = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2)

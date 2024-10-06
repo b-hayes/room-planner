@@ -45,8 +45,15 @@ export default class Grid extends Component {
         if (!this._shapes[shapeId]) {
             throw new Error('shape not found in grid')
         }
+
+        let deletedShape = new CustomEvent('shape-deleted', {
+            detail: {
+                shape: this._shapes[shapeId]
+            }
+        })
         this._shapes[shapeId].destroy()
         delete this._shapes[shapeId]
+        this.dispatchEventWithDebounce(deletedShape)
     }
 
     /**
@@ -123,7 +130,12 @@ export default class Grid extends Component {
         event.preventDefault() // prevent browser menu
         let shape = event.target.closest('.shape')?.componentInstance ?? null
         if (shape instanceof Shape) {
-            shape.contextMenu(event)
+            new Menu({
+                position: { x: event.clientX, y: event.clientY},
+                items: [
+                    {label: '🚮 Delete', action: () => this.deleteShape(shape.id)}
+                ]
+            } )
         }
     }
 
