@@ -7,7 +7,7 @@ export default class Menu extends Component{
         this.position = position
         let el = this.element()
 
-        // if no items add some place holder items
+        // if no items add some placeholder items
         if (!items) {
             items = [
                 {label: 'Item 1', action: () => console.log('Item 1')},
@@ -42,6 +42,12 @@ export default class Menu extends Component{
             this.destroy()
         }
     }
+
+    // onDocContextMenu(event) {
+    //     if (!this.element().contains(event.target)) {
+    //         this.destroy()// a new menu will open so discard this one
+    //     }
+    // }
 
     html() {
         // language=html

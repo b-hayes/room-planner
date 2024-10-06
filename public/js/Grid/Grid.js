@@ -128,9 +128,15 @@ export default class Grid extends Component {
             return // let the browser do its normal menu
         }
         event.preventDefault() // prevent browser menu
+
+        //remove the old context menu if it exists
+        if (this._contextMenu) {
+            this._contextMenu.destroy()
+        }
+
         let shape = event.target.closest('.shape')?.componentInstance ?? null
         if (shape instanceof Shape) {
-            new Menu({
+            this._contextMenu = new Menu({
                 position: { x: event.clientX, y: event.clientY},
                 items: [
                     //todo: referencing the global deleteShape function is not ideal. But need to do this for now.
