@@ -44,27 +44,32 @@ export default class Loader {
     static async replaceTagsWithComponents(parent, sourceRoot = '/js/') {
         let tags = parent.getElementsByTagName('*')
         for (let tag of tags) {
-            let tagName = tag.tagName.toLowerCase()
+            // all tags come back as capitals.
+            let lowerCaseTagName = tag.tagName.toLowerCase()
             //convert classname from kebab-case to PascalCase
-            let className = Text.toPascalCase(tagName)
-            let classPath = className.replace('.', '/') + '.js'
+            let className = Text.toPascalCase(lowerCaseTagName)
+            let classPath = className
+                .replace('.', '/')
+                .replace(':', '/')
+                + '.js'
 
             //skip slot
-            if (['slot'].includes(tagName)) {
+            if (['slot'].includes(lowerCaseTagName)) {
                 continue
             }
             //skip common html tags like div span p etc
-            if (['div', 'span', 'p', 'a', 'img', 'button', 'input', 'form', 'label', 'select', 'option', 'textarea', 'meta', 'head', 'script', 'link', 'html', 'body', 'title', 'style'].includes(tagName)) {
+            if (['div', 'span', 'p', 'a', 'img', 'button', 'input', 'form', 'label', 'select', 'option', 'textarea', 'meta', 'head', 'script', 'link', 'html', 'body', 'title', 'style'].includes(lowerCaseTagName)) {
                 continue
             }
             //skip all tags defined in the html 5 specification from w3c (might have missed some I was not thorough).
             if (['article', 'aside', 'details', 'figcaption', 'figure', 'footer', 'header', 'main', 'mark', 'nav', 'section', 'summary', 'time', 'audio', 'video', 'canvas', 'progress', 'meter', 'embed', 'object', 'param', 'iframe', 'picture', 'source', 'svg',
                 'datalist', 'fieldset', 'legend', 'output', 'progress', 'meter', 'table', 'caption', 'colgroup', 'col', 'tbody', 'thead', 'tfoot', 'tr', 'td',
-                'th', 'button', 'datalist', 'fieldset', 'form', 'input', 'label', 'legend', 'meter', 'optgroup', 'option', 'output', 'progress', 'select', 'textarea'].includes(tagName)) {
+                'th', 'button', 'datalist', 'fieldset', 'form', 'input', 'label', 'legend', 'meter', 'optgroup', 'option', 'output', 'progress', 'select', 'textarea'].includes(lowerCaseTagName)) {
                 continue
             }
 
             // Dynamically import the module
+            console.log('Loading module: ' + sourceRoot + classPath)
             let module = await import(sourceRoot + classPath)
             // Access the class using the variable
             const LoadedClass = module.default; // Assuming the class is the default export

@@ -21,7 +21,7 @@ export default class Text {
     }
 
     static toPascalCase(text) {
-        return text.replace(/(^\w|-\w)/g, Text.clearAndUpper);
+        return text.replace(/(^\w|[^\w]\w)/g, Text.clearAndUpper);
     }
 
     static clearAndUpper(text) {

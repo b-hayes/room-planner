@@ -24,7 +24,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
 </div>
 <main>
-    <Grid.Grid params='{ "scale": 1 }'></Grid.Grid>
+    <grid:grid params='{ "scale": 1 }'></grid:grid>
 </main>
 
 <div class="status-bar">
