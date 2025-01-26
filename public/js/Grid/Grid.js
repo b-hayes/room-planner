@@ -80,6 +80,31 @@ export default class Grid extends Component {
         return this._selectedShape
     }
 
+    onClick(event) {
+        if (this.dragHappened(event)) {
+            return;
+        }
+        if (this.selectedShape === this.previoselySelectedShape) {
+            // try clicking through to select the next shape underneath.
+            const shapeUnderTheMouse = document.elementsFromPoint(event.clientX, event.clientY)
+                .filter(element => element.componentInstance instanceof Shape)
+                .map(element => element.componentInstance)
+            console.log('shapeUnderTheMouse', shapeUnderTheMouse)
+            const indexOfSelected = shapeUnderTheMouse.indexOf(this.selectedShape)
+            console.log('indexOfSelected', indexOfSelected)
+            this.selectedShape = shapeUnderTheMouse[indexOfSelected + 1] ?? shapeUnderTheMouse[0]
+        }
+    }
+
+    dragHappened(event) {
+        if (this.element().scrollLeft !== this.mouseDownInfo.scrollX ||
+            this.element().scrollTop !== this.mouseDownInfo.scrollY ||
+            event.pageX !== this.mouseDownInfo.clickX ||
+            event.pageY !== this.mouseDownInfo.clickY) {
+            return true; // something was dragged.
+        }
+    }
+
     onMouseDown(event) {
         // record click and scroll position for the drag handler
         this.mouseDownInfo = {
@@ -92,6 +117,7 @@ export default class Grid extends Component {
         // detect if the mouse down event was on a Shape
         let shape = event.target?.componentInstance ?? null
         if (shape instanceof Shape) {
+            this.previoselySelectedShape = this.selectedShape
             this.selectedShape = shape
             shape.mouseDown(event)
         } else {

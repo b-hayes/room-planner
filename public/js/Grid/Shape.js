@@ -361,6 +361,10 @@ const style = `
         border: 1px solid var(--link, cornflowerblue);
         z-index: 100;
     }
+    
+    .shape:hover {
+        border: 1px solid var(--link-hover, darkseagreen);
+    }
 
     .shape.selected {
         z-index: 200;
