@@ -81,8 +81,8 @@ export default class Grid extends Component {
     }
 
     onMouseDown(event) {
-        // record click and scroll position for the pan function to use as a reference point.
-        this.positionWhenClicked = {
+        // record click and scroll position for the drag handler
+        this.mouseDownInfo = {
             scrollX: this.element().scrollLeft,
             scrollY: this.element().scrollTop,
             clickX: event.pageX,
@@ -90,7 +90,7 @@ export default class Grid extends Component {
         }
 
         // detect if the mouse down event was on a Shape
-        let shape = event.target.closest('.shape')?.componentInstance ?? null
+        let shape = event.target?.componentInstance ?? null
         if (shape instanceof Shape) {
             this.selectedShape = shape
             shape.mouseDown(event)
@@ -103,12 +103,12 @@ export default class Grid extends Component {
         // Pan if the alt key is held, or middle mouse button is held
         if (e.altKey || e.buttons === 4) {
             let shift = new Point(
-                this.positionWhenClicked.clickX - e.pageX,
-                this.positionWhenClicked.clickY - e.pageY
+                this.mouseDownInfo.clickX - e.pageX,
+                this.mouseDownInfo.clickY - e.pageY
             )
             let from = new Point(
-                this.positionWhenClicked.scrollX,
-                this.positionWhenClicked.scrollY
+                this.mouseDownInfo.scrollX,
+                this.mouseDownInfo.scrollY
             )
             this.pan(shift, from)
             return;

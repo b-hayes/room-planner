@@ -66,7 +66,6 @@ try {
 
     //extra info for developers.
     $developerMode = (stripos($_SERVER['HTTP_HOST'], 'localhost') !== false);
-    $developerMode = true;
     if ($developerMode) {
         $errorResponse['error_details'] = $errorInfo;
         $encodingOptions = $encodingOptions | JSON_PRETTY_PRINT;
@@ -86,5 +85,3 @@ try {
         echo "</pre>";
     }
 }
-
-?>

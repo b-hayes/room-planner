@@ -125,7 +125,7 @@ export default class Loader {
                 let commonEventsOnly = false
                 let indexUsages = [
                     // add class methods names here if you want their usage indexed.
-                    'onMouseDown', 'onDrag', 'onClick', 'onMouseDown', 'onMouseMove', 'onContextMenu'
+                    'onMouseDown', 'onDrag', 'onClick', 'onMouseDown', 'onMouseMove', 'onContextMenu', 'onScroll'
                 ];
                 if (!indexUsages.includes(prop) && commonEventsOnly) {
                     return

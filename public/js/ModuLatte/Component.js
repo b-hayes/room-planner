@@ -91,6 +91,7 @@ export default class Component {
     }
 
     /**
+     *  All event handlers are executed via this method enabling us to add overrides and tracking.
      *
      * @param event
      * @param method
