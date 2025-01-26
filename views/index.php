@@ -24,7 +24,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
 </div>
 <main>
-    <Grid params='{ "scale": 1 }'></Grid>
+    <Grid.Grid params='{ "scale": 1 }'></Grid.Grid>
 </main>
 
 <div class="status-bar">
@@ -128,29 +128,32 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
 <script type="module">
     //import Grid from "/js/Grid.js" //this import isn't needed because of the dynamic component loading.
-    import Shape from "/js/Shape.js"
+    //  just leaving here as an example of how it would look if my special loader wasn't in place.
+    //  the other imports are still needed because they are directly referenced before the loader is called.
+    import Shape from "/js/Grid/Shape.js"
     import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"
-    import Loader from "../public/js/Scafold/Loader.js"
+    import Loader from "../public/js/ModuLatte/Loader.js"
+    import Text from "../public/js/ModuLatte/Text.js"
 
+    window.t = Text
     window.shapes = []
 
-    window.randomId = function () {
-        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    window.error = function (message) {
+        throw new Error(message)
     }
 
     window.newShape = function () {
-        const shape = new Shape(randomId())
+        const shape = new Shape()
         grid.addShape(shape)
-        shape.select()
-        shapes.push(shape)// keep track of the shapes here for client storage.
-        console.log(window.shapes, shapes)
+        grid.selectedShape = shape
+        shapes.push(shape)
     }
 
     window.deleteShape = function (id) {
         const shape = window.shapes.find(shape => shape.id === id)
         if (!shape) {
-            console.error(`Cant find shape to delete: '${id}'`)
+            console.error(`Cant find shape to delete. Id:`, id)
         } else {
             grid.deleteShape(shape.id)
             //update the shapes list.
@@ -159,9 +162,9 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     }
 
     window.newRoom = function () {
-        const room = new Room(randomId())
+        const room = new Room()
         grid.addShape(room)
-        room.select()
+        grid.selectedShape = room
         shapes.push(room)
     }
 
@@ -176,7 +179,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
     window.save = function () {
         let data = {
-            shapes: shapes.map(shape => {
+            shapes: Object.values(grid.shapes()).map(shape => {
                 return {
                     id: shape.id,
                     position: shape.position,
@@ -223,52 +226,6 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     window.grid = document.querySelector(".grid")
         .componentInstance
     load()
-
-    //Prevent the default right click menu
-    document.addEventListener('contextmenu', function (event) {
-        //unless the control/command key is held down
-        if (event.ctrlKey || event.metaKey) {
-            return
-        }
-        event.preventDefault()
-    }, true)
-
-    // Context menu
-    grid.element().addEventListener('shape-click', function (event) {
-        if (event.detail.button !== 2) {
-            return
-        }
-
-        let menuHtml = `
-            <div class="shape-context-menu">
-                <div class="context-menu-item" onclick="
-                deleteShape('${event.detail.shape.id}')
-                this.parentElement.parentElement.remove()
-                ">🚮 Delete</div>
-            </div>
-        `
-        let menu = document.createElement('div')
-        menu.innerHTML = menuHtml
-        menu.style.position = 'absolute'
-        menu.style.left = event.detail.x + 'px'
-        menu.style.top = event.detail.y + 'px'
-        menu.style.zIndex = 999999
-        menu.style.backgroundColor = 'var(--background)'
-        menu.style.border = '1px solid var(--foreground)'
-        menu.style.padding = '5px'
-        menu.style.borderRadius = '5px'
-        menu.style.boxShadow = '5px 5px 10px 3px rgba(0, 0, 0, 0.5)'
-        menu.style.cursor = 'pointer'
-        menu.addEventListener('click', function (event) {
-            event.stopPropagation()
-        })
-        //remove the menu when the user clicks anywhere else
-        document.addEventListener('click', function () {
-            menu.remove()
-        })
-        //add the menu to the document
-        document.body.appendChild(menu)
-    }, true)
 
     //Show the memory usage in the performance div update every 1 second
     setInterval(function () {
