@@ -4,20 +4,20 @@ import Text from "./Text.js"
 /**
  * Sensitive methods:
  *  do not override the element method but use it to access the dom node.
- *  do not use _underscored methods in your components they are only for internal use here.
+ *  do not use _underscored methods in your components, they are only for internal use here.
  * Requirements:
- *  you need to override the html and style methods.
+ *  you need to override the HTML and style methods.
  * Events:
- *  you don't need to bind event listeners, they will be added for you if you simply function for it like:
- *  onScroll, onMouseMove, onMouseDown, onMouseUp, onDrag, onDragEnter etc.
- *  If you need listeners on the document instead call them onDocScroll, onDocMouseMove etc.
+ *  you don't need to bind event listeners, they will be added for you if you supply a function named for it like:
+ *  onScroll, onMouseMove, onMouseDown, onMouseUp, onDrag, onDragEnter, etc.
+ *  If you need listeners on the document instead, call them onDocScroll, onDocMouseMove etc.
  */
 export default class Component {
     //private properties only for this class.
     _eventListeners = []
 
     /**
-     * Override this method to return the html for you component
+     * Override this method to return the HTML for your component
      * @returns {string}
      */
     html() {
@@ -25,7 +25,7 @@ export default class Component {
     }
 
     /**
-     * Override this method to return the css for you component
+     * Override this method to return the CSS for your component
      * @returns {string}
      */
     style() {
@@ -34,7 +34,7 @@ export default class Component {
 
     /**
      * Returns the dom node component.
-     * Loads the css, html and event listeners on first call
+     * Loads the CSS, HTML and event listeners on the first call
      * @returns {Element}
      */
     element() {
@@ -55,7 +55,7 @@ export default class Component {
     }
 
     /**
-     * Helper to add event listeners, so that they are tracked and removed if the component is destroyed.
+     * Helper to add event listeners so that they are tracked and removed if the component is destroyed.
      *  JS does not remove event listeners automatically if an element is removed and can lead to memory leaks.
      *
      * @param {String} eventName
@@ -91,7 +91,7 @@ export default class Component {
     }
 
     /**
-     *  All event handlers are executed via this method enabling us to add overrides and tracking.
+     *  All event handlers are executed via this method, enabling us to add overrides and tracking.
      *
      * @param event
      * @param method
@@ -124,8 +124,8 @@ export default class Component {
 
     /**
      * Dispatches an event with a debounce time to improve performance.
-     *  If performance becomes an issue with the number of elements reacting to realtime events this could help.
-     *  100ms is enough for scroll events with a trackpad not to be triggered more than once during the wind down of the scroll.
+     *  If performance becomes an issue with the number of elements reacting to realtime events, this could help.
+     *  100 ms is enough for scroll events with a trackpad not to be triggered more than once during the wind down of the scroll.
      * @param {Event} event
      * @param {number} debounceTime
      */
@@ -133,7 +133,7 @@ export default class Component {
         if (!(event instanceof Event)) throw new Error('event must be an instance of Event')
         if (typeof debounceTime !== 'number') throw new Error('debounceTime must be a number')
 
-        //if the timeout is 0 then just dispatch the event
+        //if the timeout is 0 then dispatch the event
         if (debounceTime === 0) {
             this.element().dispatchEvent(event)
             return

@@ -3,7 +3,7 @@ declare(strict_types=1);
 $latestUpdates = explode("\n", `git log --pretty=format:"%cd %s" --date=format:"%a %e %b %Y"` ?? "No\n logs\n found.");
 $latestUpdates = array_unique($latestUpdates);// this lets me do several commits in a row without it showing up multiple times
 $latestUpdates = array_filter($latestUpdates, function ($update) {
-    // exclude work in progress commits or cleanup commits (i tend to do those a lot when I have to leave my machine in a hurry)
+    // exclude work in progress commits or cleanup commits (I tend to do those a lot when I have to leave my machine in a hurry)
     return stripos($update, 'wip') === false && stripos($update, 'cleanup') === false;
 });
 $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 unique commit messages
@@ -128,13 +128,15 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
 <script type="module">
     //import Grid from "/js/Grid.js" //this import isn't needed because of the dynamic component loading.
-    //  just leaving here as an example of how it would look if my special loader wasn't in place.
-    //  the other imports are still needed because they are directly referenced before the loader is called.
+
+    // Warning! if your IDE puts relative `../` paths in the import statements, they might get double imports and all kinds of broken stuff can happen.
+    //  us absolute paths here only.
     import Shape from "/js/Grid/Shape.js"
     import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"
-    import Loader from "../public/js/ModuLatte/Loader.js"
-    import Text from "../public/js/ModuLatte/Text.js"
+    import Loader from "/js/ModuLatte/Loader.js"
+    import Text from "/js/ModuLatte/Text.js"
+    import Position from "/js/Grid/Position.js";
 
     window.t = Text
     window.shapes = []
@@ -156,7 +158,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
             console.error(`Cant find shape to delete. Id:`, id)
         } else {
             grid.deleteShape(shape.id)
-            //update the shapes list.
+            //update the shape list.
             window.shapes = window.shapes.filter(shape => shape.id !== id)
         }
     }
@@ -215,7 +217,9 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
                 Shape,
                 Room
             }
-            let shape = new classMap[shapeData.class](shapeData.id, shapeData.position)
+            let {x, y, width, height, rotation} = shapeData.position
+            let position = new Position(x, y, width, height, rotation);
+            let shape = new classMap[shapeData.class](shapeData.id, position)
             grid.addShape(shape)
             loadedShapes.push(shape)
         })

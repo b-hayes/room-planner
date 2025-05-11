@@ -120,9 +120,17 @@ export default class Grid extends Component {
             this.previoselySelectedShape = this.selectedShape
             this.selectedShape = shape
             shape.mouseDown(event)
-        } else {
-            this.selectedShape = null
+            return;
         }
+
+        // rotation handle of a shape clicked
+        if (event.target.classList.contains('rotation-handle')) {
+            this.selectedShape.mouseDown(event)
+            return;
+        }
+
+        // nothing clicked deselect the shape
+        this.selectedShape = null
     }
 
     onDrag(e, initialMouseDownEvent) {
