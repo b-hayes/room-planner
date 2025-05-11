@@ -133,8 +133,9 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     import Shape from "/js/Grid/Shape.js"
     import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"
-    import Loader from "../public/js/ModuLatte/Loader.js"
-    import Text from "../public/js/ModuLatte/Text.js"
+    import Loader from "/js/ModuLatte/Loader.js"
+    import Text from "/js/ModuLatte/Text.js"
+    import Position from "/js/Grid/Position.js";
 
     window.t = Text
     window.shapes = []
@@ -156,7 +157,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
             console.error(`Cant find shape to delete. Id:`, id)
         } else {
             grid.deleteShape(shape.id)
-            //update the shapes list.
+            //update the shape list.
             window.shapes = window.shapes.filter(shape => shape.id !== id)
         }
     }
@@ -215,7 +216,9 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
                 Shape,
                 Room
             }
-            let shape = new classMap[shapeData.class](shapeData.id, shapeData.position)
+            let {x, y, width, height, rotation} = shapeData.position
+            let position = new Position(x, y, width, height, rotation);
+            let shape = new classMap[shapeData.class](shapeData.id, position)
             grid.addShape(shape)
             loadedShapes.push(shape)
         })

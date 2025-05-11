@@ -52,10 +52,6 @@ export default class Shape extends Component {
         }
         this.id = id
 
-        if (!(position instanceof Position)) {
-            throw new TypeError('position must be an instance of Position')
-        }
-
         // get labels. these will be updated when a re-draw is triggered.
         this.posText = this.element().querySelector('.posText')
         this.widthText = this.element().querySelector('.widthText')
@@ -150,7 +146,7 @@ export default class Shape extends Component {
         }
 
 
-        this.position = {x, y, width, height, rotation}
+        this.position = new Position(x, y, width, height, rotation)
     }
 
     /**
@@ -202,13 +198,11 @@ export default class Shape extends Component {
     }
 
     // Virtual position. Not the real position of the element.
-    set  position({x, y, width, height, rotation}) {
-        // make sure we have Numbers and not strings
-        width = parseFloat(width) ?? 300
-        height = parseFloat(height) ?? 300
-        x = parseFloat(x) ?? 150
-        y = parseFloat(y) ?? 150
-        rotation = parseFloat(rotation) ?? 0
+    set  position(position) {
+        if (!(position instanceof Position)) {
+            throw new TypeError('position must be an instance of Position')
+        }
+        let {x, y, width, height, rotation} = position;
 
         // limits
         let minX = width / 2
