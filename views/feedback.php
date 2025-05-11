@@ -1,9 +1,9 @@
-<?php
+<?php /** @noinspection PhpUnhandledExceptionInspection */
 declare(strict_types=1);
 
 use PHPMailer\PHPMailer\PHPMailer;
 
-// Some basic spam prevention... not ideal but it will do for now.
+// Some basic spam prevention... not ideal, but it will do for now.
 // Check if the ip address already submitted feedback in the last hour and hide the form / prevent submissions.
 $feedBackLogFile = __DIR__ . '/../feedback.log';
 if (is_file($feedBackLogFile)) {
@@ -21,39 +21,40 @@ if (is_file($feedBackLogFile)) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($alreadySubmittedRecently)) {
 
-    // Email feedback to the devs
     $feedback = $_POST['feedback'];
+    if (getenv('SMTP_HOST')) {
+        // Email feedback to the devs
+        $mail = new PHPMailer(true);
 
-    $mail = new PHPMailer(true);
+        //Server settings
+        //$mail->SMTPDebug = SMTP::DEBUG_SERVER;            //Enable verbose debug output
+        $mail->isSMTP();                                  //Send using SMTP
+        $mail->Host = getenv('SMTP_HOST');          //Set the SMTP server to send it through
+        $mail->SMTPAuth = true;                           //Enable SMTP authentication
+        $mail->Username = getenv('SMTP_USER');      //SMTP username
+        $mail->Password = getenv('SMTP_PASSWORD');  //SMTP password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;  //Enable implicit TLS encryption
+        $mail->Port = 465;                                //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
 
-    //Server settings
-//    $mail->SMTPDebug = SMTP::DEBUG_SERVER;            //Enable verbose debug output
-    $mail->isSMTP();                                  //Send using SMTP
-    $mail->Host = getenv('SMTP_HOST');          //Set the SMTP server to send through
-    $mail->SMTPAuth = true;                           //Enable SMTP authentication
-    $mail->Username = getenv('SMTP_USER');      //SMTP username
-    $mail->Password = getenv('SMTP_PASSWORD');  //SMTP password
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;  //Enable implicit TLS encryption
-    $mail->Port = 465;                                //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+        //Recipients
+        $userName = $_POST['name'] ?? 'Room Planner: Feedback';
+        $userEmail = $_POST['email'] ?? null;
+        if ($userEmail) {
+            //$mail->setFrom($userEmail, $userName);
+            //My smtp provider will not allow me to make the email from the users provided email address.
+            // So I'm emailing myself, from myself.
+            $mail->setFrom($mail->Username, $userName);
+        }
+        $mail->addAddress(getenv('FEEDBACK_EMAIL'));
 
-    //Recipients
-    $userName = $_POST['name'] ?? 'Room Planner: Feedback';
-    $userEmail = $_POST['email'] ?? null;
-    if ($userEmail) {
-        //$mail->setFrom($userEmail, $userName);
-        //My smtp provider will not allow me to make the email from the users provided email address.
-        // So im emailing myself, from myself.
-        $mail->setFrom($mail->Username, $userName);
+        //Content
+        $mail->isHTML();
+        $mail->Subject = 'Room Planer feedback.';
+        $mail->Body = "<b>$userName</b> submitted some feedback: <p>$feedback</p>";
+        $mail->AltBody = "$userName submitted some feedback: \n\n $feedback";
+
+        $mail->send();
     }
-    $mail->addAddress(getenv('FEEDBACK_EMAIL'));
-
-    //Content
-    $mail->isHTML();
-    $mail->Subject = 'Room Planer feedback.';
-    $mail->Body = "<b>$userName</b> submitted some feedback: <p>$feedback</p>";
-    $mail->AltBody = "$userName submitted some feedback: \n\n $feedback";
-
-    $mail->send();
 
     echo '<h1>🤩Thanks for the feedback!</h1>
     <a href="/">Back to Room Planner</a>';
@@ -77,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($alreadySubmittedRecently)) 
         <?php if (isset($alreadySubmittedRecently)): ?>
             <div style="text-align: center;">
                 <h1>⛔️Feedback received recently.</h1>
-                <p>To prevent us getting spammed we ask that you wait an hour before sending feedback again.</p>
+                <p>To prevent us getting spammed, we ask that you wait an hour before sending feedback again.</p>
                 <a href="/">Back to Room Planner</a>
             </div>
         <?php else: ?>
@@ -100,8 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($alreadySubmittedRecently)) 
         <div>
             <br>
             <h2>Want some more info?</h2>
-            <p>Checkout the <a href="https://trello.com/b/5K94ZcYt/room-planner" target="_blank">Trello Board</a> to see what's planned / being worked on.</p>
-            <p>I made this project in my spare time because there is no hassle-free options out there so figured I'd build my own and let everyone have it.</p>
+            <p>Check out the <a href="https://trello.com/b/5K94ZcYt/room-planner" target="_blank">Trello Board</a> to see what's planned / being worked on.</p>
+            <p>I made this project in my spare time because there are no hassle-free options out there, so figured I'd build my own and let everyone have it.</p>
             <p>If the Room Planner helped you out, and you'd like to say thank you then
                 <a href="https://www.paypal.com/donate?business=no-reply%40codeninja.fun&item_name=%E2%98%95+Turning+Coffee++into+Code.&currency_code=AUD">
             buy me a coffee. ☕😃 <img src="https://img.shields.io/badge/Donate-PayPal-green.svg" alt="Donate">
@@ -196,8 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($alreadySubmittedRecently)) 
             body: formData
         });
 
-        const html = await response.text();
-        form.innerHTML = html;
+        form.innerHTML = await response.text();
 
         // Hide the overlay
         document.querySelector('.overlay').classList.add('hidden');

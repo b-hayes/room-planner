@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpUnhandledExceptionInspection */
 declare(strict_types=1);
 // Because of my shared hosting provider, I need to:
 //  - manually load ENV vars from a file
@@ -12,7 +13,8 @@ $devPath = __DIR__ . '/../dev.env';
 $filename = realpath($prodPath) ?: realpath($devPath);
 
 if (!$filename) {
-    throw new \Exception("No environment file! Tried: $prodPath && $devPath and found nothing.");
+    return; //env file is optional
+    //throw new \Exception("No environment file! Tried: $prodPath && $devPath and found nothing.");
 }
 
 $handle = fopen($filename, "r");
