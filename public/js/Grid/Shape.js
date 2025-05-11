@@ -283,12 +283,12 @@ export default class Shape extends Component {
         this.element().classList.remove('resize-top')
         this.element().classList.remove('resize-bottom')
 
-        //if not selected then don't bother
+        //if not selected, then don't bother
         if (this._selected === false || this.element().contains(event.target) === false) {
             return;
         }
 
-        //if hovering over a rotation handle then set rotation mode
+        //if hovering over a rotation handle, then set rotation mode
         if (event.target.classList.contains('rotation-handle')) {
             this.rotating = true
             this.element().classList.add('rotating')
