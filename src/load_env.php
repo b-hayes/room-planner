@@ -1,12 +1,14 @@
 <?php
 declare(strict_types=1);
-//because of my shared hosting provider I need to:
+// Because of my shared hosting provider, I need to:
 //  - manually load ENV vars from a file
 //  - and I am forced to keep this file outside the document root
+// Hence the first path is outside the document root and uses the composer project name.
 $project = json_decode(file_get_contents(__DIR__ . '/../composer.json'))->name ?? 'undefined/undefined';
 $project = explode('/', $project)[1];
-$prodPath = __DIR__ . '/prod.env';
-$devPath = __DIR__ . '/dev.env';
+// otherwise use prod.env or dev.env
+$prodPath = __DIR__ . '/../prod.env';
+$devPath = __DIR__ . '/../dev.env';
 $filename = realpath($prodPath) ?: realpath($devPath);
 
 if (!$filename) {

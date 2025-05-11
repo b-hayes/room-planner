@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($alreadySubmittedRecently)) 
         // So im emailing myself, from myself.
         $mail->setFrom($mail->Username, $userName);
     }
-    $mail->addAddress(getenv('feedbackEmail'));
+    $mail->addAddress(getenv('FEEDBACK_EMAIL'));
 
     //Content
     $mail->isHTML();
