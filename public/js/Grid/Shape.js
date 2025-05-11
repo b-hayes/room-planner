@@ -18,10 +18,10 @@ export default class Shape extends Component {
     resizing = false;
     rotating = false;
 
-    // event
+    // event related
     shapePositionWhenClicked = {};
 
-    // labels (would be nice to use data binds instead of direct manipulations in future).
+    // labels (would be nice to use data binds instead of direct manipulations in the future).
     posText = undefined;
     widthText = undefined;
     heightText = undefined;
@@ -52,27 +52,18 @@ export default class Shape extends Component {
         }
         this.id = id
 
-        // get the position values
-        let {width, height, x, y, rotation} = position
-
-        //If no position then center while rounding to the nearest 100
-        if (x === undefined) {
-            x = (position.width / 2) - (width / 2)
-            // x = x - (x % 100)
-        }
-        if (y === undefined) {
-            y = (position.height / 2) - (height / 2)
-            // y = y - (y % 100)
+        if (!(position instanceof Position)) {
+            throw new TypeError('position must be an instance of Position')
         }
 
-        //get labels.
+        // get labels. these will be updated when a re-draw is triggered.
         this.posText = this.element().querySelector('.posText')
         this.widthText = this.element().querySelector('.widthText')
         this.heightText = this.element().querySelector('.heightText')
         this.rotationText = this.element().querySelector('.rotationText')
 
-        // set the initial position and scale (triggers a redraw twice for now).
-        this.position = {x, y, width, height, rotation}
+        // both of these trigger a re-draw, which means an extra unnecessary re-draw.
+        this.position = position
         this.scale = scale
     }
 
@@ -94,7 +85,7 @@ export default class Shape extends Component {
     }
 
     /**
-     * Calculate the real location of the centre of the shape in the window.
+     * Calculate the real center location of the shape in the window.
      *
      * @returns Point
      */
@@ -111,6 +102,7 @@ export default class Shape extends Component {
     }
 
     drag(mouseMoveEvent, initialMouseDownEvent) {
+        // mouse events are translated to be relative to the rotation scale.
         let center = this.getCentre()
         let rotatedMouseLocation = new Point(mouseMoveEvent.clientX, mouseMoveEvent.clientY)
             .rotate(this.position.rotation, center);
@@ -124,7 +116,7 @@ export default class Shape extends Component {
 
         let {x, y, width, height, rotation} = this.shapePositionWhenClicked;
 
-        //apply an inverse scale to the shift values so the change in position is without the current vue scale.
+        // apply an inverse scale to the shift values so the change in position is without the current view scale.
         let invertedScale = 1 / this.scale
         shiftX *= invertedScale
         shiftY *= invertedScale
@@ -162,14 +154,14 @@ export default class Shape extends Component {
     }
 
     /**
-     * Returns a copy of object with all numerical values in the object.
+     * Returns a copy of the object with all numerical values in the object.
      *  'rotation' is excluded from the scaling.
      *
      * @param object
      * @param scale
      */
     getScaled(object, scale = this.scale) {
-        //clone the object
+        // clone the object to avoid side effects.
         object = {...object}
         for (let key in object) {
             if (key === 'rotation') continue // dont scale rotation values.
@@ -180,7 +172,7 @@ export default class Shape extends Component {
         return object
     }
 
-    //updates real position of the element and labels etc.
+    // updates the real position of the element and labels etc.
     redraw() {
         const pos = this.position
         const sPos = this.getScaled(pos)
@@ -204,12 +196,12 @@ export default class Shape extends Component {
         this.rotationText.innerHTML = 'r: ' + pos.rotation
     }
 
-    //Virtual position. Not the real position of the element.
+    // Virtual position. Not the real position of the element.
     get position() {
         return this._gridPosition;
     }
 
-    //Virtual position. Not the real position of the element.
+    // Virtual position. Not the real position of the element.
     set  position({x, y, width, height, rotation}) {
         // make sure we have Numbers and not strings
         width = parseFloat(width) ?? 300
