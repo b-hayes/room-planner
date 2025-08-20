@@ -274,7 +274,7 @@ export default class Shape extends Component {
         }
         this._backgroundImage = value;
         this.element().style.backgroundImage = this._backgroundImage ? `url(${this._backgroundImage})` : ''
-        this.element().style.backgroundSize = 'cover'
+        this.element().style.backgroundSize = '100% 100%'
         this.element().style.backgroundPosition = 'center'
         this.element().style.backgroundRepeat = 'no-repeat'
     }
