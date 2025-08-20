@@ -63,6 +63,17 @@ export default class Grid extends Component {
         this.dispatchEventWithDebounce(deletedShape)
     }
 
+    setShapeBackgroundImage(shape) {
+        const imageUrl = prompt('Enter image URL:', shape.backgroundImage || '')
+        if (imageUrl !== null) {
+            shape.backgroundImage = imageUrl.trim() || null
+        }
+    }
+
+    removeShapeBackgroundImage(shape) {
+        shape.backgroundImage = null
+    }
+
     /**
      * @param {Shape|null} shape
      */
@@ -180,6 +191,8 @@ export default class Grid extends Component {
             this._contextMenu = new Menu({
                 position: { x: event.clientX, y: event.clientY},
                 items: [
+                    {label: '🖼️ Set Background Image', action: () => this.setShapeBackgroundImage(shape)},
+                    {label: '🗑️ Remove Background Image', action: () => this.removeShapeBackgroundImage(shape)},
                     {label: '🚮 Delete', action: () => this.deleteShape(shape.id)}
                 ]
             })

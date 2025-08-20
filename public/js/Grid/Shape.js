@@ -13,6 +13,9 @@ export default class Shape extends Component {
     _gridScale = 1;
     _gridPosition = {x: 0, y: 0, width: 0, height: 0, rotation: 0};
 
+    // background image
+    _backgroundImage = null;
+
     // states
     _selected = false;
     resizing = false;
@@ -44,7 +47,8 @@ export default class Shape extends Component {
             300,
             0
         ),
-        scale = 1
+        scale = 1,
+        backgroundImage = null
     ) {
         super();
         if (!id || typeof id !== 'string') {
@@ -61,6 +65,7 @@ export default class Shape extends Component {
         // both of these trigger a re-draw, which means an extra unnecessary re-draw.
         this.position = position
         this.scale = scale
+        this.backgroundImage = backgroundImage
     }
 
     get selected() {
@@ -185,6 +190,16 @@ export default class Shape extends Component {
         this.element().style.height = sPos.height + 'px'
         this.element().style.transform = `rotate(${pos.rotation}deg)`
 
+        // Apply background image if set
+        if (this._backgroundImage) {
+            this.element().style.backgroundImage = `url(${this._backgroundImage})`
+            this.element().style.backgroundSize = 'cover'
+            this.element().style.backgroundPosition = 'center'
+            this.element().style.backgroundRepeat = 'no-repeat'
+        } else {
+            this.element().style.backgroundImage = ''
+        }
+
         // Update the labels
         this.posText.innerHTML = 'x: ' + pos.x + ' y: ' + pos.y
         this.widthText.innerHTML = 'w: ' + pos.width
@@ -256,6 +271,15 @@ export default class Shape extends Component {
 
     set snap(value) {
         this._gridSnap = value
+    }
+
+    get backgroundImage() {
+        return this._backgroundImage;
+    }
+
+    set backgroundImage(value) {
+        this._backgroundImage = value;
+        this.redraw();
     }
 
     hover(event) {
