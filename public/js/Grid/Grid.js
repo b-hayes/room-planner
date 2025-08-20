@@ -66,12 +66,12 @@ export default class Grid extends Component {
     setShapeBackgroundImage(shape) {
         const imageUrl = prompt('Enter image URL:', shape.backgroundImage || '')
         if (imageUrl !== null) {
-            shape.backgroundImage = imageUrl.trim() || null
+            shape.backgroundImage = imageUrl.trim()
         }
     }
 
     removeShapeBackgroundImage(shape) {
-        shape.backgroundImage = null
+        shape.backgroundImage = ''
     }
 
     /**

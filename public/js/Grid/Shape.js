@@ -14,7 +14,7 @@ export default class Shape extends Component {
     _gridPosition = {x: 0, y: 0, width: 0, height: 0, rotation: 0};
 
     // background image
-    _backgroundImage = null;
+    _backgroundImage = '';
 
     // states
     _selected = false;
@@ -48,7 +48,7 @@ export default class Shape extends Component {
             0
         ),
         scale = 1,
-        backgroundImage = null
+        backgroundImage = ''
     ) {
         super();
         if (!id || typeof id !== 'string') {
@@ -190,15 +190,6 @@ export default class Shape extends Component {
         this.element().style.height = sPos.height + 'px'
         this.element().style.transform = `rotate(${pos.rotation}deg)`
 
-        // Apply background image if set
-        if (this._backgroundImage) {
-            this.element().style.backgroundImage = `url(${this._backgroundImage})`
-            this.element().style.backgroundSize = 'cover'
-            this.element().style.backgroundPosition = 'center'
-            this.element().style.backgroundRepeat = 'no-repeat'
-        } else {
-            this.element().style.backgroundImage = ''
-        }
 
         // Update the labels
         this.posText.innerHTML = 'x: ' + pos.x + ' y: ' + pos.y
@@ -278,8 +269,14 @@ export default class Shape extends Component {
     }
 
     set backgroundImage(value) {
+        if (typeof value !== 'string') {
+            throw new TypeError('backgroundImage must be a string, received ' + typeof value)
+        }
         this._backgroundImage = value;
-        this.redraw();
+        this.element().style.backgroundImage = this._backgroundImage ? `url(${this._backgroundImage})` : ''
+        this.element().style.backgroundSize = 'cover'
+        this.element().style.backgroundPosition = 'center'
+        this.element().style.backgroundRepeat = 'no-repeat'
     }
 
     hover(event) {

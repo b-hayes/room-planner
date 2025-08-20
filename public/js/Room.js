@@ -13,9 +13,11 @@ export default class Room extends Shape {
             300,
             300,
             0
-        )
+        ),
+        scale = 1,
+        backgroundImage = ''
     ) {
-        super(id, position)
+        super(id, position, scale, backgroundImage)
         this.element().classList.add('room')
     }
 

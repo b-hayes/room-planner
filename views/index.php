@@ -185,6 +185,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
                 return {
                     id: shape.id,
                     position: shape.position,
+                    backgroundImage: shape.backgroundImage,
                     //store the class name so we can recreate the object
                     class: shape.constructor.name
                 }
@@ -219,7 +220,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
             }
             let {x, y, width, height, rotation} = shapeData.position
             let position = new Position(x, y, width, height, rotation);
-            let shape = new classMap[shapeData.class](shapeData.id, position)
+            let shape = new classMap[shapeData.class](shapeData.id, position, 1, shapeData.backgroundImage || '')
             grid.addShape(shape)
             loadedShapes.push(shape)
         })
