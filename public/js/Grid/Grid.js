@@ -180,6 +180,12 @@ export default class Grid extends Component {
             this._contextMenu = new Menu({
                 position: { x: event.clientX, y: event.clientY},
                 items: [
+                    {label: '🖼 Set background image', action: () => {
+                        const current = shape.backgroundImage || '';
+                        const url = window.prompt('Enter background image URL', current);
+                        if (url === null) return;
+                        shape.backgroundImage = url.trim();
+                    }},
                     {label: '🚮 Delete', action: () => this.deleteShape(shape.id)}
                 ]
             })

@@ -21,6 +21,9 @@ export default class Shape extends Component {
     // event related
     shapePositionWhenClicked = {};
 
+    // background image url only
+    _backgroundImage = '';
+
     // labels (would be nice to use data binds instead of direct manipulations in the future).
     posText = undefined;
     widthText = undefined;
@@ -58,6 +61,11 @@ export default class Shape extends Component {
         this.heightText = this.element().querySelector('.heightText')
         this.rotationText = this.element().querySelector('.rotationText')
 
+        // Ensure background images fit the shape box by default
+        this.element().style.backgroundRepeat = 'no-repeat'
+        this.element().style.backgroundSize = 'contain'
+        this.element().style.backgroundPosition = 'center center'
+
         // both of these trigger a re-draw, which means an extra unnecessary re-draw.
         this.position = position
         this.scale = scale
@@ -78,6 +86,24 @@ export default class Shape extends Component {
         } else {
             this.element().classList.remove('selected')
         }
+    }
+
+    // Background image support
+    get backgroundImage() {
+        return this._backgroundImage
+    }
+
+    /**
+     * @param {string} url
+     */
+    set backgroundImage(url) {
+        if (url !== undefined && typeof url !== 'string') throw new TypeError('backgroundImage must be a string url or undefined')
+        this._backgroundImage = url || ''
+        this.element().style.backgroundImage = this._backgroundImage ? `url("${this._backgroundImage}")` : ''
+        // Ensure it fits within the shape (shrink if needed)
+        this.element().style.backgroundRepeat = 'no-repeat'
+        this.element().style.backgroundSize = 'contain'
+        this.element().style.backgroundPosition = 'center center'
     }
 
     /**
