@@ -22,6 +22,15 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     </div>
     <button class="toolbar-button" onclick="newRoom()">⬜ Room</button>
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
+    <div class="toolbar-header">
+        Furniture
+    </div>
+    <button class="toolbar-button" onclick="newFurniture('bed')">🛏️ Bed</button>
+    <button class="toolbar-button" onclick="newFurniture('desk')">🪑 Desk</button>
+    <button class="toolbar-button" onclick="newFurniture('sofa')">🛋️ Sofa</button>
+    <button class="toolbar-button" onclick="newFurniture('table')">🪑 Table</button>
+    <button class="toolbar-button" onclick="newFurniture('office-chair')">🪑 Chair</button>
+    <button class="toolbar-button" onclick="newFurniture('bookshelf')">📚 Shelf</button>
 </div>
 <main>
     <grid:grid params='{ "scale": 1 }'></grid:grid>
@@ -134,6 +143,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     import Shape from "/js/Grid/Shape.js"
     import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"
+    import Furniture from "/js/Furniture.js"
     import Loader from "/js/ModuLatte/Loader.js"
     import Text from "/js/ModuLatte/Text.js"
     import Position from "/js/Grid/Position.js";
@@ -168,6 +178,13 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         grid.addShape(room)
         grid.selectedShape = room
         shapes.push(room)
+    }
+
+    window.newFurniture = function (furnitureType) {
+        const furniture = new Furniture(furnitureType)
+        grid.addShape(furniture)
+        grid.selectedShape = furniture
+        shapes.push(furniture)
     }
 
     window.deleteData = function () {
@@ -216,7 +233,8 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         data.shapes.forEach(shapeData => {
             let classMap = {
                 Shape,
-                Room
+                Room,
+                Furniture
             }
             let {x, y, width, height, rotation} = shapeData.position
             let position = new Position(x, y, width, height, rotation);
