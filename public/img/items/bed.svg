@@ -1,8 +1,27 @@
-<svg width="120" height="80" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-  <rect x="5" y="10" width="110" height="60" fill="#8B4513" stroke="#654321" stroke-width="2" rx="8"/>
-  <rect x="10" y="15" width="100" height="50" fill="#DEB887" stroke="#8B4513" stroke-width="1" rx="5"/>
-  <rect x="15" y="5" width="90" height="15" fill="#654321" stroke="#4A4A4A" stroke-width="2" rx="3"/>
-  <circle cx="30" cy="45" r="8" fill="#F5F5DC" stroke="#DEB887" stroke-width="1"/>
-  <circle cx="60" cy="35" r="10" fill="#F5F5DC" stroke="#DEB887" stroke-width="1"/>
-  <circle cx="90" cy="50" r="7" fill="#F5F5DC" stroke="#DEB887" stroke-width="1"/>
+<svg width="80" height="120" viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bed frame -->
+  <rect x="5" y="5" width="70" height="110" fill="#8B4513" stroke="#654321" stroke-width="2" rx="4"/>
+  
+  <!-- Bed headboard (thicker) -->
+  <rect x="3" y="3" width="74" height="12" fill="#654321" stroke="#4A4A4A" stroke-width="2" rx="3"/>
+  
+  <!-- Mattress -->
+  <rect x="8" y="8" width="64" height="104" fill="#F5F5DC" stroke="#DDD" stroke-width="1" rx="3"/>
+  
+  <!-- Bedsheet/blanket -->
+  <rect x="4" y="20" width="72" height="92" fill="#4A90E2" stroke="#357ABD" stroke-width="1" rx="2"/>
+  
+  <!-- Pillows at head of bed -->
+  <rect x="16" y="10" width="24" height="12" fill="#FFFFFF" stroke="#DDD" stroke-width="1" rx="4"/>
+  <rect x="40" y="10" width="24" height="12" fill="#FFFFFF" stroke="#DDD" stroke-width="1" rx="4"/>
+  
+  <!-- Pillow indentations -->
+  <ellipse cx="28" cy="16" rx="8" ry="3" fill="none" stroke="#CCC" stroke-width="1" opacity="0.5"/>
+  <ellipse cx="52" cy="16" rx="8" ry="3" fill="none" stroke="#CCC" stroke-width="1" opacity="0.5"/>
+  
+  <!-- Mattress center seam -->
+  <line x1="40" y1="12" x2="40" y2="108" stroke="#DDD" stroke-width="1" opacity="0.6"/>
+  
+  <!-- Blanket fold at foot -->
+  <rect x="4" y="105" width="72" height="8" fill="#357ABD" stroke="#2E6DA4" stroke-width="1" rx="1"/>
 </svg>

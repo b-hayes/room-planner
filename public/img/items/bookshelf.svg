@@ -1,13 +1,7 @@
-<svg width="60" height="100" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
-  <rect x="5" y="5" width="50" height="90" fill="#8B4513" stroke="#654321" stroke-width="2" rx="3"/>
-  <rect x="8" y="8" width="44" height="84" fill="#A0522D" stroke="#654321" stroke-width="1" rx="2"/>
-  <rect x="10" y="15" width="40" height="15" fill="#DEB887" stroke="#8B4513" stroke-width="1"/>
-  <rect x="10" y="35" width="40" height="15" fill="#DEB887" stroke="#8B4513" stroke-width="1"/>
-  <rect x="10" y="55" width="40" height="15" fill="#DEB887" stroke="#8B4513" stroke-width="1"/>
-  <rect x="10" y="75" width="40" height="15" fill="#DEB887" stroke="#8B4513" stroke-width="1"/>
-  <rect x="12" y="17" width="4" height="11" fill="#FF6B6B"/>
-  <rect x="17" y="17" width="4" height="11" fill="#4ECDC4"/>
-  <rect x="22" y="17" width="4" height="11" fill="#45B7D1"/>
-  <rect x="27" y="17" width="4" height="11" fill="#96CEB4"/>
-  <rect x="32" y="17" width="4" height="11" fill="#FFEAA7"/>
+<svg width="40" height="80" viewBox="0 0 40 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bookshelf frame (simple rectangle top view) -->
+  <rect x="5" y="5" width="30" height="70" fill="#8B4513" stroke="#654321" stroke-width="2" rx="2"/>
+  
+  <!-- Inner area -->
+  <rect x="8" y="8" width="24" height="64" fill="#A0522D" stroke="#654321" stroke-width="1" rx="1"/>
 </svg>
