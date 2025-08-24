@@ -1,0 +1,7 @@
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Corner desk surface (L-shaped) -->
+  <polygon points="5,5 75,5 75,35 35,35 35,75 5,75" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+  
+  <!-- Inner desk area -->
+  <polygon points="8,8 72,8 72,32 32,32 32,72 8,72" fill="#A0522D" stroke="#654321" stroke-width="1"/>
+</svg>
