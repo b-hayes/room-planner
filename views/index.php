@@ -26,11 +26,17 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         Furniture
     </div>
     <button class="toolbar-button" onclick="newFurniture('bed')">🛏️ Bed</button>
-    <button class="toolbar-button" onclick="newFurniture('desk')">🪑 Desk</button>
+    <button class="toolbar-button" onclick="newFurniture('bedside-table')">🛏️ Bedside</button>
+    <button class="toolbar-button" onclick="newFurniture('desk')">🟫 Desk</button>
+    <button class="toolbar-button" onclick="newFurniture('corner-desk')">🟫 Corner Desk</button>
     <button class="toolbar-button" onclick="newFurniture('sofa')">🛋️ Sofa</button>
-    <button class="toolbar-button" onclick="newFurniture('table')">🪑 Table</button>
+    <button class="toolbar-button" onclick="newFurniture('lounge-chair')">💺 Lounge Chair</button>
     <button class="toolbar-button" onclick="newFurniture('office-chair')">🪑 Chair</button>
+    <button class="toolbar-button" onclick="newFurniture('table')">🍽️ Table</button>
     <button class="toolbar-button" onclick="newFurniture('bookshelf')">📚 Shelf</button>
+    <button class="toolbar-button" onclick="newFurniture('filing-cabinet')">🗃️ Cabinet</button>
+    <button class="toolbar-button" onclick="newFurniture('lamp')">💡 Lamp</button>
+    <button class="toolbar-button" onclick="newFurniture('plant')">🌱 Plant</button>
 </div>
 <main>
     <grid:grid params='{ "scale": 1 }'></grid:grid>
@@ -143,7 +149,6 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     import Shape from "/js/Grid/Shape.js"
     import Alert from "/js/Toast.js"
     import Room from "/js/Room.js"
-    import Furniture from "/js/Furniture.js"
     import Loader from "/js/ModuLatte/Loader.js"
     import Text from "/js/ModuLatte/Text.js"
     import Position from "/js/Grid/Position.js";
@@ -181,7 +186,27 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     }
 
     window.newFurniture = function (furnitureType) {
-        const furniture = new Furniture(furnitureType)
+        // Furniture dimensions (1px = 1cm)
+        const dimensions = {
+            'bed': {width: 200, height: 140},
+            'bedside-table': {width: 50, height: 40},
+            'bookshelf': {width: 80, height: 180},
+            'corner-desk': {width: 120, height: 120},
+            'desk': {width: 120, height: 60},
+            'filing-cabinet': {width: 40, height: 60},
+            'lamp': {width: 30, height: 30},
+            'lounge-chair': {width: 80, height: 90},
+            'office-chair': {width: 60, height: 60},
+            'plant': {width: 40, height: 40},
+            'sofa': {width: 200, height: 90},
+            'table': {width: 120, height: 80}
+        }
+        
+        const dim = dimensions[furnitureType] || {width: 60, height: 60}
+        const position = new Position(150, 150, dim.width, dim.height, 0)
+        const backgroundImage = `/img/items/${furnitureType}.svg`
+        
+        const furniture = new Shape(Text.randomId(), position, 1, backgroundImage)
         grid.addShape(furniture)
         grid.selectedShape = furniture
         shapes.push(furniture)
@@ -233,8 +258,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         data.shapes.forEach(shapeData => {
             let classMap = {
                 Shape,
-                Room,
-                Furniture
+                Room
             }
             let {x, y, width, height, rotation} = shapeData.position
             let position = new Position(x, y, width, height, rotation);
