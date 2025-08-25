@@ -434,36 +434,59 @@ const style = `
         pointer-events: none;
         user-select: none;
         position: absolute;
-        top: 50%;
+        top: -30px;
         left: 50%;
-        transform: translate(-50%, -50%);
+        transform: translate(-50%, 0);
+        background: var(--background);
+        color: var(--foreground);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+        opacity: 0.9;
     }
 
     .widthText {
         pointer-events: none;
         user-select: none;
         position: absolute;
-        bottom: 0;
-        width: 100%;
-        text-align: center;
+        bottom: -25px;
+        left: 50%;
+        transform: translate(-50%, 0);
+        background: var(--background);
+        color: var(--foreground);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+        opacity: 0.9;
     }
 
     .heightText {
         pointer-events: none;
         user-select: none;
         position: absolute;
-        bottom: 50%;
-        right: -10px;
-        transform: rotate(-90deg);
+        top: 50%;
+        right: -45px;
+        transform: translate(0, -50%) rotate(-90deg);
+        background: var(--background);
+        color: var(--foreground);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+        opacity: 0.9;
     }
 
     .rotationText {
         pointer-events: none;
         user-select: none;
         position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translate(-50%);
+        top: -30px;
+        right: 0;
+        background: var(--background);
+        color: var(--foreground);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+        opacity: 0.9;
     }
 
     .rotation-handle {
