@@ -17,6 +17,10 @@ export default class Grid extends Component {
         this.background = this.element() //the background is the element now.
         this.toolTip = this.element().getElementsByClassName('tool-tip')[0]
         this.spacer = this.element().getElementsByClassName('grid-spacer')[0]
+
+        // Update initial display values based on scale
+        this.toolTip.innerText = `Scale: 1px = ${this.scale}cm`
+        this.background.style.backgroundSize = `${100 * this.scale}px ${100 * this.scale}px`
     }
 
     html() {
@@ -249,14 +253,19 @@ export default class Grid extends Component {
 
         //ZOOM IN AND OUT
         let scaleInput = event.deltaY * -0.001
-        this.zoom(scaleInput)
+        // Get mouse position relative to the grid
+        const rect = this.element().getBoundingClientRect()
+        const mouseX = event.clientX - rect.left
+        const mouseY = event.clientY - rect.top
+        this.zoom(scaleInput, new Point(mouseX, mouseY))
     }
 
     /**
      * Zoom in or out by the shift amount.
      * @param {number} shift
+     * @param {Point|undefined} mousePosition - Mouse position in view space (defaults to center)
      */
-    zoom(shift) {
+    zoom(shift, mousePosition = undefined) {
         shift = Float.parse(shift, 'zoom shift must be a number')
 
         let maxScale = 5
@@ -321,7 +330,7 @@ export default class Grid extends Component {
          * and adjusts the scroll position to keep looking at the same VirtualPoint.
          *
          * Steps:
-         *  - Calculate the centre of the View.
+         *  - Calculate the mouse position in the View (or use center if not provided).
          *  - Add the ScrollPoint to turn it into a GridPoint.
          *  - Convert the GridPoint into a VirtualPoint (the point we are looking at).
          *  -
@@ -333,12 +342,12 @@ export default class Grid extends Component {
          *
          */
 
-            // Calculate the centre of the View.
-        let viewCentre = new Point(this.element().clientWidth / 2, this.element().clientHeight / 2);
+        // Calculate the zoom focal point in the View (use mouse position or default to center).
+        let viewPoint = mousePosition || new Point(this.element().clientWidth / 2, this.element().clientHeight / 2);
         // Add the ScrollPoint to turn it into a GridPoint.
         let gridPoint = new Point(
-            viewCentre.x + this.element().scrollLeft,
-            viewCentre.y + this.element().scrollTop
+            viewPoint.x + this.element().scrollLeft,
+            viewPoint.y + this.element().scrollTop
         )
 
         // Convert the GridPoint into a VirtualPoint.

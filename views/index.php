@@ -52,7 +52,7 @@ usort($furnitureItems, function($a, $b) {
     <?php endforeach; ?>
 </div>
 <main>
-    <grid:grid params='{ "scale": 1 }'></grid:grid>
+    <grid:grid params='{ "scale": 2.5 }'></grid:grid>
 </main>
 
 <div class="status-bar">
@@ -281,6 +281,7 @@ usort($furnitureItems, function($a, $b) {
 
     window.save = function () {
         let data = {
+            scale: grid.scale,
             shapes: Object.values(grid.shapes()).map(shape => {
                 return {
                     id: shape.id,
@@ -310,6 +311,11 @@ usort($furnitureItems, function($a, $b) {
 
         if (!Array.isArray(data.shapes)) {
             throw new Error('data.shapes is not an array')
+        }
+
+        // Restore scale if saved
+        if (data.scale) {
+            grid.zoom(data.scale - grid.scale)
         }
 
         let loadedShapes = []
