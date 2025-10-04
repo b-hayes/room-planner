@@ -48,6 +48,7 @@ usort($furnitureItems, function($a, $b) {
                 onclick="newFurniture('<?= htmlspecialchars($item['path'], ENT_QUOTES) ?>')"
                 title="<?= htmlspecialchars($item['displayName']) ?>">
             <img src="<?= htmlspecialchars($item['path']) ?>" alt="<?= htmlspecialchars($item['displayName']) ?>">
+            <span><?= htmlspecialchars($item['displayName']) ?></span>
         </button>
     <?php endforeach; ?>
 </div>
@@ -77,8 +78,8 @@ usort($furnitureItems, function($a, $b) {
     main {
         position: relative;
         top: 0;
-        left: 10vw;
-        width: 90vw;
+        left: 150px;
+        width: calc(100vw - 150px);
         height: calc(100vh - 20px);
     }
 
@@ -88,7 +89,7 @@ usort($furnitureItems, function($a, $b) {
         top: 0;
         left: 0;
         height: 100vh;
-        width: 10vw;
+        width: 150px;
         background-color: var(--background);
         border-right: 1px solid var(--foreground);
     }
@@ -118,14 +119,22 @@ usort($furnitureItems, function($a, $b) {
         padding: 5px;
         height: 60px;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 3px;
     }
 
     .toolbar-button.furniture-button img {
-        max-width: 40px;
-        max-height: 40px;
+        max-width: 30px;
+        max-height: 30px;
         filter: none;
+    }
+
+    .toolbar-button.furniture-button span {
+        font-size: 10px;
+        font-weight: normal;
+        text-align: center;
     }
 
     .toolbar-button.furniture-button:hover img {
