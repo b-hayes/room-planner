@@ -216,8 +216,8 @@ usort($furnitureItems, function($a, $b) {
             shape.position.width = 45
             shape.position.height = 35  // depth from wall
         } else if (imagePath === '/img/items/bookshelf.svg') {
-            shape.position.width = 80
-            shape.position.height = 30  // depth
+            shape.position.width = 30 // depth
+            shape.position.height = 80
         } else if (imagePath === '/img/items/corner-desk.svg') {
             shape.position.width = 150
             shape.position.height = 150

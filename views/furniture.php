@@ -162,12 +162,11 @@ usort($furnitureItems, function($a, $b) {
     }
 
     .furniture-icon img {
-        max-width: 70px;
-        max-height: 70px;
         width: auto;
         height: auto;
         filter: none;
         transition: filter 0.3s ease;
+        border: 2px solid red;
     }
 
     .furniture-item:hover .furniture-icon img {
