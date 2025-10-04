@@ -7,6 +7,26 @@ $latestUpdates = array_filter($latestUpdates, function ($update) {
     return stripos($update, 'wip') === false && stripos($update, 'cleanup') === false;
 });
 $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 unique commit messages
+
+// Get all SVG files from the items directory for furniture
+$itemsDir = __DIR__ . '/../public/img/items/';
+$svgFiles = glob($itemsDir . '*.svg');
+$furnitureItems = [];
+
+foreach ($svgFiles as $file) {
+    $filename = basename($file, '.svg');
+    $displayName = ucwords(str_replace('-', ' ', $filename));
+    $furnitureItems[] = [
+        'filename' => $filename,
+        'displayName' => $displayName,
+        'path' => '/img/items/' . basename($file)
+    ];
+}
+
+// Sort alphabetically by display name
+usort($furnitureItems, function($a, $b) {
+    return strcmp($a['displayName'], $b['displayName']);
+});
 ?>
 <head>
     <meta charset="UTF-8">
@@ -22,6 +42,14 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     </div>
     <button class="toolbar-button" onclick="newRoom()">⬜ Room</button>
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
+    <div class="toolbar-header">Furniture</div>
+    <?php foreach ($furnitureItems as $item): ?>
+        <button class="toolbar-button furniture-button"
+                onclick="newFurniture('<?= htmlspecialchars($item['path'], ENT_QUOTES) ?>')"
+                title="<?= htmlspecialchars($item['displayName']) ?>">
+            <img src="<?= htmlspecialchars($item['path']) ?>" alt="<?= htmlspecialchars($item['displayName']) ?>">
+        </button>
+    <?php endforeach; ?>
 </div>
 <main>
     <grid:grid params='{ "scale": 1 }'></grid:grid>
@@ -86,6 +114,30 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         color: var(--background);
     }
 
+    .toolbar-button.furniture-button {
+        padding: 5px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .toolbar-button.furniture-button img {
+        max-width: 40px;
+        max-height: 40px;
+        filter: none;
+    }
+
+    .toolbar-button.furniture-button:hover img {
+        filter: invert(1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .toolbar-button.furniture-button:hover img {
+            filter: invert(0);
+        }
+    }
+
     .toolbar-separator {
         width: 100%;
         height: 3px;
@@ -147,6 +199,54 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
     window.newShape = function () {
         const shape = new Shape()
+        grid.addShape(shape)
+        grid.selectedShape = shape
+        shapes.push(shape)
+    }
+
+    window.newFurniture = function (imagePath) {
+        const shape = new Shape()
+        shape.backgroundImage = imagePath
+
+        // Set default dimensions for specific furniture items (in cm, Australian standard sizes)
+        if (imagePath === '/img/items/bed.svg') {
+            shape.position.width = 138  // Double bed
+            shape.position.height = 190
+        } else if (imagePath === '/img/items/bedside-table.svg') {
+            shape.position.width = 45
+            shape.position.height = 35  // depth from wall
+        } else if (imagePath === '/img/items/bookshelf.svg') {
+            shape.position.width = 80
+            shape.position.height = 30  // depth
+        } else if (imagePath === '/img/items/corner-desk.svg') {
+            shape.position.width = 150
+            shape.position.height = 150
+        } else if (imagePath === '/img/items/desk.svg') {
+            shape.position.width = 140
+            shape.position.height = 70
+        } else if (imagePath === '/img/items/filing-cabinet.svg') {
+            shape.position.width = 47
+            shape.position.height = 62
+        } else if (imagePath === '/img/items/lamp.svg') {
+            shape.position.width = 25
+            shape.position.height = 25
+        } else if (imagePath === '/img/items/lounge-chair.svg') {
+            shape.position.width = 80
+            shape.position.height = 90
+        } else if (imagePath === '/img/items/office-chair.svg') {
+            shape.position.width = 60
+            shape.position.height = 60
+        } else if (imagePath === '/img/items/plant.svg') {
+            shape.position.width = 30
+            shape.position.height = 30
+        } else if (imagePath === '/img/items/sofa.svg') {
+            shape.position.width = 200  // 3-seater
+            shape.position.height = 90
+        } else if (imagePath === '/img/items/table.svg') {
+            shape.position.width = 120
+            shape.position.height = 80
+        }
+
         grid.addShape(shape)
         grid.selectedShape = shape
         shapes.push(shape)

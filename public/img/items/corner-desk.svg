@@ -1,4 +1,4 @@
-<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+<svg preserveAspectRatio="none" width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
   <!-- Corner desk surface (L-shaped) -->
   <polygon points="5,5 75,5 75,35 35,35 35,75 5,75" fill="#8B4513" stroke="#654321" stroke-width="2"/>
   
