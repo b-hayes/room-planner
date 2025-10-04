@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" width="62" height="63" viewBox="4 4 62 63" xmlns="http://www.w3.org/2000/svg">
+  <!-- Chair seat -->
+  <rect x="10" y="25" width="50" height="40" fill="#8B4513" stroke="#654321" stroke-width="2" rx="8"/>
+  
+  <!-- Chair back -->
+  <rect x="15" y="5" width="40" height="25" fill="#A0522D" stroke="#654321" stroke-width="1" rx="6"/>
+  
+  <!-- Armrests -->
+  <rect x="5" y="20" width="12" height="35" fill="#8B4513" stroke="#654321" stroke-width="1" rx="4"/>
+  <rect x="53" y="20" width="12" height="35" fill="#8B4513" stroke="#654321" stroke-width="1" rx="4"/>
+
+</svg>

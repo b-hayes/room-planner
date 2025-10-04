@@ -7,6 +7,26 @@ $latestUpdates = array_filter($latestUpdates, function ($update) {
     return stripos($update, 'wip') === false && stripos($update, 'cleanup') === false;
 });
 $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 unique commit messages
+
+// Get all SVG files from the items directory for furniture
+$itemsDir = __DIR__ . '/../public/img/items/';
+$svgFiles = glob($itemsDir . '*.svg');
+$furnitureItems = [];
+
+foreach ($svgFiles as $file) {
+    $filename = basename($file, '.svg');
+    $displayName = ucwords(str_replace('-', ' ', $filename));
+    $furnitureItems[] = [
+        'filename' => $filename,
+        'displayName' => $displayName,
+        'path' => '/img/items/' . basename($file)
+    ];
+}
+
+// Sort alphabetically by display name
+usort($furnitureItems, function($a, $b) {
+    return strcmp($a['displayName'], $b['displayName']);
+});
 ?>
 <head>
     <meta charset="UTF-8">
@@ -22,9 +42,18 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     </div>
     <button class="toolbar-button" onclick="newRoom()">⬜ Room</button>
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
+    <div class="toolbar-header">Furniture</div>
+    <?php foreach ($furnitureItems as $item): ?>
+        <button class="toolbar-button furniture-button"
+                onclick="newFurniture('<?= htmlspecialchars($item['path'], ENT_QUOTES) ?>')"
+                title="<?= htmlspecialchars($item['displayName']) ?>">
+            <img src="<?= htmlspecialchars($item['path']) ?>" alt="<?= htmlspecialchars($item['displayName']) ?>">
+            <span><?= htmlspecialchars($item['displayName']) ?></span>
+        </button>
+    <?php endforeach; ?>
 </div>
 <main>
-    <grid:grid params='{ "scale": 1 }'></grid:grid>
+    <grid:grid params='{ "scale": 2.5 }'></grid:grid>
 </main>
 
 <div class="status-bar">
@@ -49,8 +78,8 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     main {
         position: relative;
         top: 0;
-        left: 10vw;
-        width: 90vw;
+        left: 150px;
+        width: calc(100vw - 150px);
         height: calc(100vh - 20px);
     }
 
@@ -60,7 +89,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         top: 0;
         left: 0;
         height: 100vh;
-        width: 10vw;
+        width: 150px;
         background-color: var(--background);
         border-right: 1px solid var(--foreground);
     }
@@ -84,6 +113,38 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
     .toolbar-button:hover {
         background-color: var(--foreground);
         color: var(--background);
+    }
+
+    .toolbar-button.furniture-button {
+        padding: 5px;
+        height: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+    }
+
+    .toolbar-button.furniture-button img {
+        max-width: 30px;
+        max-height: 30px;
+        filter: none;
+    }
+
+    .toolbar-button.furniture-button span {
+        font-size: 10px;
+        font-weight: normal;
+        text-align: center;
+    }
+
+    .toolbar-button.furniture-button:hover img {
+        filter: invert(1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .toolbar-button.furniture-button:hover img {
+            filter: invert(0);
+        }
     }
 
     .toolbar-separator {
@@ -152,6 +213,54 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
         shapes.push(shape)
     }
 
+    window.newFurniture = function (imagePath) {
+        const shape = new Shape()
+        shape.backgroundImage = imagePath
+
+        // Set default dimensions for specific furniture items (in cm, Australian standard sizes)
+        if (imagePath === '/img/items/bed.svg') {
+            shape.position.width = 138  // Double bed
+            shape.position.height = 190
+        } else if (imagePath === '/img/items/bedside-table.svg') {
+            shape.position.width = 45
+            shape.position.height = 35  // depth from wall
+        } else if (imagePath === '/img/items/bookshelf.svg') {
+            shape.position.width = 30 // depth
+            shape.position.height = 80
+        } else if (imagePath === '/img/items/corner-desk.svg') {
+            shape.position.width = 150
+            shape.position.height = 150
+        } else if (imagePath === '/img/items/desk.svg') {
+            shape.position.width = 140
+            shape.position.height = 70
+        } else if (imagePath === '/img/items/filing-cabinet.svg') {
+            shape.position.width = 47
+            shape.position.height = 62
+        } else if (imagePath === '/img/items/lamp.svg') {
+            shape.position.width = 25
+            shape.position.height = 25
+        } else if (imagePath === '/img/items/lounge-chair.svg') {
+            shape.position.width = 80
+            shape.position.height = 90
+        } else if (imagePath === '/img/items/office-chair.svg') {
+            shape.position.width = 60
+            shape.position.height = 60
+        } else if (imagePath === '/img/items/plant.svg') {
+            shape.position.width = 30
+            shape.position.height = 30
+        } else if (imagePath === '/img/items/sofa.svg') {
+            shape.position.width = 200  // 3-seater
+            shape.position.height = 90
+        } else if (imagePath === '/img/items/table.svg') {
+            shape.position.width = 120
+            shape.position.height = 80
+        }
+
+        grid.addShape(shape)
+        grid.selectedShape = shape
+        shapes.push(shape)
+    }
+
     window.deleteShape = function (id) {
         const shape = window.shapes.find(shape => shape.id === id)
         if (!shape) {
@@ -181,10 +290,12 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
 
     window.save = function () {
         let data = {
+            scale: grid.scale,
             shapes: Object.values(grid.shapes()).map(shape => {
                 return {
                     id: shape.id,
                     position: shape.position,
+                    backgroundImage: shape.backgroundImage,
                     //store the class name so we can recreate the object
                     class: shape.constructor.name
                 }
@@ -211,6 +322,11 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
             throw new Error('data.shapes is not an array')
         }
 
+        // Restore scale if saved
+        if (data.scale) {
+            grid.zoom(data.scale - grid.scale)
+        }
+
         let loadedShapes = []
         data.shapes.forEach(shapeData => {
             let classMap = {
@@ -219,7 +335,7 @@ $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 uni
             }
             let {x, y, width, height, rotation} = shapeData.position
             let position = new Position(x, y, width, height, rotation);
-            let shape = new classMap[shapeData.class](shapeData.id, position)
+            let shape = new classMap[shapeData.class](shapeData.id, position, 1, shapeData.backgroundImage || '')
             grid.addShape(shape)
             loadedShapes.push(shape)
         })
