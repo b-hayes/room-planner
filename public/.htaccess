@@ -42,9 +42,12 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} !=/index.php
 RewriteRule .* /index.php [L,QSA]
 
-# Cache control. Cache for static files must be revalidated every hour.
+# Cache control with ETag validation - only re-download if files have changed
 <IfModule mod_headers.c>
+    # Enable ETags based on file modification time and size
+    FileETag MTime Size
+
     <FilesMatch ".*">
-        Header set Cache-Control "max-age=3600, must-revalidate"
+        Header set Cache-Control "max-age=31536000, public"
     </FilesMatch>
 </IfModule>
