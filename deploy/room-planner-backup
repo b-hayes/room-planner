@@ -1,0 +1,4 @@
+# Daily backup of Room Planner (data/ + prod.env) to /array/backup.
+# Runs as brad (container runs as UID 1000; no root needed).
+# Install: sudo cp deploy/room-planner-backup /etc/cron.d/room-planner-backup
+8 2 * * * brad /home/brad/repo/room-planner/bin/backup.sh >> /home/brad/repo/room-planner/backup.log 2>&1
