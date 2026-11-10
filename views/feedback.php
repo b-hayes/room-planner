@@ -5,14 +5,14 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 // Some basic spam prevention... not ideal, but it will do for now.
 // Check if the ip address already submitted feedback in the last hour and hide the form / prevent submissions.
-$feedBackLogFile = __DIR__ . '/../feedback.log';
+$feedBackLogFile = __DIR__ . '/../data/feedback.log';
 if (is_file($feedBackLogFile)) {
     $file = fopen($feedBackLogFile, 'r');
     $lastHour = strtotime('-1 hour');
     while ($line = fgets($file)) {
         $parts = explode(' | ', $line);
         $logTime = strtotime($parts[0]);
-        if ($logTime > $lastHour && $parts[1] ?? 'undefined' === $_SERVER['REMOTE_ADDR']) {
+        if ($logTime > $lastHour && ($parts[1] ?? 'undefined') === $_SERVER['REMOTE_ADDR']) {
             $alreadySubmittedRecently = true;
         }
     }
@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($alreadySubmittedRecently)) 
 <script>
     // Convert the form to an ajax form and replace the form with the response.
     const form = document.querySelector('form');
-    form.addEventListener('submit', async (event) => {
+    form?.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         // Show the overlay

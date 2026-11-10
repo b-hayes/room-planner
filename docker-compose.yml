@@ -1,0 +1,13 @@
+name: room-planner
+
+services:
+  room-planner:
+    build: .
+    image: room-planner
+    container_name: room-planner
+    user: "1000:1000"
+    restart: unless-stopped
+    ports:
+      - "7744:8080"
+    volumes:
+      - .:/var/www/html

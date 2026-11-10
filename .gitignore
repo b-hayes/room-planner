@@ -19,6 +19,11 @@ composer.phar
 test/coverage/
 .phpunit.result.cache
 
+# App state.
+/data/
+/data.pre-restore-*/
+/prod.env.pre-restore-*
+
 # Potentually sensitive files.
 *.env.json
 *.env
