@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($alreadySubmittedRecently)) 
 <script>
     // Convert the form to an ajax form and replace the form with the response.
     const form = document.querySelector('form');
-    form.addEventListener('submit', async (event) => {
+    form?.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         // Show the overlay
