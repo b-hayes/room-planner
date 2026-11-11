@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" width="31.5" height="12.5" viewBox="0 0 31.5 12.5" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="keys" x="1.2" y="1.2" width="1.9" height="1.9" patternUnits="userSpaceOnUse">
+      <rect x="0.15" y="0.15" width="1.6" height="1.6" fill="#2E2E2E" rx="0.2"/>
+    </pattern>
+  </defs>
+  <rect x="0.25" y="0.25" width="31" height="12" fill="#1E1E1E" stroke="#555555" stroke-width="0.3" rx="0.6"/>
+  <rect x="1.2" y="1.2" width="22.8" height="1.9" fill="url(#keys)"/>
+  <rect x="1.2" y="3.6" width="22.8" height="7.6" fill="url(#keys)"/>
+  <rect x="25" y="3.6" width="5.7" height="3.8" fill="url(#keys)"/>
+  <rect x="25" y="9.3" width="5.7" height="1.9" fill="url(#keys)"/>
+</svg>

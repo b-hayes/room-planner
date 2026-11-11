@@ -5,6 +5,8 @@ import Position from "./Grid/Position.js"
 
 export default class Room extends Shape {
 
+    static wallThickness = 10
+
     constructor(
         id = Text.randomId(),
         position = new Position (
@@ -19,6 +21,11 @@ export default class Room extends Shape {
     ) {
         super(id, position, scale, backgroundImage)
         this.element().classList.add('room')
+    }
+
+    redraw() {
+        super.redraw()
+        this.element().style.outlineWidth = `${Room.wallThickness * this.scale}px`
     }
 
     mouseDown(e) {
@@ -67,11 +74,17 @@ const style = `
         color: black;
         /* inner shadow */
         box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, 0.5);
-        border: 3px solid black
+        border: none;
+        outline: solid black;
+    }
+
+    .room.shape:hover {
+        border: none;
     }
 
     .room.shape.selected {
         color: var(--foreground, black);
-        border: 3px solid var(--link-hover, darkseagreen);
+        border: none;
+        outline-color: var(--link-hover, darkseagreen);
     }
 `

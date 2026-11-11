@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" width="43" height="43" viewBox="0 0 43 43" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="vent" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.55" fill="#5E5E5E"/>
+    </pattern>
+  </defs>
+  <rect x="0.5" y="0.5" width="42" height="42" fill="#8C8C8C" stroke="#5E5E5E" stroke-width="1" rx="1"/>
+  <rect x="4" y="4" width="35" height="35" fill="#A3A3A3" stroke="#6E6E6E" stroke-width="0.5"/>
+  <rect x="8" y="8" width="27" height="27" fill="url(#vent)" stroke="#6E6E6E" stroke-width="0.5"/>
+</svg>
