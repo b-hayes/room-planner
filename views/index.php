@@ -36,12 +36,15 @@ usort($furnitureItems, function($a, $b) {
 <div class="toolbar">
     <div class="toolbar-header">File</div>
     <button class="toolbar-button" onclick="save()">💾 Save</button>
+    <button class="toolbar-button" onclick="share()">🔗 Share</button>
     <button class="toolbar-button" onclick="deleteData()">🗑️ Delete</button>
     <div class="toolbar-header">
         Objects
     </div>
     <button class="toolbar-button" onclick="newRoom()">⬜ Room</button>
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
+    <button class="toolbar-button" onclick="newFurniture('/img/objects/door.svg')">🚪 Door</button>
+    <button class="toolbar-button" onclick="newFurniture('/img/objects/window.svg')">🪟 Window</button>
     <div class="toolbar-header">Furniture</div>
     <?php foreach ($furnitureItems as $item): ?>
         <button class="toolbar-button furniture-button"
@@ -233,6 +236,12 @@ usort($furnitureItems, function($a, $b) {
         } else if (imagePath === '/img/items/desk.svg') {
             shape.position.width = 140
             shape.position.height = 70
+        } else if (imagePath === '/img/objects/door.svg') {
+            shape.position.width = 82
+            shape.position.height = 82
+        } else if (imagePath === '/img/objects/window.svg') {
+            shape.position.width = 120
+            shape.position.height = 60
         } else if (imagePath === '/img/items/filing-cabinet.svg') {
             shape.position.width = 47
             shape.position.height = 62
@@ -288,27 +297,59 @@ usort($furnitureItems, function($a, $b) {
         window.location.reload()
     }
 
-    window.save = function () {
-        let data = {
-            scale: grid.scale,
-            shapes: Object.values(grid.shapes()).map(shape => {
-                return {
-                    id: shape.id,
-                    position: shape.position,
-                    backgroundImage: shape.backgroundImage,
-                    //store the class name so we can recreate the object
-                    class: shape.constructor.name
-                }
-            })
-        }
+    const layoutJson = () => JSON.stringify({
+        scale: grid.scale,
+        shapes: Object.values(grid.shapes()).map(shape => ({
+            id: shape.id,
+            position: shape.position,
+            backgroundImage: shape.backgroundImage,
+            //store the class name so we can recreate the object
+            class: shape.constructor.name
+        }))
+    })
 
-        let jsonString = JSON.stringify(data)
-        localStorage.setItem("data", jsonString)
-        new Alert('Saved your stuff (locally).', 'success')
+    const transform = (bytes, stream) => new Response(new Blob([bytes]).stream().pipeThrough(stream))
+
+    const layoutLink = () => transform(layoutJson(), new CompressionStream('deflate-raw'))
+        .arrayBuffer()
+        .then(buffer => {
+            const encoded = new Uint8Array(buffer).toBase64({alphabet: 'base64url', omitPadding: true})
+            return `${location.origin}/#layout=${encoded}`
+        })
+
+    window.save = function () {
+        localStorage.setItem("data", layoutJson())
+        if (!location.hash.includes('layout=')) {
+            new Alert('Saved your stuff (locally).', 'success')
+            return
+        }
+        // a shared link in the address bar takes priority on load, so keep it in sync
+        return layoutLink().then(url => {
+            history.replaceState(null, '', url)
+            new Alert('Saved your stuff (locally).', 'success')
+        })
     }
 
-    window.load = function () {
-        let jsonString = localStorage.getItem("data")
+    window.share = function () {
+        return layoutLink()
+            .then(url => {
+                if (!navigator.clipboard) {
+                    prompt('Copy this share link:', url)
+                    return
+                }
+                return navigator.clipboard.writeText(url)
+                    .then(() => new Alert('Share link copied to clipboard.', 'success'))
+            })
+    }
+
+    const sharedLayoutJson = encoded => {
+        const bytes = Uint8Array.fromBase64(encoded, {alphabet: 'base64url'})
+        return transform(bytes, new DecompressionStream('deflate-raw')).text()
+    }
+
+    window.load = async function () {
+        const sharedLayout = new URLSearchParams(location.hash.slice(1)).get('layout')
+        const jsonString = sharedLayout ? await sharedLayoutJson(sharedLayout) : localStorage.getItem("data")
         if (!jsonString) {
             return
         }
@@ -345,7 +386,7 @@ usort($furnitureItems, function($a, $b) {
     await Loader.replaceTagsWithComponents(document)
     window.grid = document.querySelector(".grid")
         .componentInstance
-    load()
+    await load()
 
     //Show the memory usage in the performance div update every 1 second
     setInterval(function () {

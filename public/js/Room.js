@@ -8,8 +8,8 @@ export default class Room extends Shape {
     constructor(
         id = Text.randomId(),
         position = new Position (
-            150,
-            150,
+            200,
+            200,
             300,
             300,
             0
@@ -19,6 +19,39 @@ export default class Room extends Shape {
     ) {
         super(id, position, scale, backgroundImage)
         this.element().classList.add('room')
+    }
+
+    mouseDown(e) {
+        super.mouseDown(e)
+        this.carriedShapes = this.shapesMostlyInside()
+            .map(shape => ({shape, positionWhenClicked: shape.position}))
+    }
+
+    drag(mouseMoveEvent, initialMouseDownEvent) {
+        super.drag(mouseMoveEvent, initialMouseDownEvent)
+        if (this.resizing !== false || this.rotating) {
+            return
+        }
+        const shiftX = this.position.x - this.shapePositionWhenClicked.x
+        const shiftY = this.position.y - this.shapePositionWhenClicked.y
+        this.carriedShapes.forEach(({shape, positionWhenClicked}) => {
+            const {x, y, width, height, rotation} = positionWhenClicked
+            shape.position = new Position(x + shiftX, y + shiftY, width, height, rotation)
+        })
+    }
+
+    shapesMostlyInside() {
+        const room = this.bounds()
+        return [...this.element().parentElement.children]
+            .map(element => element.componentInstance)
+            .filter(shape => shape instanceof Shape && !(shape instanceof Room))
+            .filter(shape => {
+                const box = shape.bounds()
+                const overlapWidth = Math.max(0, Math.min(box.right, room.right) - Math.max(box.left, room.left))
+                const overlapHeight = Math.max(0, Math.min(box.bottom, room.bottom) - Math.max(box.top, room.top))
+                const area = (box.right - box.left) * (box.bottom - box.top)
+                return overlapWidth * overlapHeight > area / 2
+            })
     }
 
     style() {

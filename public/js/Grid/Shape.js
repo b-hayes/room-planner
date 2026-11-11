@@ -98,6 +98,25 @@ export default class Shape extends Component {
         )
     }
 
+    static rotatedSize(width, height, rotation) {
+        const angle = rotation * (Math.PI / 180)
+        const cos = Math.abs(Math.cos(angle))
+        const sin = Math.abs(Math.sin(angle))
+        return {width: width * cos + height * sin, height: width * sin + height * cos}
+    }
+
+    // Axis-aligned bounds of the rotated shape in grid space.
+    bounds() {
+        const {x, y, width, height, rotation} = this.position
+        const size = Shape.rotatedSize(width, height, rotation)
+        return {
+            left: x - size.width / 2,
+            top: y - size.height / 2,
+            right: x + size.width / 2,
+            bottom: y + size.height / 2
+        }
+    }
+
     mouseDown(e) {
         this.shapePositionWhenClicked = this.position
     }
@@ -210,18 +229,10 @@ export default class Shape extends Component {
         }
         let {x, y, width, height, rotation} = position;
 
-        // limits
-        let minX = width / 2
-        let minY = height / 2
-
-        //minx and Y should adjust for the rotation
-        let angle = rotation * (Math.PI / 180);
-        let cosAngle = Math.cos(angle);
-        let sinAngle = Math.sin(angle);
-        let rotatedWidth = Math.abs(width * cosAngle) + Math.abs(height * sinAngle);
-        let rotatedHeight = Math.abs(width * sinAngle) + Math.abs(height * cosAngle);
-        minX = rotatedWidth / 2
-        minY = rotatedHeight / 2
+        // limits adjusted for the rotation
+        const rotatedSize = Shape.rotatedSize(width, height, rotation)
+        const minX = rotatedSize.width / 2
+        const minY = rotatedSize.height / 2
 
         let minWidth = 10
         let minHeight = 10
@@ -277,6 +288,7 @@ export default class Shape extends Component {
         this.element().style.backgroundSize = '100% 100%'
         this.element().style.backgroundPosition = 'center'
         this.element().style.backgroundRepeat = 'no-repeat'
+        this.element().classList.toggle('has-image', this._backgroundImage !== '')
     }
 
     hover(event) {
@@ -369,6 +381,10 @@ const style = `
         z-index: 100;
     }
     
+    .shape.has-image {
+        border-color: transparent;
+    }
+
     .shape:hover {
         border: 1px solid var(--link-hover, darkseagreen);
     }
