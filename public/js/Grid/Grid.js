@@ -1,6 +1,7 @@
 import Component from "../ModuLatte/Component.js"
 import Point from "./Point.js"
 import Shape from "./Shape.js"
+import Position from "./Position.js"
 import Float from "../ModuLatte/Float.js"
 import Text from "../ModuLatte/Text.js"
 import Menu from "../ModuLatte/Menu.js"
@@ -9,6 +10,7 @@ export default class Grid extends Component {
 
     _shapes = []
     _selectedShape
+    carriedShapes = []
 
     constructor({scale = 1}) {
         super()
@@ -45,7 +47,7 @@ export default class Grid extends Component {
     addShape(shape) {
         if (!shape instanceof Shape) throw new Error('shape must be an instance of Shape but received ' + typeof shape)
         shape.scale = this.scale
-        this.element().appendChild(shape.element())
+        this.element().append(shape.element(), ...shape.partElements())
         this._shapes[shape.id] = shape
     }
 
@@ -62,9 +64,98 @@ export default class Grid extends Component {
                 shape: this._shapes[shapeId]
             }
         })
+        this.childrenOf(this._shapes[shapeId]).forEach(child => child.parentId = this._shapes[shapeId].parentId)
         this._shapes[shapeId].destroy()
         delete this._shapes[shapeId]
+        this.restack()
         this.dispatchEventWithDebounce(deletedShape)
+    }
+
+    parentOf(shape) {
+        return this._shapes[shape.parentId] ?? null
+    }
+
+    childrenOf(shape) {
+        return Object.values(this._shapes).filter(child => child.parentId === shape.id)
+    }
+
+    descendantsOf(shape) {
+        return this.childrenOf(shape).flatMap(child => [child, ...this.descendantsOf(child)])
+    }
+
+    // a shape sits on top of its parent, or on the floor when its parent is a room
+    baseOf(shape) {
+        const parent = this.parentOf(shape)
+        return parent && !parent.isRoom ? parent.top : 0
+    }
+
+    restack() {
+        const restackFrom = shape => {
+            shape.base = this.baseOf(shape)
+            this.childrenOf(shape).forEach(restackFrom)
+        }
+        Object.values(this._shapes).filter(shape => !this.parentOf(shape)).forEach(restackFrom)
+    }
+
+    /**
+     * @param {Shape|null} shape
+     */
+    set dropTarget(shape) {
+        this._dropTarget?.element().classList.remove('drop-target')
+        shape?.element().classList.add('drop-target')
+        this._dropTarget = shape
+    }
+
+    get dropTarget() {
+        return this._dropTarget ?? null
+    }
+
+    // shapes under the mouse, top first, skipping where their image is transparent
+    shapesAt(event) {
+        const shapes = document.elementsFromPoint(event.clientX, event.clientY)
+            .map(element => element.closest('.shape')?.componentInstance)
+            .filter(shape => shape instanceof Shape && shape.isOpaqueAt(event.clientX, event.clientY))
+        return [...new Set(shapes)]
+    }
+
+    dropTargetAt(event, shape) {
+        const carried = [shape, ...this.carriedShapes.map(carry => carry.shape)]
+        return this.shapesAt(event)
+            .find(target => !carried.includes(target) && shape.canDropOnto(target)) ?? null
+    }
+
+    // descendants keep their place relative to the shape as it moves, rotates and resizes
+    carryDescendants(shape) {
+        const from = shape.shapePositionWhenClicked
+        const to = shape.position
+        this.carriedShapes.forEach(({shape: child, positionWhenClicked: {x, y, width, height, rotation}}) => {
+            const offset = new Point(x - from.x, y - from.y).rotate(from.rotation)
+            offset.x *= to.width / from.width
+            offset.y *= to.height / from.height
+            offset.rotate(-to.rotation)
+            child.position = new Position(
+                to.x + offset.x,
+                to.y + offset.y,
+                width,
+                height,
+                rotation + to.rotation - from.rotation
+            )
+        })
+    }
+
+    startDrag(shape, event) {
+        shape.mouseDown(event)
+        this.carriedShapes = this.descendantsOf(shape)
+            .map(child => ({shape: child, positionWhenClicked: child.position}))
+    }
+
+    setShapeHeight(shape) {
+        const height = prompt('Height in cm:', String(shape.height))
+        if (height === null) {
+            return
+        }
+        shape.height = Float.parse(height, 'height must be a number')
+        this.restack()
     }
 
     setShapeBackgroundImage(shape) {
@@ -101,9 +192,7 @@ export default class Grid extends Component {
         }
         if (this.selectedShape === this.previoselySelectedShape) {
             // try clicking through to select the next shape underneath.
-            const shapeUnderTheMouse = document.elementsFromPoint(event.clientX, event.clientY)
-                .filter(element => element.componentInstance instanceof Shape)
-                .map(element => element.componentInstance)
+            const shapeUnderTheMouse = this.shapesAt(event)
             console.log('shapeUnderTheMouse', shapeUnderTheMouse)
             const indexOfSelected = shapeUnderTheMouse.indexOf(this.selectedShape)
             console.log('indexOfSelected', indexOfSelected)
@@ -129,18 +218,24 @@ export default class Grid extends Component {
             clickY: event.pageY
         }
 
-        // detect if the mouse down event was on a Shape
-        let shape = event.target?.componentInstance ?? null
-        if (shape instanceof Shape) {
-            this.previoselySelectedShape = this.selectedShape
-            this.selectedShape = shape
-            shape.mouseDown(event)
+        // rotation handle of a shape clicked
+        if (event.target.classList.contains('rotation-handle')) {
+            this.draggingShape = this.selectedShape
+            this.startDrag(this.selectedShape, event)
             return;
         }
 
-        // rotation handle of a shape clicked
-        if (event.target.classList.contains('rotation-handle')) {
-            this.selectedShape.mouseDown(event)
+        // the selected shape keeps priority where it is drawn and on its resize edges,
+        // otherwise take the top shape actually drawn under the mouse
+        const shapes = this.shapesAt(event)
+        const resizing = this.selectedShape?.resizing !== false && event.target === this.selectedShape?.element()
+        const keepSelected = resizing || shapes.includes(this.selectedShape)
+        const shape = keepSelected ? this.selectedShape : shapes[0] ?? null
+        this.draggingShape = shape
+        if (shape) {
+            this.previoselySelectedShape = this.selectedShape
+            this.selectedShape = shape
+            this.startDrag(shape, event)
             return;
         }
 
@@ -165,11 +260,30 @@ export default class Grid extends Component {
 
         //Pass the event to selected shape, so it can resize and move.
         if (
-            e.buttons === 1 && this.selectedShape instanceof Shape &&
-            this.selectedShape.element().contains(initialMouseDownEvent.target)
+            e.buttons === 1 && this.draggingShape
         ) {
-            this.selectedShape.drag(e, initialMouseDownEvent)
+            const shape = this.draggingShape
+            shape.drag(e, initialMouseDownEvent)
+            this.carryDescendants(shape)
+            if (!shape.moving) {
+                return
+            }
+            this.movedShape = shape
+            // holding shift keeps the current parent, e.g. to slide something under a desk
+            this.dropTarget = e.shiftKey ? null : this.dropTargetAt(e, shape)
         }
+    }
+
+    onDocMouseUp(event) {
+        if (!this.movedShape) {
+            return
+        }
+        if (!event.shiftKey) {
+            this.movedShape.parentId = this.dropTarget?.id ?? ''
+        }
+        this.movedShape = null
+        this.dropTarget = null
+        this.restack()
     }
 
     onMouseMove(e) {
@@ -190,11 +304,12 @@ export default class Grid extends Component {
             this._contextMenu.destroy()
         }
 
-        let shape = event.target.closest('.shape')?.componentInstance ?? null
-        if (shape instanceof Shape) {
+        const shape = this.shapesAt(event)[0]
+        if (shape) {
             this._contextMenu = new Menu({
                 position: { x: event.clientX, y: event.clientY},
                 items: [
+                    {label: `📏 Set Height (${shape.height} cm)`, action: () => this.setShapeHeight(shape)},
                     {label: '🖼️ Set Background Image', action: () => this.setShapeBackgroundImage(shape)},
                     {label: '🗑️ Remove Background Image', action: () => this.removeShapeBackgroundImage(shape)},
                     {label: '🚮 Delete', action: () => this.deleteShape(shape.id)}
@@ -531,6 +646,7 @@ const style = `
         box-shadow: inset 5px 5px 10px 3px rgba(0, 0, 0, 0.5);
         overflow: hidden;
         /* overflow hidden still allows scrolling if child nodes use position absolute */
+        isolation: isolate; /* keep shape layers below menus */
     }
 
     /* make all .grid children use position absolute */
@@ -550,7 +666,7 @@ const style = `
         color: var(--foreground, black);
         padding: 5px;
         font-size: 16px;
-        z-index: 100;
+        z-index: 100000; /* above every shape layer */
         width: 100%;
         text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
     }

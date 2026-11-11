@@ -2,11 +2,22 @@ import Component from "../ModuLatte/Component.js";
 import Point from "./Point.js"
 import Position from "./Position.js"
 import Text from "../ModuLatte/Text.js"
+import HitMask from "./HitMask.js"
 
 export default class Shape extends Component {
 
     // identity
     id = '';
+
+    // grouping
+    parentId = '';
+    isRoom = false;
+    category = '';
+
+    // stacking, in cm off the floor
+    _height = 0;
+    _base = 0;
+    _parts = [];
 
     // grid
     _gridSnap = 0.5;
@@ -105,16 +116,93 @@ export default class Shape extends Component {
         return {width: width * cos + height * sin, height: width * sin + height * cos}
     }
 
-    // Axis-aligned bounds of the rotated shape in grid space.
-    bounds() {
-        const {x, y, width, height, rotation} = this.position
-        const size = Shape.rotatedSize(width, height, rotation)
-        return {
-            left: x - size.width / 2,
-            top: y - size.height / 2,
-            right: x + size.width / 2,
-            bottom: y + size.height / 2
+    get height() {
+        return this._height
+    }
+
+    set height(value) {
+        if (typeof value !== 'number' || value < 0) throw new TypeError('height must be a positive number')
+        this._height = value
+        this.restack()
+    }
+
+    get base() {
+        return this._base
+    }
+
+    set base(value) {
+        this._base = value
+        this.restack()
+    }
+
+    get top() {
+        return this.base + this.height
+    }
+
+    // Images drawn at their own heights, e.g. a chair's seat, arms and back.
+    set parts(parts) {
+        this._parts.forEach(({element}) => element.remove())
+        this._parts = parts.map(({image, height}) => {
+            const element = document.createElement('div')
+            element.className = 'shape-part'
+            element.style.backgroundImage = `url(${image})`
+            HitMask.of(image)
+            return {image, height, element}
+        })
+        this.element().classList.toggle('has-parts', parts.length > 0)
+        this.element().parentElement?.append(...this.partElements())
+        this.redraw()
+        this.restack()
+    }
+
+    // false where the shape's image is transparent at this screen point
+    isOpaqueAt(clientX, clientY) {
+        const images = this._parts.length ? this._parts.map(({image}) => image) : [this.backgroundImage]
+        if (!images[0]) {
+            return true
         }
+        const centre = this.getCentre()
+        const point = new Point(clientX, clientY).rotate(this.position.rotation, centre)
+        const width = this.element().offsetWidth
+        const height = this.element().offsetHeight
+        const u = (point.x - centre.x) / width + 0.5
+        const v = (point.y - centre.y) / height + 0.5
+        const reach = 4
+        return images.some(image => HitMask.of(image).isOpaqueNear(u, v, reach / width, reach / height))
+    }
+
+    partElements() {
+        return this._parts.map(({element}) => element)
+    }
+
+    // room objects stay on the floor so everything draws over door swings and light rays
+    layerOf(top) {
+        return this.isRoomObject ? 0 : Math.round(top * 10)
+    }
+
+    restack() {
+        this.element().style.setProperty('--layer', this.layerOf(this.top))
+        this._parts.forEach(({height, element}) => {
+            element.style.zIndex = 100 + this.layerOf(this.base + height) * 2
+        })
+    }
+
+    destroy() {
+        this._parts.forEach(({element}) => element.remove())
+        super.destroy()
+    }
+
+    get isRoomObject() {
+        return this.category === 'roomObject'
+    }
+
+    // rooms sit on the grid, room objects only sit in rooms and hold nothing
+    canDropOnto(target) {
+        return !this.isRoom && !target.isRoomObject && (!this.isRoomObject || target.isRoom)
+    }
+
+    get moving() {
+        return this.resizing === false && !this.rotating
     }
 
     mouseDown(e) {
@@ -208,7 +296,13 @@ export default class Shape extends Component {
         this.element().style.width = sPos.width + 'px'
         this.element().style.height = sPos.height + 'px'
         this.element().style.transform = `rotate(${pos.rotation}deg)`
-
+        this._parts.forEach(({element}) => {
+            element.style.top = this.element().style.top
+            element.style.left = this.element().style.left
+            element.style.width = this.element().style.width
+            element.style.height = this.element().style.height
+            element.style.transform = this.element().style.transform
+        })
 
         // Update the labels
         this.posText.innerHTML = 'x: ' + pos.x + ' y: ' + pos.y
@@ -284,6 +378,7 @@ export default class Shape extends Component {
             throw new TypeError('backgroundImage must be a string, received ' + typeof value)
         }
         this._backgroundImage = value;
+        if (value) HitMask.of(value)
         this.element().style.backgroundImage = this._backgroundImage ? `url(${this._backgroundImage})` : ''
         this.element().style.backgroundSize = '100% 100%'
         this.element().style.backgroundPosition = 'center'
@@ -378,9 +473,9 @@ const style = `
         box-sizing: border-box;
         position: absolute;
         border: 1px solid var(--link, cornflowerblue);
-        z-index: 100;
+        z-index: calc(100 + var(--layer, 0) * 2);
     }
-    
+
     .shape.has-image {
         border-color: transparent;
     }
@@ -390,8 +485,23 @@ const style = `
     }
 
     .shape.selected {
-        z-index: 200;
+        z-index: calc(101 + var(--layer, 0) * 2);
         border: 3px solid var(--link-hover, darkseagreen);
+    }
+
+    .shape.has-parts {
+        background-image: none !important;
+    }
+
+    .shape-part {
+        position: absolute;
+        pointer-events: none;
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+    }
+
+    .shape.drop-target {
+        outline: 3px solid hotpink;
     }
 
     .selected .showWhenSelected {
@@ -444,6 +554,12 @@ const style = `
     .shape.resize-bottom {
         border-bottom-style: dotted;
         cursor: ns-resize;
+    }
+
+    .posText, .widthText, .heightText, .rotationText {
+        color: black;
+        text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white,
+            0 -1px 0 white, 0 1px 0 white, -1px 0 0 white, 1px 0 0 white;
     }
 
     .posText {

@@ -8,25 +8,7 @@ $latestUpdates = array_filter($latestUpdates, function ($update) {
 });
 $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 unique commit messages
 
-// Get all SVG files from the items directory for furniture
-$itemsDir = __DIR__ . '/../public/img/items/';
-$svgFiles = glob($itemsDir . '*.svg');
-$furnitureItems = [];
-
-foreach ($svgFiles as $file) {
-    $filename = basename($file, '.svg');
-    $displayName = ucwords(str_replace('-', ' ', $filename));
-    $furnitureItems[] = [
-        'filename' => $filename,
-        'displayName' => $displayName,
-        'path' => '/img/items/' . basename($file)
-    ];
-}
-
-// Sort alphabetically by display name
-usort($furnitureItems, function($a, $b) {
-    return strcmp($a['displayName'], $b['displayName']);
-});
+$catalog = json_decode(file_get_contents(__DIR__ . '/../src/catalog.json'), true, flags: JSON_THROW_ON_ERROR);
 ?>
 <head>
     <meta charset="UTF-8">
@@ -38,21 +20,19 @@ usort($furnitureItems, function($a, $b) {
     <button class="toolbar-button" onclick="save()">💾 Save</button>
     <button class="toolbar-button" onclick="share()">🔗 Share</button>
     <button class="toolbar-button" onclick="deleteData()">🗑️ Delete</button>
-    <div class="toolbar-header">
-        Objects
-    </div>
+    <div class="toolbar-header">Shapes</div>
     <button class="toolbar-button" onclick="newRoom()">⬜ Room</button>
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
-    <button class="toolbar-button" onclick="newFurniture('/img/objects/door.svg')">🚪 Door</button>
-    <button class="toolbar-button" onclick="newFurniture('/img/objects/window.svg')">🪟 Window</button>
-    <div class="toolbar-header">Furniture</div>
-    <?php foreach ($furnitureItems as $item): ?>
-        <button class="toolbar-button furniture-button"
-                onclick="newFurniture('<?= htmlspecialchars($item['path'], ENT_QUOTES) ?>')"
-                title="<?= htmlspecialchars($item['displayName']) ?>">
-            <img src="<?= htmlspecialchars($item['path']) ?>" alt="<?= htmlspecialchars($item['displayName']) ?>">
-            <span><?= htmlspecialchars($item['displayName']) ?></span>
-        </button>
+    <?php foreach ($catalog['categories'] as $category => $label): ?>
+        <div class="toolbar-header"><?= htmlspecialchars($label) ?></div>
+        <?php foreach (array_filter($catalog['items'], fn(array $item) => $item['category'] === $category) as $item): ?>
+            <button class="toolbar-button item-button"
+                    onclick="newItem('<?= htmlspecialchars($item['image'], ENT_QUOTES) ?>')"
+                    title="<?= htmlspecialchars($item['name']) ?>">
+                <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['name']) ?>">
+                <span><?= htmlspecialchars($item['name']) ?></span>
+            </button>
+        <?php endforeach; ?>
     <?php endforeach; ?>
 </div>
 <main>
@@ -119,7 +99,7 @@ usort($furnitureItems, function($a, $b) {
         color: var(--background);
     }
 
-    .toolbar-button.furniture-button {
+    .toolbar-button.item-button {
         padding: 5px;
         height: 60px;
         display: flex;
@@ -129,24 +109,24 @@ usort($furnitureItems, function($a, $b) {
         gap: 3px;
     }
 
-    .toolbar-button.furniture-button img {
+    .toolbar-button.item-button img {
         max-width: 30px;
         max-height: 30px;
         filter: none;
     }
 
-    .toolbar-button.furniture-button span {
+    .toolbar-button.item-button span {
         font-size: 10px;
         font-weight: normal;
         text-align: center;
     }
 
-    .toolbar-button.furniture-button:hover img {
+    .toolbar-button.item-button:hover img {
         filter: invert(1);
     }
 
     @media (prefers-color-scheme: dark) {
-        .toolbar-button.furniture-button:hover img {
+        .toolbar-button.item-button:hover img {
             filter: invert(0);
         }
     }
@@ -217,42 +197,19 @@ usort($furnitureItems, function($a, $b) {
         shapes.push(shape)
     }
 
-    // Default [width, height] in cm, top edge is the back
-    const defaultSizes = {
-        '/img/objects/door.svg': [96.5, 95.5], // frame, 82.5 door inside
-        '/img/objects/window.svg': [194.5, 63], // frame, 180 glass inside
-        '/img/items/bed.svg': [138, 190],
-        '/img/items/bedside-table.svg': [45, 35],
-        '/img/items/bookshelf.svg': [140, 24.5],
-        '/img/items/center-speaker.svg': [16.5, 12],
-        '/img/items/coat-rack.svg': [45, 49],
-        '/img/items/corner-desk.svg': [180, 180],
-        '/img/items/desk.svg': [150, 70],
-        '/img/items/filing-cabinet.svg': [47, 62],
-        '/img/items/folding-bench.svg': [145, 170], // opened, 57x70 folded at the back
-        '/img/items/keyboard.svg': [31.5, 12.5],
-        '/img/items/lamp.svg': [25, 25],
-        '/img/items/lounge-chair.svg': [80, 90],
-        '/img/items/monitor.svg': [63.5, 45.5],
-        '/img/items/mouse.svg': [7, 10.4],
-        '/img/items/mousepad.svg': [35, 22],
-        '/img/items/office-chair.svg': [55, 57],
-        '/img/items/pc-tower.svg': [20, 45.5],
-        '/img/items/plant.svg': [30, 30],
-        '/img/items/satellite-speaker.svg': [9.5, 16],
-        '/img/items/server-rack.svg': [43, 43],
-        '/img/items/sofa.svg': [200, 90],
-        '/img/items/squat-rack.svg': [125, 65],
-        '/img/items/stackable-shelves.svg': [91, 41],
-        '/img/items/subwoofer.svg': [28, 41],
-        '/img/items/table.svg': [120, 80],
-        '/img/items/wardrobe.svg': [212, 60],
-    }
+    // sizes are [width, height] in cm, the top edge of an image is the back
+    const catalog = <?= json_encode($catalog['items'], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) ?>
 
-    window.newFurniture = function (imagePath) {
+    const catalogItem = image => catalog.find(item => item.image === image)
+
+    window.newItem = function (image) {
+        const item = catalogItem(image)
+        const [width, height] = item.size
         const shape = new Shape()
-        shape.backgroundImage = imagePath
-        const [width, height] = defaultSizes[imagePath] ?? [shape.position.width, shape.position.height]
+        shape.backgroundImage = image
+        shape.category = item.category
+        shape.height = item.height
+        shape.parts = item.parts ?? []
         const {x, y, rotation} = shape.position
         shape.position = new Position(x, y, width, height, rotation)
 
@@ -294,6 +251,9 @@ usort($furnitureItems, function($a, $b) {
             id: shape.id,
             position: shape.position,
             backgroundImage: shape.backgroundImage,
+            parent: shape.parentId,
+            category: shape.category,
+            height: shape.height,
             //store the class name so we can recreate the object
             class: shape.constructor.name
         }))
@@ -368,10 +328,16 @@ usort($furnitureItems, function($a, $b) {
             let {x, y, width, height, rotation} = shapeData.position
             let position = new Position(x, y, width, height, rotation);
             let shape = new classMap[shapeData.class](shapeData.id, position, 1, shapeData.backgroundImage || '')
+            shape.parentId = shapeData.parent ?? ''
+            const item = catalogItem(shape.backgroundImage)
+            shape.category = shapeData.category ?? item?.category ?? ''
+            shape.height = shapeData.height ?? item?.height ?? 0
+            shape.parts = item?.parts ?? []
             grid.addShape(shape)
             loadedShapes.push(shape)
         })
         window.shapes = loadedShapes
+        grid.restack()
     }
 
     await Loader.replaceTagsWithComponents(document)
