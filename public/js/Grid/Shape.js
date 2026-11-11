@@ -2,7 +2,6 @@ import Component from "../ModuLatte/Component.js";
 import Point from "./Point.js"
 import Position from "./Position.js"
 import Text from "../ModuLatte/Text.js"
-import HitMask from "./HitMask.js"
 
 export default class Shape extends Component {
 
@@ -109,6 +108,17 @@ export default class Shape extends Component {
         )
     }
 
+    // the resize cursor for an edge, turned with the shape
+    static resizeCursor(edge, rotation) {
+        const edgeAngles = {
+            'top': 0, 'top-right': 45, 'right': 90, 'bottom-right': 135,
+            'bottom': 180, 'bottom-left': 225, 'left': 270, 'top-left': 315
+        }
+        const cursors = ['ns-resize', 'nesw-resize', 'ew-resize', 'nwse-resize']
+        const step = Math.round((edgeAngles[edge] + rotation) / 45)
+        return cursors[((step % 4) + 4) % 4]
+    }
+
     static rotatedSize(width, height, rotation) {
         const angle = rotation * (Math.PI / 180)
         const cos = Math.abs(Math.cos(angle))
@@ -146,8 +156,7 @@ export default class Shape extends Component {
             const element = document.createElement('div')
             element.className = 'shape-part'
             element.style.backgroundImage = `url(${image})`
-            HitMask.of(image)
-            return {image, height, element}
+            return {height, element}
         })
         this.element().classList.toggle('has-parts', parts.length > 0)
         this.element().parentElement?.append(...this.partElements())
@@ -155,29 +164,29 @@ export default class Shape extends Component {
         this.restack()
     }
 
-    // false where the shape's image is transparent at this screen point
-    isOpaqueAt(clientX, clientY) {
-        const images = this._parts.length ? this._parts.map(({image}) => image) : [this.backgroundImage]
-        if (!images[0]) {
-            return true
-        }
-        const centre = this.getCentre()
-        const point = new Point(clientX, clientY).rotate(this.position.rotation, centre)
-        const width = this.element().offsetWidth
-        const height = this.element().offsetHeight
-        const u = (point.x - centre.x) / width + 0.5
-        const v = (point.y - centre.y) / height + 0.5
-        const reach = 4
-        return images.some(image => HitMask.of(image).isOpaqueNear(u, v, reach / width, reach / height))
+    // Only these areas catch the mouse while unselected, e.g. the arms of a corner desk.
+    // Each is [x, y, width, height] as fractions of the shape.
+    set hitAreas(areas) {
+        this.element().querySelectorAll('.hit-area').forEach(element => element.remove())
+        areas.forEach(([x, y, width, height]) => {
+            const element = document.createElement('div')
+            element.className = 'hit-area'
+            element.style.left = x * 100 + '%'
+            element.style.top = y * 100 + '%'
+            element.style.width = width * 100 + '%'
+            element.style.height = height * 100 + '%'
+            element.componentInstance = this
+            this.element().append(element)
+        })
+        this.element().classList.toggle('has-hit-areas', areas.length > 0)
     }
 
     partElements() {
         return this._parts.map(({element}) => element)
     }
 
-    // room objects stay on the floor so everything draws over door swings and light rays
     layerOf(top) {
-        return this.isRoomObject ? 0 : Math.round(top * 10)
+        return Math.round(top * 10)
     }
 
     restack() {
@@ -232,21 +241,31 @@ export default class Shape extends Component {
         rotatedShiftY *= invertedScale
 
         switch (true) {
-            case this.resizing !== false:
-                //resize the shape
+            case this.resizing !== false: {
+                // resize from the dragged edge, keeping the opposite edge in place
+                const from = this.shapePositionWhenClicked
+                const shift = new Point(0, 0)
                 if (this.resizing.includes('left')) {
-                    width = this.shapePositionWhenClicked.width - rotatedShiftX * 2
+                    width = Math.max(1, from.width - rotatedShiftX)
+                    shift.x = (from.width - width) / 2
                 }
                 if (this.resizing.includes('right')) {
-                    width = this.shapePositionWhenClicked.width + rotatedShiftX * 2
+                    width = Math.max(1, from.width + rotatedShiftX)
+                    shift.x = (width - from.width) / 2
                 }
                 if (this.resizing.includes('top')) {
-                    height = this.shapePositionWhenClicked.height - rotatedShiftY * 2
+                    height = Math.max(1, from.height - rotatedShiftY)
+                    shift.y = (from.height - height) / 2
                 }
                 if (this.resizing.includes('bottom')) {
-                    height = this.shapePositionWhenClicked.height + rotatedShiftY * 2
+                    height = Math.max(1, from.height + rotatedShiftY)
+                    shift.y = (height - from.height) / 2
                 }
+                shift.rotate(-from.rotation)
+                x = from.x + shift.x
+                y = from.y + shift.y
                 break;
+            }
             case this.rotating:
                 let angleShift = new Point(mouseMoveEvent.x - center.x, mouseMoveEvent.y - center.y).angle() - new Point(initialMouseDownEvent.pageX - center.x, initialMouseDownEvent.pageY - center.y).angle()
                 rotation = this.shapePositionWhenClicked.rotation + angleShift
@@ -378,7 +397,6 @@ export default class Shape extends Component {
             throw new TypeError('backgroundImage must be a string, received ' + typeof value)
         }
         this._backgroundImage = value;
-        if (value) HitMask.of(value)
         this.element().style.backgroundImage = this._backgroundImage ? `url(${this._backgroundImage})` : ''
         this.element().style.backgroundSize = '100% 100%'
         this.element().style.backgroundPosition = 'center'
@@ -404,6 +422,7 @@ export default class Shape extends Component {
         this.element().classList.remove('resize-right')
         this.element().classList.remove('resize-top')
         this.element().classList.remove('resize-bottom')
+        this.element().style.cursor = ''
 
         //if not selected, then don't bother
         if (this._selected === false || this.element().contains(event.target) === false) {
@@ -442,7 +461,10 @@ export default class Shape extends Component {
             this.resizing = 'bottom'
         }
         //add a css class to the element matching the resize mode
-        if (this.resizing) this.element().classList.add('resize-' + this.resizing)
+        if (this.resizing) {
+            this.element().classList.add('resize-' + this.resizing)
+            this.element().style.cursor = Shape.resizeCursor(this.resizing, this.position.rotation)
+        }
     }
 }
 
@@ -485,7 +507,7 @@ const style = `
     }
 
     .shape.selected {
-        z-index: calc(101 + var(--layer, 0) * 2);
+        z-index: 50000; /* the selected shape and its controls draw above everything */
         border: 3px solid var(--link-hover, darkseagreen);
     }
 
@@ -498,6 +520,19 @@ const style = `
         pointer-events: none;
         background-size: 100% 100%;
         background-repeat: no-repeat;
+    }
+
+    .shape.has-hit-areas:not(.selected) {
+        pointer-events: none;
+    }
+
+    .hit-area {
+        position: absolute;
+        pointer-events: auto;
+    }
+
+    .shape.selected .hit-area {
+        pointer-events: none;
     }
 
     .shape.drop-target {

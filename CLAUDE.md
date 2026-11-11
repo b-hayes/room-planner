@@ -19,6 +19,7 @@
 ## Catalog
 - `src/catalog.json` lists every toolbar item: name, image, default size and category (`roomObject`, `furniture`, `accessory`).
 - Furniture and accessory images put their back on the top edge.
+- Catalog `hitAreas` limit where an unselected item catches the mouse, as `[x, y, width, height]` fractions of the shape (e.g. the corner desk's arms).
 
 ## Grouping
 - A shape's `parentId` is the shape it was last dropped onto (empty when dropped on the grid). Rooms never have a parent.
@@ -29,5 +30,11 @@
 
 ## Heights and stacking
 - Each shape has a `height` in cm. `base` is the parent's `top` (0 when the parent is a room); `top` is `base + height`.
-- Shapes draw in order of `top`. Room objects always draw at floor level.
+- Shapes draw in order of `top`.
+- A room's `height` is its ceiling, 245 cm by default.
 - Catalog `parts` split an item into images with their own heights (e.g. a chair's seat, arms and back).
+
+## Saving
+- The `#layout=` link in the address bar updates automatically within a second of any change, and wins on load.
+- Save writes the layout to local storage, used when the page has no `#layout=` link.
+- Each layout change is a new history entry, so browser back/forward are undo/redo. Ctrl+Z undo, Ctrl+Shift+Z or Ctrl+Y redo, Ctrl+S save.

@@ -182,6 +182,7 @@ $catalog = json_decode(file_get_contents(__DIR__ . '/../src/catalog.json'), true
     import Loader from "/js/ModuLatte/Loader.js"
     import Text from "/js/ModuLatte/Text.js"
     import Position from "/js/Grid/Position.js";
+    import Point from "/js/Grid/Point.js"
 
     window.t = Text
     window.shapes = []
@@ -210,6 +211,7 @@ $catalog = json_decode(file_get_contents(__DIR__ . '/../src/catalog.json'), true
         shape.category = item.category
         shape.height = item.height
         shape.parts = item.parts ?? []
+        shape.hitAreas = item.hitAreas ?? []
         const {x, y, rotation} = shape.position
         shape.position = new Position(x, y, width, height, rotation)
 
@@ -241,44 +243,156 @@ $catalog = json_decode(file_get_contents(__DIR__ . '/../src/catalog.json'), true
             return
         }
         localStorage.removeItem("data")
+        history.replaceState(null, '', location.pathname)
         alert('Deleted your (local) storage. Page will now reload.')
         window.location.reload()
     }
 
+    const shapeData = shape => ({
+        id: shape.id,
+        position: shape.position,
+        backgroundImage: shape.backgroundImage,
+        parent: shape.parentId,
+        category: shape.category,
+        height: shape.height,
+        //store the class name so we can recreate the object
+        class: shape.constructor.name
+    })
+
+    const shapeClasses = {Shape, Room}
+
+    const createShape = data => {
+        const {x, y, width, height, rotation} = data.position
+        const position = new Position(x, y, width, height, rotation)
+        const shape = new shapeClasses[data.class](data.id, position, 1, data.backgroundImage || '')
+        shape.parentId = data.parent ?? ''
+        const item = catalogItem(shape.backgroundImage)
+        shape.category = data.category ?? item?.category ?? ''
+        shape.height = data.height ?? item?.height ?? shape.height
+        shape.parts = item?.parts ?? []
+        shape.hitAreas = item?.hitAreas ?? []
+        grid.addShape(shape)
+        return shape
+    }
+
+    const shapesJson = () => JSON.stringify(Object.values(grid.shapes()).map(shapeData))
+
     const layoutJson = () => JSON.stringify({
         scale: grid.scale,
-        shapes: Object.values(grid.shapes()).map(shape => ({
-            id: shape.id,
-            position: shape.position,
-            backgroundImage: shape.backgroundImage,
-            parent: shape.parentId,
-            category: shape.category,
-            height: shape.height,
-            //store the class name so we can recreate the object
-            class: shape.constructor.name
-        }))
+        shapes: Object.values(grid.shapes()).map(shapeData)
     })
+
+    // copy the selected shape with everything grouped on it; each paste lands a bit further along
+    let copied = []
+    let pasteCount = 0
+    const copy = () => {
+        const shape = grid.selectedShape
+        if (!shape) {
+            return
+        }
+        copied = [shape, ...grid.descendantsOf(shape)].map(shapeData)
+        pasteCount = 0
+    }
+
+    const paste = () => {
+        if (!copied.length) {
+            return
+        }
+        pasteCount++
+        const offset = 20 * pasteCount
+        const newIds = Object.fromEntries(copied.map(data => [data.id, Text.randomId()]))
+        const pasted = copied.map(data => createShape({
+            ...data,
+            id: newIds[data.id],
+            parent: newIds[data.parent] ?? data.parent,
+            position: {...data.position, x: data.position.x + offset, y: data.position.y + offset}
+        }))
+        shapes.push(...pasted)
+        grid.restack()
+        grid.selectedShape = pasted[0]
+    }
 
     const transform = (bytes, stream) => new Response(new Blob([bytes]).stream().pipeThrough(stream))
 
-    const layoutLink = () => transform(layoutJson(), new CompressionStream('deflate-raw'))
+    const layoutLink = (json = layoutJson()) => transform(json, new CompressionStream('deflate-raw'))
         .arrayBuffer()
         .then(buffer => {
             const encoded = new Uint8Array(buffer).toBase64({alphabet: 'base64url', omitPadding: true})
             return `${location.origin}/#layout=${encoded}`
         })
 
-    window.save = function () {
-        localStorage.setItem("data", layoutJson())
-        if (!location.hash.includes('layout=')) {
-            new Alert('Saved your stuff (locally).', 'success')
+    // keeps the address bar in sync with the layout, so a refresh always shows the latest.
+    // Each change is a new history entry, so the browser's back and forward act as undo and redo.
+    let linkedJson = null
+    let linkedShapes = null
+    let loading = true
+    let mouseIsDown = false
+    document.addEventListener('mousedown', () => mouseIsDown = true)
+    document.addEventListener('mouseup', () => mouseIsDown = false)
+
+    const updateLink = () => {
+        const json = layoutJson()
+        if (loading || mouseIsDown || json === linkedJson) {
+            return Promise.resolve()
+        }
+        // only shape changes are undo steps; zooming just updates the current link
+        const shapes = shapesJson()
+        const newStep = linkedShapes !== null && shapes !== linkedShapes
+        const step = (history.state?.step ?? 0) + (newStep ? 1 : 0)
+        linkedJson = json
+        linkedShapes = shapes
+        return layoutLink(json).then(url => newStep
+            ? history.pushState({step}, '', url)
+            : history.replaceState({step}, '', url))
+    }
+
+    // undo and redo keep the current zoom and scroll
+    window.addEventListener('popstate', () => {
+        loading = true
+        const scroll = new Point(grid.element().scrollLeft, grid.element().scrollTop)
+        grid.clear()
+        load({keepView: true}).then(() => {
+            grid.pan(new Point(0, 0), scroll)
+            linkedJson = layoutJson()
+            linkedShapes = shapesJson()
+            loading = false
+        })
+    })
+
+    document.addEventListener('keydown', event => {
+        if (!(event.ctrlKey || event.metaKey)) {
             return
         }
-        // a shared link in the address bar takes priority on load, so keep it in sync
-        return layoutLink().then(url => {
-            history.replaceState(null, '', url)
-            new Alert('Saved your stuff (locally).', 'success')
-        })
+        const key = event.key.toLowerCase()
+        if (key === 's') {
+            event.preventDefault()
+            save()
+            return
+        }
+        if (key === 'c') {
+            copy()
+            return
+        }
+        if (key === 'v') {
+            paste()
+            return
+        }
+        const redo = key === 'y' || (key === 'z' && event.shiftKey)
+        if (redo) {
+            event.preventDefault()
+            history.forward()
+            return
+        }
+        // don't undo past the first layout and off the page
+        if (key === 'z' && history.state?.step > 0) {
+            event.preventDefault()
+            history.back()
+        }
+    })
+
+    window.save = function () {
+        localStorage.setItem("data", layoutJson())
+        return updateLink().then(() => new Alert('Saved your stuff (locally).', 'success'))
     }
 
     window.share = function () {
@@ -298,7 +412,7 @@ $catalog = json_decode(file_get_contents(__DIR__ . '/../src/catalog.json'), true
         return transform(bytes, new DecompressionStream('deflate-raw')).text()
     }
 
-    window.load = async function () {
+    window.load = async function ({keepView = false} = {}) {
         const sharedLayout = new URLSearchParams(location.hash.slice(1)).get('layout')
         const jsonString = sharedLayout ? await sharedLayoutJson(sharedLayout) : localStorage.getItem("data")
         if (!jsonString) {
@@ -315,28 +429,11 @@ $catalog = json_decode(file_get_contents(__DIR__ . '/../src/catalog.json'), true
         }
 
         // Restore scale if saved
-        if (data.scale) {
+        if (data.scale && !keepView) {
             grid.zoom(data.scale - grid.scale)
         }
 
-        let loadedShapes = []
-        data.shapes.forEach(shapeData => {
-            let classMap = {
-                Shape,
-                Room
-            }
-            let {x, y, width, height, rotation} = shapeData.position
-            let position = new Position(x, y, width, height, rotation);
-            let shape = new classMap[shapeData.class](shapeData.id, position, 1, shapeData.backgroundImage || '')
-            shape.parentId = shapeData.parent ?? ''
-            const item = catalogItem(shape.backgroundImage)
-            shape.category = shapeData.category ?? item?.category ?? ''
-            shape.height = shapeData.height ?? item?.height ?? 0
-            shape.parts = item?.parts ?? []
-            grid.addShape(shape)
-            loadedShapes.push(shape)
-        })
-        window.shapes = loadedShapes
+        window.shapes = data.shapes.map(createShape)
         grid.restack()
     }
 
@@ -344,6 +441,9 @@ $catalog = json_decode(file_get_contents(__DIR__ . '/../src/catalog.json'), true
     window.grid = document.querySelector(".grid")
         .componentInstance
     await load()
+    loading = false
+    updateLink()
+    setInterval(updateLink, 1000)
 
     //Show the memory usage in the performance div update every 1 second
     setInterval(function () {

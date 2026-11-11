@@ -71,6 +71,11 @@ export default class Grid extends Component {
         this.dispatchEventWithDebounce(deletedShape)
     }
 
+    clear() {
+        this.selectedShape = null
+        Object.keys(this._shapes).forEach(id => this.deleteShape(id))
+    }
+
     parentOf(shape) {
         return this._shapes[shape.parentId] ?? null
     }
@@ -110,18 +115,11 @@ export default class Grid extends Component {
         return this._dropTarget ?? null
     }
 
-    // shapes under the mouse, top first, skipping where their image is transparent
-    shapesAt(event) {
-        const shapes = document.elementsFromPoint(event.clientX, event.clientY)
-            .map(element => element.closest('.shape')?.componentInstance)
-            .filter(shape => shape instanceof Shape && shape.isOpaqueAt(event.clientX, event.clientY))
-        return [...new Set(shapes)]
-    }
-
     dropTargetAt(event, shape) {
         const carried = [shape, ...this.carriedShapes.map(carry => carry.shape)]
-        return this.shapesAt(event)
-            .find(target => !carried.includes(target) && shape.canDropOnto(target)) ?? null
+        return document.elementsFromPoint(event.clientX, event.clientY)
+            .map(element => element.closest('.shape')?.componentInstance)
+            .find(target => target instanceof Shape && !carried.includes(target) && shape.canDropOnto(target)) ?? null
     }
 
     // descendants keep their place relative to the shape as it moves, rotates and resizes
@@ -192,7 +190,9 @@ export default class Grid extends Component {
         }
         if (this.selectedShape === this.previoselySelectedShape) {
             // try clicking through to select the next shape underneath.
-            const shapeUnderTheMouse = this.shapesAt(event)
+            const shapeUnderTheMouse = document.elementsFromPoint(event.clientX, event.clientY)
+                .filter(element => element.componentInstance instanceof Shape)
+                .map(element => element.componentInstance)
             console.log('shapeUnderTheMouse', shapeUnderTheMouse)
             const indexOfSelected = shapeUnderTheMouse.indexOf(this.selectedShape)
             console.log('indexOfSelected', indexOfSelected)
@@ -218,24 +218,18 @@ export default class Grid extends Component {
             clickY: event.pageY
         }
 
-        // rotation handle of a shape clicked
-        if (event.target.classList.contains('rotation-handle')) {
-            this.draggingShape = this.selectedShape
-            this.startDrag(this.selectedShape, event)
-            return;
-        }
-
-        // the selected shape keeps priority where it is drawn and on its resize edges,
-        // otherwise take the top shape actually drawn under the mouse
-        const shapes = this.shapesAt(event)
-        const resizing = this.selectedShape?.resizing !== false && event.target === this.selectedShape?.element()
-        const keepSelected = resizing || shapes.includes(this.selectedShape)
-        const shape = keepSelected ? this.selectedShape : shapes[0] ?? null
-        this.draggingShape = shape
-        if (shape) {
+        // detect if the mouse down event was on a Shape
+        let shape = event.target?.componentInstance ?? null
+        if (shape instanceof Shape) {
             this.previoselySelectedShape = this.selectedShape
             this.selectedShape = shape
             this.startDrag(shape, event)
+            return;
+        }
+
+        // rotation handle of a shape clicked
+        if (event.target.classList.contains('rotation-handle')) {
+            this.startDrag(this.selectedShape, event)
             return;
         }
 
@@ -260,9 +254,10 @@ export default class Grid extends Component {
 
         //Pass the event to selected shape, so it can resize and move.
         if (
-            e.buttons === 1 && this.draggingShape
+            e.buttons === 1 && this.selectedShape instanceof Shape &&
+            this.selectedShape.element().contains(initialMouseDownEvent.target)
         ) {
-            const shape = this.draggingShape
+            const shape = this.selectedShape
             shape.drag(e, initialMouseDownEvent)
             this.carryDescendants(shape)
             if (!shape.moving) {
@@ -304,8 +299,8 @@ export default class Grid extends Component {
             this._contextMenu.destroy()
         }
 
-        const shape = this.shapesAt(event)[0]
-        if (shape) {
+        let shape = event.target.closest('.shape')?.componentInstance ?? null
+        if (shape instanceof Shape) {
             this._contextMenu = new Menu({
                 position: { x: event.clientX, y: event.clientY},
                 items: [

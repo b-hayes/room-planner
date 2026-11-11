@@ -5,15 +5,15 @@
     "accessory": "Accessories"
   },
   "items": [
-    {"name": "Door", "image": "/img/objects/door.svg", "size": [96.5, 95.5], "category": "roomObject", "height": 200},
-    {"name": "Window", "image": "/img/objects/window.svg", "size": [194.5, 63], "category": "roomObject", "height": 120},
+    {"name": "Door", "image": "/img/objects/door.svg", "size": [96.5, 95.5], "category": "roomObject", "height": 213},
+    {"name": "Window", "image": "/img/objects/window.svg", "size": [194.5, 63], "category": "roomObject", "height": 213},
     {"name": "Built-in Wardrobe", "image": "/img/objects/wardrobe.svg", "size": [212, 60], "category": "roomObject", "height": 240},
 
     {"name": "Bed", "image": "/img/items/bed.svg", "size": [138, 190], "category": "furniture", "height": 50},
     {"name": "Bedside Table", "image": "/img/items/bedside-table.svg", "size": [45, 35], "category": "furniture", "height": 55},
     {"name": "Bookshelf", "image": "/img/items/bookshelf.svg", "size": [140, 24.5], "category": "furniture", "height": 105},
     {"name": "Coat Rack", "image": "/img/items/coat-rack.svg", "size": [45, 49], "category": "furniture", "height": 175},
-    {"name": "Corner Desk", "image": "/img/items/corner-desk.svg", "size": [180, 180], "category": "furniture", "height": 70},
+    {"name": "Corner Desk", "image": "/img/items/corner-desk.svg", "size": [180, 180], "category": "furniture", "height": 70, "hitAreas": [[0, 0, 1, 0.4167], [0, 0, 0.4167, 1]]},
     {"name": "Desk", "image": "/img/items/desk.svg", "size": [150, 70], "category": "furniture", "height": 70},
     {"name": "Filing Cabinet", "image": "/img/items/filing-cabinet.svg", "size": [47, 62], "category": "furniture", "height": 70},
     {"name": "Folding Bench", "image": "/img/items/folding-bench.svg", "size": [70, 57], "category": "furniture", "height": 140},
@@ -21,7 +21,7 @@
     {"name": "Lounge Chair", "image": "/img/items/lounge-chair.svg", "size": [80, 90], "category": "furniture", "height": 80},
     {"name": "Office Chair", "image": "/img/items/office-chair.svg", "size": [55, 57], "category": "furniture", "height": 129, "parts": [{"image": "/img/items/parts/office-chair-seat.svg", "height": 50}, {"image": "/img/items/parts/office-chair-arms.svg", "height": 75}, {"image": "/img/items/parts/office-chair-back.svg", "height": 129}]},
     {"name": "Server Rack", "image": "/img/items/server-rack.svg", "size": [43, 43], "category": "furniture", "height": 82},
-    {"name": "Sofa", "image": "/img/items/sofa.svg", "size": [200, 90], "category": "furniture", "height": 85},
+    {"name": "Sofa", "image": "/img/items/sofa.svg", "size": [200, 90], "category": "furniture", "height": 85, "parts": [{"image": "/img/items/parts/sofa-seat.svg", "height": 45}, {"image": "/img/items/parts/sofa-arms.svg", "height": 65}, {"image": "/img/items/parts/sofa-back.svg", "height": 85}]},
     {"name": "Squat Rack", "image": "/img/items/squat-rack.svg", "size": [125, 65], "category": "furniture", "height": 150},
     {"name": "Stackable Shelves", "image": "/img/items/stackable-shelves.svg", "size": [91, 41], "category": "furniture", "height": 91},
     {"name": "Table", "image": "/img/items/table.svg", "size": [120, 80], "category": "furniture", "height": 75},

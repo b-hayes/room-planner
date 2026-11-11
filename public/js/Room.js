@@ -5,6 +5,7 @@ import Position from "./Grid/Position.js"
 export default class Room extends Shape {
 
     static wallThickness = 10
+    static ceilingHeight = 245
 
     isRoom = true
 
@@ -22,6 +23,7 @@ export default class Room extends Shape {
     ) {
         super(id, position, scale, backgroundImage)
         this.element().classList.add('room')
+        this.height = Room.ceilingHeight
     }
 
     redraw() {
