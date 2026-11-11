@@ -93,6 +93,7 @@ usort($furnitureItems, function($a, $b) {
         left: 0;
         height: 100vh;
         width: 150px;
+        overflow-y: auto;
         background-color: var(--background);
         border-right: 1px solid var(--foreground);
     }
@@ -216,54 +217,44 @@ usort($furnitureItems, function($a, $b) {
         shapes.push(shape)
     }
 
+    // Default [width, height] in cm, top edge is the back
+    const defaultSizes = {
+        '/img/objects/door.svg': [96.5, 95.5], // frame, 82.5 door inside
+        '/img/objects/window.svg': [194.5, 63], // frame, 180 glass inside
+        '/img/items/bed.svg': [138, 190],
+        '/img/items/bedside-table.svg': [45, 35],
+        '/img/items/bookshelf.svg': [140, 24.5],
+        '/img/items/center-speaker.svg': [16.5, 12],
+        '/img/items/coat-rack.svg': [45, 49],
+        '/img/items/corner-desk.svg': [180, 180],
+        '/img/items/desk.svg': [150, 70],
+        '/img/items/filing-cabinet.svg': [47, 62],
+        '/img/items/folding-bench.svg': [145, 170], // opened, 57x70 folded at the back
+        '/img/items/keyboard.svg': [31.5, 12.5],
+        '/img/items/lamp.svg': [25, 25],
+        '/img/items/lounge-chair.svg': [80, 90],
+        '/img/items/monitor.svg': [63.5, 45.5],
+        '/img/items/mouse.svg': [7, 10.4],
+        '/img/items/mousepad.svg': [35, 22],
+        '/img/items/office-chair.svg': [55, 57],
+        '/img/items/pc-tower.svg': [20, 45.5],
+        '/img/items/plant.svg': [30, 30],
+        '/img/items/satellite-speaker.svg': [9.5, 16],
+        '/img/items/server-rack.svg': [43, 43],
+        '/img/items/sofa.svg': [200, 90],
+        '/img/items/squat-rack.svg': [125, 65],
+        '/img/items/stackable-shelves.svg': [91, 41],
+        '/img/items/subwoofer.svg': [28, 41],
+        '/img/items/table.svg': [120, 80],
+        '/img/items/wardrobe.svg': [212, 60],
+    }
+
     window.newFurniture = function (imagePath) {
         const shape = new Shape()
         shape.backgroundImage = imagePath
-
-        // Set default dimensions for specific furniture items (in cm, Australian standard sizes)
-        if (imagePath === '/img/items/bed.svg') {
-            shape.position.width = 138  // Double bed
-            shape.position.height = 190
-        } else if (imagePath === '/img/items/bedside-table.svg') {
-            shape.position.width = 45
-            shape.position.height = 35  // depth from wall
-        } else if (imagePath === '/img/items/bookshelf.svg') {
-            shape.position.width = 30 // depth
-            shape.position.height = 80
-        } else if (imagePath === '/img/items/corner-desk.svg') {
-            shape.position.width = 150
-            shape.position.height = 150
-        } else if (imagePath === '/img/items/desk.svg') {
-            shape.position.width = 140
-            shape.position.height = 70
-        } else if (imagePath === '/img/objects/door.svg') {
-            shape.position.width = 82
-            shape.position.height = 82
-        } else if (imagePath === '/img/objects/window.svg') {
-            shape.position.width = 120
-            shape.position.height = 60
-        } else if (imagePath === '/img/items/filing-cabinet.svg') {
-            shape.position.width = 47
-            shape.position.height = 62
-        } else if (imagePath === '/img/items/lamp.svg') {
-            shape.position.width = 25
-            shape.position.height = 25
-        } else if (imagePath === '/img/items/lounge-chair.svg') {
-            shape.position.width = 80
-            shape.position.height = 90
-        } else if (imagePath === '/img/items/office-chair.svg') {
-            shape.position.width = 60
-            shape.position.height = 60
-        } else if (imagePath === '/img/items/plant.svg') {
-            shape.position.width = 30
-            shape.position.height = 30
-        } else if (imagePath === '/img/items/sofa.svg') {
-            shape.position.width = 200  // 3-seater
-            shape.position.height = 90
-        } else if (imagePath === '/img/items/table.svg') {
-            shape.position.width = 120
-            shape.position.height = 80
-        }
+        const [width, height] = defaultSizes[imagePath] ?? [shape.position.width, shape.position.height]
+        const {x, y, rotation} = shape.position
+        shape.position = new Position(x, y, width, height, rotation)
 
         grid.addShape(shape)
         grid.selectedShape = shape

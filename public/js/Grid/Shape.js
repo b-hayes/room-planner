@@ -9,7 +9,7 @@ export default class Shape extends Component {
     id = '';
 
     // grid
-    _gridSnap = 1;
+    _gridSnap = 0.5;
     _gridScale = 1;
     _gridPosition = {x: 0, y: 0, width: 0, height: 0, rotation: 0};
 
@@ -234,8 +234,8 @@ export default class Shape extends Component {
         const minX = rotatedSize.width / 2
         const minY = rotatedSize.height / 2
 
-        let minWidth = 10
-        let minHeight = 10
+        let minWidth = 1
+        let minHeight = 1
 
         // clamp values
         if (x < minX) x = minX
