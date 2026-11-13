@@ -13,8 +13,30 @@
 ## Doors and windows
 - The bottom edge of the door/window image is the wall side. Rotate by wall: bottom 0, left 90, top 180, right 270.
 - Frames are 13 cm deep, centred on the wall (frame centre 5 cm outside the room's inside edge).
-- Standard window: 194.5 cm frame, 180 cm glass. Shape 194.5 x 63.
+- Standard window: 194.5 cm frame, 180 cm glass. Shape 194.5 x 13 (the frame); its light is a floor-level part drawn into the room.
 - Standard door: 96.5 cm frame, 82.5 cm door. Shape 96.5 x 95.5, hinge on the left when unrotated.
+- Doors, windows and built-ins snap onto room walls within 20 cm while dragged (catalog `wallSnap`); Shift drops without snapping.
+- Catalog `resizeLock`: `height` keeps a window's thickness, `ratio` keeps a door's proportions.
 
-## Furniture
-- Furniture images put their back on the top edge.
+## Catalog
+- `src/catalog.json` lists every toolbar item: name, image, default size and category (`roomObject`, `furniture`, `accessory`).
+- Furniture and accessory images put their back on the top edge.
+- Catalog `hitAreas` limit where an unselected item catches the mouse, as `[x, y, width, height]` fractions of the shape (e.g. the corner desk's arms).
+
+## Grouping
+- A shape's `parentId` is the shape it was last dropped onto (empty when dropped on the grid). Rooms never have a parent.
+- Room objects (doors, windows, built-ins) only take a room as parent and never hold children.
+- Moving a shape carries all its descendants.
+- Rotating or resizing a shape moves its descendants with it: they turn around its centre and their offset from it scales.
+- Holding Shift while dropping keeps the current parent.
+
+## Heights and stacking
+- Each shape has a `height` in cm. `base` is the parent's `top` (0 when the parent is a room); `top` is `base + height`.
+- Shapes draw in order of `top`.
+- A room's `height` is its ceiling, 245 cm by default.
+- Catalog `parts` split an item into images with their own heights (e.g. a chair's seat, arms and back). A part may set its own `size` and centre `offset`, as fractions of the shape (e.g. window light).
+
+## Saving
+- The `#layout=` link in the address bar updates automatically within a second of any change, and wins on load.
+- Save writes the layout to local storage, used when the page has no `#layout=` link.
+- Each layout change is a new history entry, so browser back/forward are undo/redo. Ctrl+Z undo, Ctrl+Shift+Z or Ctrl+Y redo, Ctrl+S save.

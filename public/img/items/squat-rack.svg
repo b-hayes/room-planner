@@ -1,7 +1,9 @@
 <svg preserveAspectRatio="none" width="125" height="65" viewBox="0 0 125 65" xmlns="http://www.w3.org/2000/svg">
-  <rect x="16" y="31" width="93" height="3" fill="#9A9A9A" stroke="#666666" stroke-width="0.5"/>
-  <rect x="0.5" y="0.5" width="7" height="64" fill="#1E1E1E" stroke="#555555" stroke-width="1"/>
-  <rect x="7.5" y="27" width="10" height="11" fill="#1E1E1E" stroke="#555555" stroke-width="1"/>
-  <rect x="117.5" y="0.5" width="7" height="64" fill="#1E1E1E" stroke="#555555" stroke-width="1"/>
-  <rect x="107.5" y="27" width="10" height="11" fill="#1E1E1E" stroke="#555555" stroke-width="1"/>
+  <rect x="16.5" y="31" width="92" height="3" fill="#9A9A9A" stroke="#666666" stroke-width="0.5"/>
+  <rect x="9.5" y="0.5" width="6" height="64" fill="#1E1E1E" stroke="#555555" stroke-width="1"/>
+  <rect x="0.5" y="0.5" width="24" height="6" fill="#1E1E1E" stroke="#555555" stroke-width="1"/>
+  <rect x="8" y="27" width="9" height="11" fill="#1E1E1E" stroke="#555555" stroke-width="1"/>
+  <rect x="109.5" y="0.5" width="6" height="64" fill="#1E1E1E" stroke="#555555" stroke-width="1"/>
+  <rect x="100.5" y="0.5" width="24" height="6" fill="#1E1E1E" stroke="#555555" stroke-width="1"/>
+  <rect x="108" y="27" width="9" height="11" fill="#1E1E1E" stroke="#555555" stroke-width="1"/>
 </svg>

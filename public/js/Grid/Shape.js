@@ -8,6 +8,20 @@ export default class Shape extends Component {
     // identity
     id = '';
 
+    // grouping
+    parentId = '';
+    isRoom = false;
+    category = '';
+    // 'height' keeps the thickness, 'ratio' keeps the proportions when resizing
+    resizeLock = '';
+    // {side, outside} for objects that snap onto room walls
+    wallSnap = null;
+
+    // stacking, in cm off the floor
+    _height = 0;
+    _base = 0;
+    _parts = [];
+
     // grid
     _gridSnap = 0.5;
     _gridScale = 1;
@@ -98,6 +112,17 @@ export default class Shape extends Component {
         )
     }
 
+    // the resize cursor for an edge, turned with the shape
+    static resizeCursor(edge, rotation) {
+        const edgeAngles = {
+            'top': 0, 'top-right': 45, 'right': 90, 'bottom-right': 135,
+            'bottom': 180, 'bottom-left': 225, 'left': 270, 'top-left': 315
+        }
+        const cursors = ['ns-resize', 'nesw-resize', 'ew-resize', 'nwse-resize']
+        const step = Math.round((edgeAngles[edge] + rotation) / 45)
+        return cursors[((step % 4) + 4) % 4]
+    }
+
     static rotatedSize(width, height, rotation) {
         const angle = rotation * (Math.PI / 180)
         const cos = Math.abs(Math.cos(angle))
@@ -105,16 +130,113 @@ export default class Shape extends Component {
         return {width: width * cos + height * sin, height: width * sin + height * cos}
     }
 
-    // Axis-aligned bounds of the rotated shape in grid space.
-    bounds() {
+    get height() {
+        return this._height
+    }
+
+    set height(value) {
+        if (typeof value !== 'number' || value < 0) throw new TypeError('height must be a positive number')
+        this._height = value
+        this.restack()
+    }
+
+    get base() {
+        return this._base
+    }
+
+    set base(value) {
+        this._base = value
+        this.restack()
+    }
+
+    get top() {
+        return this.base + this.height
+    }
+
+    // Images drawn at their own heights, e.g. a chair's seat, arms and back.
+    set parts(parts) {
+        this._parts.forEach(({element}) => element.remove())
+        this._parts = parts.map(({image, height, size, offset}) => {
+            const element = document.createElement('div')
+            element.className = 'shape-part'
+            element.style.backgroundImage = `url(${image})`
+            return {height, size, offset, element}
+        })
+        this.element().classList.toggle('has-parts', parts.length > 0)
+        this.element().parentElement?.append(...this.partElements())
+        this.redraw()
+        this.restack()
+    }
+
+    // A part covers the shape unless it has its own size and centre offset, both as fractions of the shape.
+    placePart({size = [1, 1], offset = [0, 0], element}) {
         const {x, y, width, height, rotation} = this.position
-        const size = Shape.rotatedSize(width, height, rotation)
-        return {
-            left: x - size.width / 2,
-            top: y - size.height / 2,
-            right: x + size.width / 2,
-            bottom: y + size.height / 2
-        }
+        const partWidth = size[0] * width
+        const partHeight = size[1] * height
+        const centre = new Point(offset[0] * width, offset[1] * height).rotate(-rotation)
+        const box = this.getScaled({
+            left: x + centre.x - partWidth / 2,
+            top: y + centre.y - partHeight / 2,
+            width: partWidth,
+            height: partHeight
+        })
+        element.style.left = box.left + 'px'
+        element.style.top = box.top + 'px'
+        element.style.width = box.width + 'px'
+        element.style.height = box.height + 'px'
+        element.style.transform = `rotate(${rotation}deg)`
+    }
+
+    // Only these areas catch the mouse while unselected, e.g. the arms of a corner desk.
+    // Each is [x, y, width, height] as fractions of the shape.
+    set hitAreas(areas) {
+        this.element().querySelectorAll('.hit-area').forEach(element => element.remove())
+        areas.forEach(([x, y, width, height]) => {
+            const element = document.createElement('div')
+            element.className = 'hit-area'
+            element.style.left = x * 100 + '%'
+            element.style.top = y * 100 + '%'
+            element.style.width = width * 100 + '%'
+            element.style.height = height * 100 + '%'
+            element.componentInstance = this
+            this.element().append(element)
+        })
+        this.element().classList.toggle('has-hit-areas', areas.length > 0)
+    }
+
+    partElements() {
+        return this._parts.map(({element}) => element)
+    }
+
+    layerOf(top) {
+        return Math.round(top * 10)
+    }
+
+    restack() {
+        this.element().style.setProperty('--layer', this.layerOf(this.top))
+        this._parts.forEach(({height, element}) => {
+            element.style.zIndex = 100 + this.layerOf(this.base + height) * 2
+        })
+    }
+
+    destroy() {
+        this._parts.forEach(({element}) => element.remove())
+        // hit areas point back at this shape, so remove them before Component.destroy() treats them as children
+        this.hitAreas = []
+        super.destroy()
+    }
+
+    get isRoomObject() {
+        return this.category === 'roomObject'
+    }
+
+    // rooms sit on the grid, room objects only sit in rooms and hold nothing
+    canDropOnto(target) {
+        return !this.isRoom && !target.isRoomObject && (!this.isRoomObject || target.isRoom)
+    }
+
+    get moving() {
+        return this.resizing === false && !this.rotating
     }
 
     mouseDown(e) {
@@ -144,21 +266,31 @@ export default class Shape extends Component {
         rotatedShiftY *= invertedScale
 
         switch (true) {
-            case this.resizing !== false:
-                //resize the shape
-                if (this.resizing.includes('left')) {
-                    width = this.shapePositionWhenClicked.width - rotatedShiftX * 2
+            case this.resizing !== false: {
+                // resize from the dragged edge, keeping the opposite edge in place
+                const from = this.shapePositionWhenClicked
+                const edge = this.resizing
+                if (edge.includes('left')) width = Math.max(1, from.width - rotatedShiftX)
+                if (edge.includes('right')) width = Math.max(1, from.width + rotatedShiftX)
+                if (edge.includes('top')) height = Math.max(1, from.height - rotatedShiftY)
+                if (edge.includes('bottom')) height = Math.max(1, from.height + rotatedShiftY)
+                if (this.resizeLock === 'ratio') {
+                    // scale both sides by whichever changed most
+                    const widthScale = width / from.width
+                    const heightScale = height / from.height
+                    const scale = Math.abs(widthScale - 1) >= Math.abs(heightScale - 1) ? widthScale : heightScale
+                    width = from.width * scale
+                    height = from.height * scale
                 }
-                if (this.resizing.includes('right')) {
-                    width = this.shapePositionWhenClicked.width + rotatedShiftX * 2
-                }
-                if (this.resizing.includes('top')) {
-                    height = this.shapePositionWhenClicked.height - rotatedShiftY * 2
-                }
-                if (this.resizing.includes('bottom')) {
-                    height = this.shapePositionWhenClicked.height + rotatedShiftY * 2
-                }
+                const shift = new Point(
+                    edge.includes('left') ? (from.width - width) / 2 : edge.includes('right') ? (width - from.width) / 2 : 0,
+                    edge.includes('top') ? (from.height - height) / 2 : edge.includes('bottom') ? (height - from.height) / 2 : 0
+                )
+                shift.rotate(-from.rotation)
+                x = from.x + shift.x
+                y = from.y + shift.y
                 break;
+            }
             case this.rotating:
                 let angleShift = new Point(mouseMoveEvent.x - center.x, mouseMoveEvent.y - center.y).angle() - new Point(initialMouseDownEvent.pageX - center.x, initialMouseDownEvent.pageY - center.y).angle()
                 rotation = this.shapePositionWhenClicked.rotation + angleShift
@@ -208,7 +340,7 @@ export default class Shape extends Component {
         this.element().style.width = sPos.width + 'px'
         this.element().style.height = sPos.height + 'px'
         this.element().style.transform = `rotate(${pos.rotation}deg)`
-
+        this._parts.forEach(part => this.placePart(part))
 
         // Update the labels
         this.posText.innerHTML = 'x: ' + pos.x + ' y: ' + pos.y
@@ -309,6 +441,7 @@ export default class Shape extends Component {
         this.element().classList.remove('resize-right')
         this.element().classList.remove('resize-top')
         this.element().classList.remove('resize-bottom')
+        this.element().style.cursor = ''
 
         //if not selected, then don't bother
         if (this._selected === false || this.element().contains(event.target) === false) {
@@ -346,8 +479,15 @@ export default class Shape extends Component {
         } else if (y > height - border) {
             this.resizing = 'bottom'
         }
+        // a locked thickness only resizes along its length
+        if (this.resizing && this.resizeLock === 'height') {
+            this.resizing = this.resizing.replace(/(top|bottom)-?/, '') || false
+        }
         //add a css class to the element matching the resize mode
-        if (this.resizing) this.element().classList.add('resize-' + this.resizing)
+        if (this.resizing) {
+            this.element().classList.add('resize-' + this.resizing)
+            this.element().style.cursor = Shape.resizeCursor(this.resizing, this.position.rotation)
+        }
     }
 }
 
@@ -378,9 +518,9 @@ const style = `
         box-sizing: border-box;
         position: absolute;
         border: 1px solid var(--link, cornflowerblue);
-        z-index: 100;
+        z-index: calc(100 + var(--layer, 0) * 2);
     }
-    
+
     .shape.has-image {
         border-color: transparent;
     }
@@ -390,8 +530,36 @@ const style = `
     }
 
     .shape.selected {
-        z-index: 200;
+        z-index: 50000; /* the selected shape and its controls draw above everything */
         border: 3px solid var(--link-hover, darkseagreen);
+    }
+
+    .shape.has-parts {
+        background-image: none !important;
+    }
+
+    .shape-part {
+        position: absolute;
+        pointer-events: none;
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+    }
+
+    .shape.has-hit-areas:not(.selected) {
+        pointer-events: none;
+    }
+
+    .hit-area {
+        position: absolute;
+        pointer-events: auto;
+    }
+
+    .shape.selected .hit-area {
+        pointer-events: none;
+    }
+
+    .shape.drop-target {
+        outline: 3px solid hotpink;
     }
 
     .selected .showWhenSelected {
@@ -444,6 +612,12 @@ const style = `
     .shape.resize-bottom {
         border-bottom-style: dotted;
         cursor: ns-resize;
+    }
+
+    .posText, .widthText, .heightText, .rotationText {
+        color: black;
+        text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white,
+            0 -1px 0 white, 0 1px 0 white, -1px 0 0 white, 1px 0 0 white;
     }
 
     .posText {

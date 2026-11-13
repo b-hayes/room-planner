@@ -8,25 +8,7 @@ $latestUpdates = array_filter($latestUpdates, function ($update) {
 });
 $latestUpdates = array_slice($latestUpdates, 0, 10);// only show the last 10 unique commit messages
 
-// Get all SVG files from the items directory for furniture
-$itemsDir = __DIR__ . '/../public/img/items/';
-$svgFiles = glob($itemsDir . '*.svg');
-$furnitureItems = [];
-
-foreach ($svgFiles as $file) {
-    $filename = basename($file, '.svg');
-    $displayName = ucwords(str_replace('-', ' ', $filename));
-    $furnitureItems[] = [
-        'filename' => $filename,
-        'displayName' => $displayName,
-        'path' => '/img/items/' . basename($file)
-    ];
-}
-
-// Sort alphabetically by display name
-usort($furnitureItems, function($a, $b) {
-    return strcmp($a['displayName'], $b['displayName']);
-});
+$catalog = json_decode(file_get_contents(__DIR__ . '/../src/catalog.json'), true, flags: JSON_THROW_ON_ERROR);
 ?>
 <head>
     <meta charset="UTF-8">
@@ -38,21 +20,19 @@ usort($furnitureItems, function($a, $b) {
     <button class="toolbar-button" onclick="save()">💾 Save</button>
     <button class="toolbar-button" onclick="share()">🔗 Share</button>
     <button class="toolbar-button" onclick="deleteData()">🗑️ Delete</button>
-    <div class="toolbar-header">
-        Objects
-    </div>
+    <div class="toolbar-header">Shapes</div>
     <button class="toolbar-button" onclick="newRoom()">⬜ Room</button>
     <button class="toolbar-button" onclick="newShape()">🟦 Square</button>
-    <button class="toolbar-button" onclick="newFurniture('/img/objects/door.svg')">🚪 Door</button>
-    <button class="toolbar-button" onclick="newFurniture('/img/objects/window.svg')">🪟 Window</button>
-    <div class="toolbar-header">Furniture</div>
-    <?php foreach ($furnitureItems as $item): ?>
-        <button class="toolbar-button furniture-button"
-                onclick="newFurniture('<?= htmlspecialchars($item['path'], ENT_QUOTES) ?>')"
-                title="<?= htmlspecialchars($item['displayName']) ?>">
-            <img src="<?= htmlspecialchars($item['path']) ?>" alt="<?= htmlspecialchars($item['displayName']) ?>">
-            <span><?= htmlspecialchars($item['displayName']) ?></span>
-        </button>
+    <?php foreach ($catalog['categories'] as $category => $label): ?>
+        <div class="toolbar-header"><?= htmlspecialchars($label) ?></div>
+        <?php foreach (array_filter($catalog['items'], fn(array $item) => $item['category'] === $category) as $item): ?>
+            <button class="toolbar-button item-button"
+                    onclick="newItem('<?= htmlspecialchars($item['image'], ENT_QUOTES) ?>')"
+                    title="<?= htmlspecialchars($item['name']) ?>">
+                <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['name']) ?>">
+                <span><?= htmlspecialchars($item['name']) ?></span>
+            </button>
+        <?php endforeach; ?>
     <?php endforeach; ?>
 </div>
 <main>
@@ -119,7 +99,7 @@ usort($furnitureItems, function($a, $b) {
         color: var(--background);
     }
 
-    .toolbar-button.furniture-button {
+    .toolbar-button.item-button {
         padding: 5px;
         height: 60px;
         display: flex;
@@ -129,24 +109,24 @@ usort($furnitureItems, function($a, $b) {
         gap: 3px;
     }
 
-    .toolbar-button.furniture-button img {
+    .toolbar-button.item-button img {
         max-width: 30px;
         max-height: 30px;
         filter: none;
     }
 
-    .toolbar-button.furniture-button span {
+    .toolbar-button.item-button span {
         font-size: 10px;
         font-weight: normal;
         text-align: center;
     }
 
-    .toolbar-button.furniture-button:hover img {
+    .toolbar-button.item-button:hover img {
         filter: invert(1);
     }
 
     @media (prefers-color-scheme: dark) {
-        .toolbar-button.furniture-button:hover img {
+        .toolbar-button.item-button:hover img {
             filter: invert(0);
         }
     }
@@ -202,6 +182,7 @@ usort($furnitureItems, function($a, $b) {
     import Loader from "/js/ModuLatte/Loader.js"
     import Text from "/js/ModuLatte/Text.js"
     import Position from "/js/Grid/Position.js";
+    import Point from "/js/Grid/Point.js"
 
     window.t = Text
     window.shapes = []
@@ -217,42 +198,22 @@ usort($furnitureItems, function($a, $b) {
         shapes.push(shape)
     }
 
-    // Default [width, height] in cm, top edge is the back
-    const defaultSizes = {
-        '/img/objects/door.svg': [96.5, 95.5], // frame, 82.5 door inside
-        '/img/objects/window.svg': [194.5, 63], // frame, 180 glass inside
-        '/img/items/bed.svg': [138, 190],
-        '/img/items/bedside-table.svg': [45, 35],
-        '/img/items/bookshelf.svg': [140, 24.5],
-        '/img/items/center-speaker.svg': [16.5, 12],
-        '/img/items/coat-rack.svg': [45, 49],
-        '/img/items/corner-desk.svg': [180, 180],
-        '/img/items/desk.svg': [150, 70],
-        '/img/items/filing-cabinet.svg': [47, 62],
-        '/img/items/folding-bench.svg': [145, 170], // opened, 57x70 folded at the back
-        '/img/items/keyboard.svg': [31.5, 12.5],
-        '/img/items/lamp.svg': [25, 25],
-        '/img/items/lounge-chair.svg': [80, 90],
-        '/img/items/monitor.svg': [63.5, 45.5],
-        '/img/items/mouse.svg': [7, 10.4],
-        '/img/items/mousepad.svg': [35, 22],
-        '/img/items/office-chair.svg': [55, 57],
-        '/img/items/pc-tower.svg': [20, 45.5],
-        '/img/items/plant.svg': [30, 30],
-        '/img/items/satellite-speaker.svg': [9.5, 16],
-        '/img/items/server-rack.svg': [43, 43],
-        '/img/items/sofa.svg': [200, 90],
-        '/img/items/squat-rack.svg': [125, 65],
-        '/img/items/stackable-shelves.svg': [91, 41],
-        '/img/items/subwoofer.svg': [28, 41],
-        '/img/items/table.svg': [120, 80],
-        '/img/items/wardrobe.svg': [212, 60],
-    }
+    // sizes are [width, height] in cm, the top edge of an image is the back
+    const catalog = <?= json_encode($catalog['items'], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) ?>
 
-    window.newFurniture = function (imagePath) {
+    const catalogItem = image => catalog.find(item => item.image === image)
+
+    window.newItem = function (image) {
+        const item = catalogItem(image)
+        const [width, height] = item.size
         const shape = new Shape()
-        shape.backgroundImage = imagePath
-        const [width, height] = defaultSizes[imagePath] ?? [shape.position.width, shape.position.height]
+        shape.backgroundImage = image
+        shape.category = item.category
+        shape.height = item.height
+        shape.parts = item.parts ?? []
+        shape.hitAreas = item.hitAreas ?? []
+        shape.resizeLock = item.resizeLock ?? ''
+        shape.wallSnap = item.wallSnap ?? null
         const {x, y, rotation} = shape.position
         shape.position = new Position(x, y, width, height, rotation)
 
@@ -284,41 +245,158 @@ usort($furnitureItems, function($a, $b) {
             return
         }
         localStorage.removeItem("data")
+        history.replaceState(null, '', location.pathname)
         alert('Deleted your (local) storage. Page will now reload.')
         window.location.reload()
     }
 
+    const shapeData = shape => ({
+        id: shape.id,
+        position: shape.position,
+        backgroundImage: shape.backgroundImage,
+        parent: shape.parentId,
+        category: shape.category,
+        height: shape.height,
+        //store the class name so we can recreate the object
+        class: shape.constructor.name
+    })
+
+    const shapeClasses = {Shape, Room}
+
+    const createShape = data => {
+        const {x, y, width, height, rotation} = data.position
+        const position = new Position(x, y, width, height, rotation)
+        const shape = new shapeClasses[data.class](data.id, position, 1, data.backgroundImage || '')
+        shape.parentId = data.parent ?? ''
+        const item = catalogItem(shape.backgroundImage)
+        shape.category = data.category ?? item?.category ?? ''
+        shape.height = data.height ?? item?.height ?? shape.height
+        shape.parts = item?.parts ?? []
+        shape.hitAreas = item?.hitAreas ?? []
+        shape.resizeLock = item?.resizeLock ?? ''
+        shape.wallSnap = item?.wallSnap ?? null
+        grid.addShape(shape)
+        return shape
+    }
+
+    const shapesJson = () => JSON.stringify(Object.values(grid.shapes()).map(shapeData))
+
     const layoutJson = () => JSON.stringify({
         scale: grid.scale,
-        shapes: Object.values(grid.shapes()).map(shape => ({
-            id: shape.id,
-            position: shape.position,
-            backgroundImage: shape.backgroundImage,
-            //store the class name so we can recreate the object
-            class: shape.constructor.name
-        }))
+        shapes: Object.values(grid.shapes()).map(shapeData)
     })
+
+    // copy the selected shape with everything grouped on it; each paste lands a bit further along
+    let copied = []
+    let pasteCount = 0
+    const copy = () => {
+        const shape = grid.selectedShape
+        if (!shape) {
+            return
+        }
+        copied = [shape, ...grid.descendantsOf(shape)].map(shapeData)
+        pasteCount = 0
+    }
+
+    const paste = () => {
+        if (!copied.length) {
+            return
+        }
+        pasteCount++
+        const offset = 20 * pasteCount
+        const newIds = Object.fromEntries(copied.map(data => [data.id, Text.randomId()]))
+        const pasted = copied.map(data => createShape({
+            ...data,
+            id: newIds[data.id],
+            parent: newIds[data.parent] ?? data.parent,
+            position: {...data.position, x: data.position.x + offset, y: data.position.y + offset}
+        }))
+        shapes.push(...pasted)
+        grid.restack()
+        grid.selectedShape = pasted[0]
+    }
 
     const transform = (bytes, stream) => new Response(new Blob([bytes]).stream().pipeThrough(stream))
 
-    const layoutLink = () => transform(layoutJson(), new CompressionStream('deflate-raw'))
+    const layoutLink = (json = layoutJson()) => transform(json, new CompressionStream('deflate-raw'))
         .arrayBuffer()
         .then(buffer => {
             const encoded = new Uint8Array(buffer).toBase64({alphabet: 'base64url', omitPadding: true})
             return `${location.origin}/#layout=${encoded}`
         })
 
-    window.save = function () {
-        localStorage.setItem("data", layoutJson())
-        if (!location.hash.includes('layout=')) {
-            new Alert('Saved your stuff (locally).', 'success')
+    // keeps the address bar in sync with the layout, so a refresh always shows the latest.
+    // Each change is a new history entry, so the browser's back and forward act as undo and redo.
+    let linkedJson = null
+    let linkedShapes = null
+    let loading = true
+    let mouseIsDown = false
+    document.addEventListener('mousedown', () => mouseIsDown = true)
+    document.addEventListener('mouseup', () => mouseIsDown = false)
+
+    const updateLink = () => {
+        const json = layoutJson()
+        if (loading || mouseIsDown || json === linkedJson) {
+            return Promise.resolve()
+        }
+        // only shape changes are undo steps; zooming just updates the current link
+        const shapes = shapesJson()
+        const newStep = linkedShapes !== null && shapes !== linkedShapes
+        const step = (history.state?.step ?? 0) + (newStep ? 1 : 0)
+        linkedJson = json
+        linkedShapes = shapes
+        return layoutLink(json).then(url => newStep
+            ? history.pushState({step}, '', url)
+            : history.replaceState({step}, '', url))
+    }
+
+    // undo and redo keep the current zoom and scroll
+    window.addEventListener('popstate', () => {
+        loading = true
+        const scroll = new Point(grid.element().scrollLeft, grid.element().scrollTop)
+        grid.clear()
+        load({keepView: true}).then(() => {
+            grid.pan(new Point(0, 0), scroll)
+            linkedJson = layoutJson()
+            linkedShapes = shapesJson()
+            loading = false
+        })
+    })
+
+    document.addEventListener('keydown', event => {
+        if (!(event.ctrlKey || event.metaKey)) {
             return
         }
-        // a shared link in the address bar takes priority on load, so keep it in sync
-        return layoutLink().then(url => {
-            history.replaceState(null, '', url)
-            new Alert('Saved your stuff (locally).', 'success')
-        })
+        const key = event.key.toLowerCase()
+        if (key === 's') {
+            event.preventDefault()
+            save()
+            return
+        }
+        if (key === 'c') {
+            copy()
+            return
+        }
+        if (key === 'v') {
+            paste()
+            return
+        }
+        const redo = key === 'y' || (key === 'z' && event.shiftKey)
+        if (redo) {
+            event.preventDefault()
+            history.forward()
+            return
+        }
+        // don't undo past the first layout and off the page
+        if (key === 'z' && history.state?.step > 0) {
+            event.preventDefault()
+            history.back()
+        }
+    })
+
+    window.save = function () {
+        localStorage.setItem("data", layoutJson())
+        return updateLink().then(() => new Alert('Saved your stuff (locally).', 'success'))
     }
 
     window.share = function () {
@@ -338,7 +416,7 @@ usort($furnitureItems, function($a, $b) {
         return transform(bytes, new DecompressionStream('deflate-raw')).text()
     }
 
-    window.load = async function () {
+    window.load = async function ({keepView = false} = {}) {
         const sharedLayout = new URLSearchParams(location.hash.slice(1)).get('layout')
         const jsonString = sharedLayout ? await sharedLayoutJson(sharedLayout) : localStorage.getItem("data")
         if (!jsonString) {
@@ -355,29 +433,21 @@ usort($furnitureItems, function($a, $b) {
         }
 
         // Restore scale if saved
-        if (data.scale) {
+        if (data.scale && !keepView) {
             grid.zoom(data.scale - grid.scale)
         }
 
-        let loadedShapes = []
-        data.shapes.forEach(shapeData => {
-            let classMap = {
-                Shape,
-                Room
-            }
-            let {x, y, width, height, rotation} = shapeData.position
-            let position = new Position(x, y, width, height, rotation);
-            let shape = new classMap[shapeData.class](shapeData.id, position, 1, shapeData.backgroundImage || '')
-            grid.addShape(shape)
-            loadedShapes.push(shape)
-        })
-        window.shapes = loadedShapes
+        window.shapes = data.shapes.map(createShape)
+        grid.restack()
     }
 
     await Loader.replaceTagsWithComponents(document)
     window.grid = document.querySelector(".grid")
         .componentInstance
     await load()
+    loading = false
+    updateLink()
+    setInterval(updateLink, 1000)
 
     //Show the memory usage in the performance div update every 1 second
     setInterval(function () {

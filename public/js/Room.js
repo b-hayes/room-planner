@@ -1,11 +1,13 @@
 import Shape from "./Grid/Shape.js"
-import Loader from "./ModuLatte/Loader.js"
 import Text from "./ModuLatte/Text.js"
 import Position from "./Grid/Position.js"
 
 export default class Room extends Shape {
 
     static wallThickness = 10
+    static ceilingHeight = 245
+
+    isRoom = true
 
     constructor(
         id = Text.randomId(),
@@ -21,44 +23,12 @@ export default class Room extends Shape {
     ) {
         super(id, position, scale, backgroundImage)
         this.element().classList.add('room')
+        this.height = Room.ceilingHeight
     }
 
     redraw() {
         super.redraw()
         this.element().style.outlineWidth = `${Room.wallThickness * this.scale}px`
-    }
-
-    mouseDown(e) {
-        super.mouseDown(e)
-        this.carriedShapes = this.shapesMostlyInside()
-            .map(shape => ({shape, positionWhenClicked: shape.position}))
-    }
-
-    drag(mouseMoveEvent, initialMouseDownEvent) {
-        super.drag(mouseMoveEvent, initialMouseDownEvent)
-        if (this.resizing !== false || this.rotating) {
-            return
-        }
-        const shiftX = this.position.x - this.shapePositionWhenClicked.x
-        const shiftY = this.position.y - this.shapePositionWhenClicked.y
-        this.carriedShapes.forEach(({shape, positionWhenClicked}) => {
-            const {x, y, width, height, rotation} = positionWhenClicked
-            shape.position = new Position(x + shiftX, y + shiftY, width, height, rotation)
-        })
-    }
-
-    shapesMostlyInside() {
-        const room = this.bounds()
-        return [...this.element().parentElement.children]
-            .map(element => element.componentInstance)
-            .filter(shape => shape instanceof Shape && !(shape instanceof Room))
-            .filter(shape => {
-                const box = shape.bounds()
-                const overlapWidth = Math.max(0, Math.min(box.right, room.right) - Math.max(box.left, room.left))
-                const overlapHeight = Math.max(0, Math.min(box.bottom, room.bottom) - Math.max(box.top, room.top))
-                const area = (box.right - box.left) * (box.bottom - box.top)
-                return overlapWidth * overlapHeight > area / 2
-            })
     }
 
     style() {
@@ -80,6 +50,10 @@ const style = `
 
     .room.shape:hover {
         border: none;
+    }
+
+    .room.shape.drop-target {
+        outline-color: hotpink;
     }
 
     .room.shape.selected {
