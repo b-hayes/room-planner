@@ -8,6 +8,8 @@ import Menu from "../ModuLatte/Menu.js"
 
 export default class Grid extends Component {
 
+    static wallSnapDistance = 20
+
     _shapes = []
     _selectedShape
     carriedShapes = []
@@ -120,6 +122,41 @@ export default class Grid extends Component {
         return document.elementsFromPoint(event.clientX, event.clientY)
             .map(element => element.closest('.shape')?.componentInstance)
             .find(target => target instanceof Shape && !carried.includes(target) && shape.canDropOnto(target)) ?? null
+    }
+
+    // Room objects dragged near a room wall turn to face it and sit on it.
+    // wallSnap.side is the shape's edge that goes against the wall, wallSnap.outside how far
+    // that edge sits outside the room's inside edge.
+    snapToWall(shape) {
+        const {side, outside} = shape.wallSnap
+        const {x, y, width, height} = shape.position
+        const centreOutside = outside - height / 2
+        const facing = side === 'bottom' ? 0 : 180
+        let nearest = null
+        Object.values(this._shapes)
+            .filter(room => room.isRoom && room.position.rotation % 180 === 0)
+            .forEach(room => {
+                const {x: roomX, y: roomY, width: roomWidth, height: roomHeight} = room.position
+                const left = roomX - roomWidth / 2
+                const right = roomX + roomWidth / 2
+                const top = roomY - roomHeight / 2
+                const bottom = roomY + roomHeight / 2
+                const walls = [
+                    {rotation: 0, x, y: bottom + centreOutside, along: x, from: left, to: right},
+                    {rotation: 90, x: left - centreOutside, y, along: y, from: top, to: bottom},
+                    {rotation: 180, x, y: top - centreOutside, along: x, from: left, to: right},
+                    {rotation: 270, x: right + centreOutside, y, along: y, from: top, to: bottom}
+                ]
+                walls.filter(wall => wall.along >= wall.from && wall.along <= wall.to).forEach(wall => {
+                    const distance = Math.hypot(wall.x - x, wall.y - y)
+                    if (distance <= Grid.wallSnapDistance && (!nearest || distance < nearest.distance)) {
+                        nearest = {...wall, distance}
+                    }
+                })
+            })
+        if (nearest) {
+            shape.position = new Position(nearest.x, nearest.y, width, height, (nearest.rotation + facing) % 360)
+        }
     }
 
     // descendants keep their place relative to the shape as it moves, rotates and resizes
@@ -259,6 +296,9 @@ export default class Grid extends Component {
         ) {
             const shape = this.selectedShape
             shape.drag(e, initialMouseDownEvent)
+            if (shape.moving && shape.wallSnap && !e.shiftKey) {
+                this.snapToWall(shape)
+            }
             this.carryDescendants(shape)
             if (!shape.moving) {
                 return

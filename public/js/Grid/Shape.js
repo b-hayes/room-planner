@@ -12,6 +12,10 @@ export default class Shape extends Component {
     parentId = '';
     isRoom = false;
     category = '';
+    // 'height' keeps the thickness, 'ratio' keeps the proportions when resizing
+    resizeLock = '';
+    // {side, outside} for objects that snap onto room walls
+    wallSnap = null;
 
     // stacking, in cm off the floor
     _height = 0;
@@ -152,16 +156,35 @@ export default class Shape extends Component {
     // Images drawn at their own heights, e.g. a chair's seat, arms and back.
     set parts(parts) {
         this._parts.forEach(({element}) => element.remove())
-        this._parts = parts.map(({image, height}) => {
+        this._parts = parts.map(({image, height, size, offset}) => {
             const element = document.createElement('div')
             element.className = 'shape-part'
             element.style.backgroundImage = `url(${image})`
-            return {height, element}
+            return {height, size, offset, element}
         })
         this.element().classList.toggle('has-parts', parts.length > 0)
         this.element().parentElement?.append(...this.partElements())
         this.redraw()
         this.restack()
+    }
+
+    // A part covers the shape unless it has its own size and centre offset, both as fractions of the shape.
+    placePart({size = [1, 1], offset = [0, 0], element}) {
+        const {x, y, width, height, rotation} = this.position
+        const partWidth = size[0] * width
+        const partHeight = size[1] * height
+        const centre = new Point(offset[0] * width, offset[1] * height).rotate(-rotation)
+        const box = this.getScaled({
+            left: x + centre.x - partWidth / 2,
+            top: y + centre.y - partHeight / 2,
+            width: partWidth,
+            height: partHeight
+        })
+        element.style.left = box.left + 'px'
+        element.style.top = box.top + 'px'
+        element.style.width = box.width + 'px'
+        element.style.height = box.height + 'px'
+        element.style.transform = `rotate(${rotation}deg)`
     }
 
     // Only these areas catch the mouse while unselected, e.g. the arms of a corner desk.
@@ -198,6 +221,8 @@ export default class Shape extends Component {
 
     destroy() {
         this._parts.forEach(({element}) => element.remove())
+        // hit areas point back at this shape, so remove them before Component.destroy() treats them as children
+        this.hitAreas = []
         super.destroy()
     }
 
@@ -244,23 +269,23 @@ export default class Shape extends Component {
             case this.resizing !== false: {
                 // resize from the dragged edge, keeping the opposite edge in place
                 const from = this.shapePositionWhenClicked
-                const shift = new Point(0, 0)
-                if (this.resizing.includes('left')) {
-                    width = Math.max(1, from.width - rotatedShiftX)
-                    shift.x = (from.width - width) / 2
+                const edge = this.resizing
+                if (edge.includes('left')) width = Math.max(1, from.width - rotatedShiftX)
+                if (edge.includes('right')) width = Math.max(1, from.width + rotatedShiftX)
+                if (edge.includes('top')) height = Math.max(1, from.height - rotatedShiftY)
+                if (edge.includes('bottom')) height = Math.max(1, from.height + rotatedShiftY)
+                if (this.resizeLock === 'ratio') {
+                    // scale both sides by whichever changed most
+                    const widthScale = width / from.width
+                    const heightScale = height / from.height
+                    const scale = Math.abs(widthScale - 1) >= Math.abs(heightScale - 1) ? widthScale : heightScale
+                    width = from.width * scale
+                    height = from.height * scale
                 }
-                if (this.resizing.includes('right')) {
-                    width = Math.max(1, from.width + rotatedShiftX)
-                    shift.x = (width - from.width) / 2
-                }
-                if (this.resizing.includes('top')) {
-                    height = Math.max(1, from.height - rotatedShiftY)
-                    shift.y = (from.height - height) / 2
-                }
-                if (this.resizing.includes('bottom')) {
-                    height = Math.max(1, from.height + rotatedShiftY)
-                    shift.y = (height - from.height) / 2
-                }
+                const shift = new Point(
+                    edge.includes('left') ? (from.width - width) / 2 : edge.includes('right') ? (width - from.width) / 2 : 0,
+                    edge.includes('top') ? (from.height - height) / 2 : edge.includes('bottom') ? (height - from.height) / 2 : 0
+                )
                 shift.rotate(-from.rotation)
                 x = from.x + shift.x
                 y = from.y + shift.y
@@ -315,13 +340,7 @@ export default class Shape extends Component {
         this.element().style.width = sPos.width + 'px'
         this.element().style.height = sPos.height + 'px'
         this.element().style.transform = `rotate(${pos.rotation}deg)`
-        this._parts.forEach(({element}) => {
-            element.style.top = this.element().style.top
-            element.style.left = this.element().style.left
-            element.style.width = this.element().style.width
-            element.style.height = this.element().style.height
-            element.style.transform = this.element().style.transform
-        })
+        this._parts.forEach(part => this.placePart(part))
 
         // Update the labels
         this.posText.innerHTML = 'x: ' + pos.x + ' y: ' + pos.y
@@ -459,6 +478,10 @@ export default class Shape extends Component {
             this.resizing = 'top'
         } else if (y > height - border) {
             this.resizing = 'bottom'
+        }
+        // a locked thickness only resizes along its length
+        if (this.resizing && this.resizeLock === 'height') {
+            this.resizing = this.resizing.replace(/(top|bottom)-?/, '') || false
         }
         //add a css class to the element matching the resize mode
         if (this.resizing) {

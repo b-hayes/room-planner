@@ -212,6 +212,8 @@ $catalog = json_decode(file_get_contents(__DIR__ . '/../src/catalog.json'), true
         shape.height = item.height
         shape.parts = item.parts ?? []
         shape.hitAreas = item.hitAreas ?? []
+        shape.resizeLock = item.resizeLock ?? ''
+        shape.wallSnap = item.wallSnap ?? null
         const {x, y, rotation} = shape.position
         shape.position = new Position(x, y, width, height, rotation)
 
@@ -271,6 +273,8 @@ $catalog = json_decode(file_get_contents(__DIR__ . '/../src/catalog.json'), true
         shape.height = data.height ?? item?.height ?? shape.height
         shape.parts = item?.parts ?? []
         shape.hitAreas = item?.hitAreas ?? []
+        shape.resizeLock = item?.resizeLock ?? ''
+        shape.wallSnap = item?.wallSnap ?? null
         grid.addShape(shape)
         return shape
     }

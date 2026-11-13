@@ -5,9 +5,9 @@
     "accessory": "Accessories"
   },
   "items": [
-    {"name": "Door", "image": "/img/objects/door.svg", "size": [96.5, 95.5], "category": "roomObject", "height": 213},
-    {"name": "Window", "image": "/img/objects/window.svg", "size": [194.5, 63], "category": "roomObject", "height": 213},
-    {"name": "Built-in Wardrobe", "image": "/img/objects/wardrobe.svg", "size": [212, 60], "category": "roomObject", "height": 240},
+    {"name": "Door", "image": "/img/objects/door.svg", "size": [96.5, 95.5], "category": "roomObject", "height": 213, "resizeLock": "ratio", "wallSnap": {"side": "bottom", "outside": 11.5}},
+    {"name": "Window", "image": "/img/objects/window.svg", "size": [194.5, 13], "category": "roomObject", "height": 213, "resizeLock": "height", "wallSnap": {"side": "bottom", "outside": 11.5}, "parts": [{"image": "/img/items/parts/window-light.svg", "height": 0, "size": [1, 7.6923], "offset": [0, -4.3462]}, {"image": "/img/objects/window.svg", "height": 213}]},
+    {"name": "Built-in Wardrobe", "image": "/img/objects/wardrobe.svg", "size": [212, 60], "category": "roomObject", "height": 240, "wallSnap": {"side": "top", "outside": 0}},
 
     {"name": "Bed", "image": "/img/items/bed.svg", "size": [138, 190], "category": "furniture", "height": 50},
     {"name": "Bedside Table", "image": "/img/items/bedside-table.svg", "size": [45, 35], "category": "furniture", "height": 55},
