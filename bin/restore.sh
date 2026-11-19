@@ -120,6 +120,6 @@ echo "${YELLOW}VERIFY before trusting this restore:${RESET}"
 echo "${CYAN}  - Feedback log restored:  tail -n 3 $DATA_DIR/feedback.log${RESET}"
 echo "${CYAN}  - Feedback form works:  curl -s -X POST -d 'feedback=restore test' $URL/feedback  (expect 'Thanks for the feedback')${RESET}"
 if [[ ! -f /etc/cron.d/room-planner-backup ]]; then
-    echo "${YELLOW}  - Backup cron is NOT installed - the schedule is stopped. Reinstall: sudo cp $ROOT/deploy/room-planner-backup /etc/cron.d/room-planner-backup${RESET}"
+    echo "${YELLOW}  - Backup cron is NOT installed - the schedule is stopped. Reinstall: sed s/__USER__/\$USER/ $ROOT/deploy/room-planner-backup | sudo tee /etc/cron.d/room-planner-backup${RESET}"
 fi
 echo "${CYAN}Only once verified, delete the pre-restore copies above.${RESET}"

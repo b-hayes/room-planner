@@ -14,7 +14,7 @@ Serves on port 7744. Composer dependencies install on container start.
 ## Backup / Restore
 - `bin/backup.sh` - copies `data/` and `prod.env` to a timestamped backup dir (`--help` for options)
 - `bin/restore.sh <backup-dir>` - restores a backup and verifies the app comes up
-- Schedule: `sudo cp deploy/room-planner-backup /etc/cron.d/room-planner-backup`
+- Schedule: `sed "s/__USER__/$USER/" deploy/room-planner-backup | sudo tee /etc/cron.d/room-planner-backup`
 
 ## Licence
 NONE.
