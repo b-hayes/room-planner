@@ -1,4 +1,4 @@
-FROM php:8.5.12-apache-trixie
+FROM php:8.5.13-apache-trixie
 
 COPY --from=composer:2.11.2 /usr/bin/composer /usr/bin/composer
 
@@ -8,8 +8,6 @@ RUN apt-get update \
 
 RUN a2enmod rewrite headers remoteip \
     && echo -n > /etc/apache2/ports.conf
-
-COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
 ENV COMPOSER_HOME=/tmp/composer
 ENV HOME=/tmp
