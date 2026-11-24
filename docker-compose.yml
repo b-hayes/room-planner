@@ -11,3 +11,4 @@ services:
       - "7744:8080"
     volumes:
       - .:/var/www/html
+      - ./docker/apache.conf:/etc/apache2/sites-available/000-default.conf:ro
